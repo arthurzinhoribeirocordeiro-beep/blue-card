@@ -70,27 +70,66 @@ main{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scro
 .howto ol{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:6px;line-height:1.4}
 .howto b{color:var(--money)}
 
+/* campo */
+.fstats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));background:var(--panel);border:1px solid var(--line);border-radius:14px}
+.fstats>div{padding:9px 10px;min-width:0;display:flex;flex-direction:column;gap:2px}
+.fstats>div+div{border-left:1px solid var(--line)}
+.fstats span{font-size:.66rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fstats b{font-family:var(--f-display);font-weight:800;font-size:1.2rem;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fstats .g{color:var(--money)}
+
+/* pilar principal */
+.hero{--rc:#f7c948;position:relative;overflow:hidden;border-radius:22px;border:1px solid color-mix(in srgb,var(--money) 45%,var(--line));background:radial-gradient(70% 90% at 28% 0%,color-mix(in srgb,var(--rc) 30%,transparent),transparent 70%),repeating-linear-gradient(90deg,rgba(255,255,255,.018) 0 28px,transparent 28px 56px),linear-gradient(180deg,#152236,#0b121c 80%);display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 14px;align-items:center;padding:12px 14px 14px 6px;cursor:pointer}
+.hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:38%;background:linear-gradient(180deg,transparent,rgba(0,0,0,.35));pointer-events:none}
+.hstage{position:relative;width:150px;height:232px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;perspective:800px;z-index:1}
+.hstage::before{content:"";position:absolute;top:-12px;left:50%;width:170px;height:96%;transform:translateX(-50%);background:linear-gradient(180deg,rgba(255,243,205,.30),rgba(255,243,205,.04) 85%);clip-path:polygon(44% 0,56% 0,100% 100%,0 100%);pointer-events:none}
+.hstage .spinner{--cw:112px;width:112px;height:156.8px}
+.hstage .pillar{width:120px;height:46px}
+.hstage .pillar .cap{height:22px}
+.hstage .pillar .body{top:11px}
+.crown{position:absolute;top:2px;left:50%;transform:translateX(-50%);width:30px;height:22px;z-index:2;filter:drop-shadow(0 2px 6px rgba(247,201,72,.6))}
+.hinfo{position:relative;z-index:1;min-width:0;display:flex;flex-direction:column;gap:5px}
+.hinfo .eyebrow{color:var(--money)}
+.hinfo h2{font-size:1.55rem;font-weight:800;line-height:1.02;overflow-wrap:anywhere}
+.hinfo .hinc{font-family:var(--f-display);font-weight:800;font-size:1.9rem;line-height:1;color:var(--money);font-variant-numeric:tabular-nums}
+.hinfo .hinc small{font-size:.55em;opacity:.8}
+.capchip{align-self:flex-start;font-size:.72rem;font-weight:800;letter-spacing:.04em;padding:3px 9px;border-radius:999px;background:color-mix(in srgb,var(--money) 16%,transparent);color:var(--money);border:1px solid color-mix(in srgb,var(--money) 45%,transparent)}
+.hero.empty{--rc:#33445e;border-style:dashed;border-color:var(--line)}
+.hero.empty .hinfo h2{color:var(--muted)}
+.hero .float{top:38%;left:75px;font-size:1.25rem}
+@media (max-width:350px){.hero{grid-template-columns:minmax(0,1fr);justify-items:center;text-align:center;padding:12px}.hinfo{align-items:center}.capchip{align-self:center}}
+
 /* pedestais */
+.ptitle2{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.ptitle2 h2{font-size:1.15rem;font-weight:800}
 .peds{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 10px}
 @media (min-width:540px){.peds{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (min-width:800px){.peds{grid-template-columns:repeat(4,minmax(0,1fr))}}
-.ped{--rc:#3a4a63;position:relative;display:flex;flex-direction:column;align-items:center;padding:6px 6px 10px;border-radius:16px;border:1px solid var(--line);background:radial-gradient(110% 60% at 50% 100%,color-mix(in srgb,var(--rc) 24%,transparent),transparent 70%),var(--floor);overflow:hidden;min-width:0}
+.ped{--rc:#3a4a63;position:relative;display:flex;flex-direction:column;align-items:center;padding:6px 6px 10px;border-radius:16px;border:1px solid var(--line);background:radial-gradient(70% 55% at 50% 0%,color-mix(in srgb,var(--rc) 16%,transparent),transparent 75%),radial-gradient(110% 50% at 50% 100%,color-mix(in srgb,var(--rc) 20%,transparent),transparent 70%),var(--floor);overflow:hidden;min-width:0}
 .ped.empty{--rc:#33445e;border-style:dashed}
 .ped.buy{--rc:#f7c948;border-style:dashed;border-color:color-mix(in srgb,var(--money) 45%,var(--line))}
 .ped.buy.cant{--rc:#53627a}
-.stage{height:148px;width:100%;display:flex;align-items:flex-end;justify-content:center;perspective:700px;position:relative}
-.bob{animation:bob 3.2s ease-in-out infinite;margin-bottom:4px}
+.rank{position:absolute;top:7px;left:10px;z-index:2;font-family:var(--f-display);font-weight:800;font-size:1rem;color:color-mix(in srgb,var(--rc) 70%,var(--fg))}
+.rank small{font-size:.7em;opacity:.7}
+.stage{height:146px;width:100%;display:flex;align-items:flex-end;justify-content:center;perspective:700px;position:relative}
+.bob{animation:bob 3.2s ease-in-out infinite;margin-bottom:2px}
 .spinner{--cw:84px;width:84px;height:117.6px;position:relative;transform-style:preserve-3d;animation:spin 9s linear infinite}
 .spinner>.card,.spinner>.cback{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden}
 .spinner>.cback{transform:rotateY(180deg)}
-.base{width:80%;height:20px;margin-top:-4px;border-radius:50%;background:radial-gradient(ellipse at 50% 35%,color-mix(in srgb,var(--rc) 75%,#fff 10%),color-mix(in srgb,var(--rc) 30%,#000) 72%);box-shadow:0 0 22px color-mix(in srgb,var(--rc) 55%,transparent),inset 0 -4px 0 rgba(0,0,0,.35)}
-.pinc{margin-top:8px;font-family:var(--f-display);font-weight:800;font-size:1.08rem;color:var(--money);font-variant-numeric:tabular-nums;line-height:1}
+/* coluna do pedestal: tampo + corpo cilíndrico + sombra no chão */
+.pillar{position:relative;width:86px;height:34px;margin-top:-6px;flex:none}
+.pillar .cap{position:absolute;left:0;right:0;top:0;height:16px;border-radius:50%;z-index:1;background:radial-gradient(ellipse at 50% 35%,color-mix(in srgb,var(--rc) 80%,#fff 15%),color-mix(in srgb,var(--rc) 40%,#05080d) 78%);box-shadow:0 0 20px color-mix(in srgb,var(--rc) 55%,transparent),inset 0 -2px 0 rgba(0,0,0,.35)}
+.pillar .body{position:absolute;left:7%;right:7%;top:8px;bottom:0;border-radius:0 0 50% 50%/0 0 7px 7px;background:linear-gradient(90deg,#06090f,color-mix(in srgb,var(--rc) 45%,#1b2638) 30%,color-mix(in srgb,var(--rc) 25%,#121b29) 60%,#06090f)}
+.pillar .body::before{content:"";position:absolute;left:0;right:0;top:40%;height:2px;background:color-mix(in srgb,var(--rc) 60%,transparent);opacity:.6}
+.pillar::after{content:"";position:absolute;left:-10%;right:-10%;bottom:-7px;height:10px;border-radius:50%;background:radial-gradient(ellipse,rgba(0,0,0,.55),transparent 70%)}
+.pinc{margin-top:9px;font-family:var(--f-display);font-weight:800;font-size:1.08rem;color:var(--money);font-variant-numeric:tabular-nums;line-height:1}
 .pinc.muted{color:var(--muted)}
 .pname{margin-top:3px;font-size:.76rem;color:var(--muted);max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.slotring{width:80px;height:112px;margin-bottom:8px;border-radius:12px;border:2px dashed #3d5170;display:grid;place-items:center;font-family:var(--f-display);font-size:2.4rem;color:#5d7393}
-.lockic{width:80px;height:112px;margin-bottom:8px;border-radius:12px;display:grid;place-items:center;background:repeating-linear-gradient(135deg,rgba(247,201,72,.08) 0 8px,transparent 8px 16px);border:2px dashed color-mix(in srgb,var(--money) 45%,transparent)}
+.slotring{width:80px;height:112px;margin-bottom:6px;border-radius:12px;border:2px dashed #3d5170;display:grid;place-items:center;font-family:var(--f-display);font-size:2.4rem;color:#5d7393}
+.lockic{width:80px;height:112px;margin-bottom:6px;border-radius:12px;display:grid;place-items:center;background:repeating-linear-gradient(135deg,rgba(247,201,72,.08) 0 8px,transparent 8px 16px);border:2px dashed color-mix(in srgb,var(--money) 45%,transparent)}
 .lockic svg{width:32px;height:32px;stroke:var(--money);fill:none;stroke-width:2}
 .float{position:absolute;left:50%;top:46%;transform:translateX(-50%);pointer-events:none;font-family:var(--f-display);font-weight:800;font-size:1.05rem;color:var(--money);text-shadow:0 2px 6px rgba(0,0,0,.6);animation:floatup 1.3s ease-out forwards;white-space:nowrap;z-index:3}
+.tag.cap{background:var(--money);color:#1d1503}
 
 /* carta */
 .card{width:var(--cw,110px);aspect-ratio:5/7;font-size:calc(var(--cw,110px) / 10);border-radius:.8em;background:var(--rg);position:relative;box-shadow:0 .35em .9em rgba(0,0,0,.5);overflow:hidden;flex:none;max-width:100%}
@@ -379,6 +418,7 @@ function migrate(o){
   if(!Array.isArray(s.stock) || s.stock.length!==PACKS.length) s.stock=[6,3,1,0,0,0];
   if(typeof s.disc!=='object' || !s.disc) s.disc={};
   if(typeof s.custom!=='object' || !s.custom) s.custom={};
+  { const on=s.ped.filter(Boolean).map(u=>s.cards.find(c=>c.u===u)).filter(Boolean).sort((a,b)=>inc(b)-inc(a)); s.ped=Array.from({length:s.slots},(_,i)=>on[i]?on[i].u:null); }
   return s;
 }
 let S = null, tab = 'field', invFilter = -1, pendingSlot = null, OP = null, CUST = null;
@@ -421,7 +461,14 @@ function albumBonus(){
   for(const k in S.disc){ const b=S.disc[k]; if(b){ found++; for(let m=1;m<MUT.length;m++) if(b&(1<<m)) extra++; } }
   return 1 + 0.03*found + 0.01*extra;
 }
-function totalRate(){ let t=0; for(const u of S.ped){ if(u){ const c=card(u); if(c) t+=inc(c); } } return t*albumBonus(); }
+const CAPX = 1.5; // bônus do pilar principal
+const slotMult = i => i===0 ? CAPX : 1;
+function totalRate(){ let t=0; S.ped.forEach((u,i)=>{ if(u){ const c=card(u); if(c) t+=inc(c)*slotMult(i); } }); return t*albumBonus(); }
+// campo sempre em ordem: melhor no pilar principal, depois do melhor para o pior
+function sortField(){
+  const on=S.ped.filter(u=>u && card(u)).sort((a,b)=>inc(card(b))-inc(card(a)));
+  S.ped=Array.from({length:S.slots},(_,i)=>on[i] ?? null);
+}
 const slotCost = () => Math.round(150*Math.pow(2.1, S.slots-4));
 const sellValue = c => Math.max(1, Math.round(inc(c)*SELLX));
 
@@ -464,27 +511,41 @@ function render(){
   updateLive(true);
 }
 
+const PILLAR = `<div class="pillar"><i class="cap"></i><i class="body"></i></div>`;
+const CROWN = `<svg class="crown" viewBox="0 0 30 22" aria-hidden="true"><path d="M2 19L4 6l7 6 4-10 4 10 7-6 2 13z" fill="#f7c948" stroke="#7a5600" stroke-width="1.2" stroke-linejoin="round"/><circle cx="15" cy="2.5" r="2" fill="#fff3b0"/></svg>`;
 function renderField(){
   const b=albumBonus(), used=S.ped.filter(Boolean).length;
-  let h=`<div class="wrap"><section class="fhead"><div><div class="eyebrow">Seu depósito</div><h1>${used} de ${S.slots} pedestais ocupados</h1><p class="sub">Bônus do álbum: +${Math.round((b-1)*100)}% na renda</p></div>${S.cards.length?`<button class="btn ghost" data-act="automont">Auto-montar</button>`:''}</section>`;
+  let h=`<div class="wrap"><section class="fhead"><div><div class="eyebrow">Seu depósito</div><h1>Pedestais</h1></div>${S.cards.length?`<button class="btn ghost" data-act="automont">Auto-montar</button>`:''}</section>`;
   if(!S.cards.length){
-    h+=`<section class="howto"><div class="eyebrow">Como jogar</div><ol><li>Vá na <b>Loja</b> e compre um Pacote Bronze. Você começa com $100.</li><li>Coloque as melhores cartas nos <b>pedestais</b>.</li><li>Cada carta em pedestal gera dinheiro sem parar, até com o jogo fechado (por até 8 horas).</li><li>Use o dinheiro em pacotes melhores e em pedestais novos. Mutações multiplicam a renda.</li></ol><button class="btn" data-act="tab:shop">Ir para a Loja</button></section>`;
+    h+=`<section class="howto"><div class="eyebrow">Como jogar</div><ol><li>Vá na <b>Loja</b> e compre um Pacote Bronze. Você começa com $100.</li><li>Coloque as melhores cartas nos <b>pedestais</b>. O melhor jogador fica no pilar principal e rende +${Math.round((CAPX-1)*100)}%.</li><li>Cada carta em pedestal gera dinheiro sem parar, até com o jogo fechado (por até 8 horas).</li><li>Use o dinheiro em pacotes melhores e em pedestais novos. Mutações multiplicam a renda.</li></ol><button class="btn" data-act="tab:shop">Ir para a Loja</button></section>`;
   }
-  h+=`<div class="peds">`;
-  S.ped.forEach((u,i)=>{
-    const c = u && card(u);
-    if(c){
-      const p=P[c.p];
-      h+=`<div class="ped" role="button" tabindex="0" data-act="ped:${i}" data-ped="${i}" style="--rc:${RAR[p.r].c}"><div class="stage"><div class="bob" style="animation-delay:-${((i*.37)%3).toFixed(2)}s"><div class="spinner" style="animation-delay:-${((i*1.7)%9).toFixed(2)}s">${cardHTML(c)}${BACK}</div></div></div><div class="base"></div><div class="pinc">+$${fmt(inc(c)*b)}/s</div><div class="pname">${esc(p.n)}</div></div>`;
-    } else {
-      h+=`<div class="ped empty" role="button" tabindex="0" data-act="ped:${i}"><div class="stage"><div class="slotring">+</div></div><div class="base"></div><div class="pinc muted">Vazio</div><div class="pname">Toque para colocar</div></div>`;
+  h+=`<div class="fstats"><div><span>Renda</span><b class="g">$${fmt(totalRate())}/s</b></div><div><span>Ocupados</span><b>${used}/${S.slots}</b></div><div><span>Álbum</span><b>+${Math.round((b-1)*100)}%</b></div></div>`;
+  // pilar principal
+  const cap = S.ped[0] && card(S.ped[0]);
+  if(cap){
+    const p=P[cap.p];
+    h+=`<section class="hero" role="button" tabindex="0" data-act="ped:0" data-ped="0" style="--rc:${RAR[p.r].c}" aria-label="Pilar principal: ${esc(p.n)}"><div class="hstage">${CROWN}<div class="bob"><div class="spinner">${cardHTML(cap)}${BACK}</div></div>${PILLAR}</div><div class="hinfo"><div class="eyebrow">Pilar principal</div><h2>${esc(p.n)}</h2><span class="sub">${RAR[p.r].n}${cap.m?' · '+MUT[cap.m].n:''} · ${p.o} de geral</span><div class="hinc">+$${fmt(inc(cap)*CAPX*b)}<small>/s</small></div><span class="capchip">Capitão +${Math.round((CAPX-1)*100)}% de renda</span></div></section>`;
+  } else {
+    h+=`<section class="hero empty" role="button" tabindex="0" data-act="ped:0"><div class="hstage"><div class="slotring" style="margin-bottom:10px">+</div>${PILLAR}</div><div class="hinfo"><div class="eyebrow">Pilar principal</div><h2>Seu melhor jogador fica aqui</h2><span class="sub">Ele rende +${Math.round((CAPX-1)*100)}% a mais que nos outros pedestais.</span></div></section>`;
+  }
+  if(S.slots>1 || S.slots<MAXS){
+    h+=`<div class="ptitle2"><h2>Elenco</h2><span class="sub">do melhor para o pior</span></div><div class="peds">`;
+    for(let i=1;i<S.slots;i++){
+      const u=S.ped[i], c=u && card(u);
+      if(c){
+        const p=P[c.p];
+        h+=`<div class="ped" role="button" tabindex="0" data-act="ped:${i}" data-ped="${i}" style="--rc:${RAR[p.r].c}"><span class="rank"><small>#</small>${i+1}</span><div class="stage"><div class="bob" style="animation-delay:-${((i*.37)%3).toFixed(2)}s"><div class="spinner" style="animation-delay:-${((i*1.7)%9).toFixed(2)}s">${cardHTML(c)}${BACK}</div></div></div>${PILLAR}<div class="pinc">+$${fmt(inc(c)*b)}/s</div><div class="pname">${esc(p.n)}</div></div>`;
+      } else {
+        h+=`<div class="ped empty" role="button" tabindex="0" data-act="ped:${i}"><span class="rank"><small>#</small>${i+1}</span><div class="stage"><div class="slotring">+</div></div>${PILLAR}<div class="pinc muted">Vazio</div><div class="pname">Toque para colocar</div></div>`;
+      }
     }
-  });
-  if(S.slots<MAXS){
-    const cost=slotCost();
-    h+=`<div class="ped buy" role="button" tabindex="0" data-act="buyslot" data-cost="${cost}"><div class="stage"><div class="lockic"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></div></div><div class="base"></div><div class="pinc">$${fmt(cost)}</div><div class="pname">Novo pedestal</div></div>`;
+    if(S.slots<MAXS){
+      const cost=slotCost();
+      h+=`<div class="ped buy" role="button" tabindex="0" data-act="buyslot" data-cost="${cost}"><div class="stage"><div class="lockic"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></div></div>${PILLAR}<div class="pinc">$${fmt(cost)}</div><div class="pname">Novo pedestal</div></div>`;
+    }
+    h+=`</div>`;
   }
-  h+=`</div></div>`;
+  h+=`</div>`;
   main.innerHTML=h;
 }
 
@@ -509,7 +570,7 @@ function renderCards(){
   if(!list.length){
     h+=`<div class="empty-note"><p class="sub">${S.cards.length?'Nenhuma carta dessa raridade ainda.':'Você ainda não tem cartas. Abra um pacote na Loja.'}</p><button class="btn" data-act="tab:shop">Ir para a Loja</button></div>`;
   } else {
-    h+=`<div class="cgrid">${list.slice(0,300).map(c=>`<button class="cw" data-act="card:${c.u}">${onField(c.u)?'<span class="tag">EM CAMPO</span>':''}${cardHTML(c)}<span class="ci">+$${fmt(inc(c)*b)}/s</span></button>`).join('')}</div>`;
+    h+=`<div class="cgrid">${list.slice(0,300).map(c=>`<button class="cw" data-act="card:${c.u}">${S.ped[0]===c.u?'<span class="tag cap">CAPITÃO</span>':onField(c.u)?'<span class="tag">EM CAMPO</span>':''}${cardHTML(c)}<span class="ci">+$${fmt(inc(c)*b)}/s</span></button>`).join('')}</div>`;
     if(list.length>300) h+=`<p class="sub" style="text-align:center">Mostrando as 300 melhores.</p>`;
   }
   h+=`</div>`;
@@ -545,7 +606,7 @@ function openPicker(i){
   const cur = S.ped[i] && card(S.ped[i]);
   const b=albumBonus(), curInc = cur ? inc(cur) : 0;
   const avail = S.cards.filter(c=>!onField(c.u)).sort((a,c)=>inc(c)-inc(a)).slice(0,80);
-  let h=`<h2>Pedestal ${i+1}</h2>`;
+  let h=`<h2>${i===0?'Pilar principal':'Pedestal '+(i+1)}</h2>${i===0?`<p class="sub">O pilar principal sempre fica com o seu melhor jogador e rende +${Math.round((CAPX-1)*100)}%.</p>`:'<p class="sub">O campo se organiza sozinho do melhor para o pior.</p>'}`;
   if(cur){
     h+=`<div class="detail" style="--cw:90px">${cardHTML(cur)}<div class="dinfo"><b>${esc(P[cur.p].n)}</b><span class="sub">${RAR[P[cur.p].r].n}${cur.m?' · '+MUT[cur.m].n:''}</span><span class="big">+$${fmt(curInc*b)}/s</span></div></div><div class="acts"><button class="btn ghost wide" data-act="unplace:${i}">Tirar do pedestal</button></div>`;
   }
@@ -629,21 +690,19 @@ function placeCard(u, slot){
   }
   const prev=S.ped.indexOf(u); if(prev>=0) S.ped[prev]=null;
   S.ped[slot]=u;
-  snd('place'); save();
+  sortField(); snd('place'); save();
   return true;
 }
 function autoMont(){
   const best=S.cards.slice().sort((a,c)=>inc(c)-inc(a)).slice(0,S.slots).map(c=>c.u);
-  const keep=S.ped.map(u=>best.includes(u)?u:null);
-  const rest=best.filter(u=>!keep.includes(u));
-  S.ped=keep.map(u=>u ?? (rest.shift() ?? null));
+  S.ped=Array.from({length:S.slots},(_,i)=>best[i] ?? null);
   snd('place'); save();
 }
 function sellCards(list){
   let total=0; const ids=new Set(list.map(c=>c.u));
   list.forEach(c=>total+=sellValue(c));
   S.cards=S.cards.filter(c=>!ids.has(c.u));
-  S.ped=S.ped.map(u=>ids.has(u)?null:u);
+  S.ped=S.ped.map(u=>ids.has(u)?null:u); sortField();
   S.money+=total; snd('coin'); save();
   toast(`Vendido por $${fmt(total)}`);
 }
@@ -770,7 +829,7 @@ function tick(){
     const b=albumBonus();
     document.querySelectorAll('[data-ped]').forEach(el=>{
       const c=card(S.ped[+el.dataset.ped]); if(!c) return;
-      const f=document.createElement('span'); f.className='float'; f.textContent='+$'+fmt(inc(c)*b*2);
+      const f=document.createElement('span'); f.className='float'; f.textContent='+$'+fmt(inc(c)*slotMult(+el.dataset.ped)*b*2);
       el.appendChild(f); setTimeout(()=>f.remove(),1350);
     });
   }
@@ -819,7 +878,7 @@ function act(a, el, ev){
     case 'close-bg': if(ev.target===el) closeSheet(); break;
     case 'ped': openPicker(+v); break;
     case 'put': if(pendingSlot!=null){ placeCard(+v,pendingSlot); closeSheet(); render(); } break;
-    case 'unplace': S.ped[+v]=null; save(); closeSheet(); render(); break;
+    case 'unplace': S.ped[+v]=null; sortField(); save(); closeSheet(); render(); break;
     case 'place': if(placeCard(+v)){ closeSheet(); render(); toast('Carta colocada no pedestal.'); } break;
     case 'card': openDetail(+v); break;
     case 'sell': { const c=card(+v); if(c){ sellCards([c]); closeSheet(); render(); } break; }
