@@ -23,9 +23,6 @@ ${corpo}
 ${seguro(ler("www/armazenamento.js"))}
 </script>
 <script>
-${seguro(ler("www/psn.js"))}
-</script>
-<script>
 ${seguro(ler("www/app.js"))}
 </script>
 `;

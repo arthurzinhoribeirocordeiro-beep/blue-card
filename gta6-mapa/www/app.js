@@ -2,7 +2,7 @@
 
 // =====================================================================
 //  Mapa de Coletáveis — app para celular.
-//  Filtros por categoria, marcação com um toque e conferência pela PSN.
+//  Filtros por categoria e marcação com um toque.
 //  Tudo fica guardado no próprio celular.
 // =====================================================================
 
@@ -35,13 +35,11 @@ const S = {
   mapa: null, // { nome, grupos, categorias, itens }
   progresso: { encontrados: {}, psn: { jogo: null, vinculos: {} } },
   imagem: null, // Blob da imagem do mapa
-  psn: { jogos: null, trofeus: null, anterior: null, ultimoSync: 0, carregando: false, erro: null, escolhendo: false },
   ui: {
     ocultas: new Set(LS.get("ocultas", [])),
     esconderEncontrados: LS.get("esconderEncontrados", false),
     rapido: LS.get("rapido", true),
     soFaltando: LS.get("soFaltando", false),
-    autoSync: LS.get("autoSync", true),
     ultimaCategoria: LS.get("ultimaCategoria", null),
     editar: false,
     aba: "mapa",
@@ -375,11 +373,9 @@ function renderTudo() {
 
   $("#esconderEncontrados").checked = S.ui.esconderEncontrados;
   $("#listaSoFaltando").checked = S.ui.soFaltando;
-  $("#psnBolinha").hidden = !psnTemDivergencia();
 
   if (S.ui.aba === "filtros") renderFiltros();
   if (S.ui.aba === "lista") renderLista();
-  if (S.ui.aba === "psn") renderPsn();
   if (S.ui.aba === "mais") renderMais();
 }
 
@@ -970,291 +966,6 @@ function abrirEdicaoCategoria(id) {
   }
 }
 
-// ---------------------------------------------------------------- PSN
-
-function trofeuDe(catId) {
-  const tid = S.progresso.psn.vinculos[catId];
-  if (tid == null || !S.psn.trofeus) return null;
-  return S.psn.trofeus.find((t) => String(t.id) === String(tid)) || null;
-}
-
-function comparar(catId) {
-  const t = trofeuDe(catId);
-  if (!t) return null;
-  const { total, feitos } = contagem(catId);
-  if (t.alvo && t.progresso != null) {
-    if (t.progresso > feitos) return { tipo: "falta", psn: t.progresso, feitos, total, t };
-    if (t.progresso < feitos) return { tipo: "sobra", psn: t.progresso, feitos, total, t };
-    return { tipo: "ok", psn: t.progresso, feitos, total, t };
-  }
-  if (t.conquistado) return feitos < total ? { tipo: "conquistado", feitos, total, t } : { tipo: "ok", feitos, total, t };
-  return { tipo: "semContador", feitos, total, t };
-}
-
-function psnTemDivergencia() {
-  return categorias().some((c) => {
-    const r = comparar(c.id);
-    return r && (r.tipo === "falta" || r.tipo === "conquistado");
-  });
-}
-
-function mostrarFaltando(catId) {
-  const cat = categoriaPorId(catId);
-  if (!cat) return;
-  S.ui.ocultas = new Set(categorias().filter((c) => c.id !== catId).map((c) => c.id));
-  S.ui.esconderEncontrados = true;
-  LS.set("esconderEncontrados", true);
-  trocarAba("mapa");
-  salvarOcultas();
-  const faltando = itens().filter((i) => i.categoria === catId && !encontrado(i.id));
-  if (faltando.length) mapa.flyToBounds(L.latLngBounds(faltando.map((i) => paraLatLng(i.x, i.y))).pad(0.3), { duration: 0.6, maxZoom: mapa.getMinZoom() + 2.5 });
-  aviso(`Mostrando só os ${faltando.length} que faltam de <b>${esc(cat.nome)}</b>. Toque no que você pegou.`, { tipo: "psn", duracao: 9000 });
-}
-
-function statusHtml(catId) {
-  if (!S.psn.trofeus) return `<div class="psn-status texto-2">Sincronize para comparar.</div>`;
-  const r = comparar(catId);
-  if (!r) return "";
-  const meta = r.t.alvo && r.t.alvo !== r.total ? `<div class="texto-2" style="margin-top:4px">O troféu pede ${r.t.alvo} e o seu mapa tem ${r.total} desse tipo.</div>` : "";
-  switch (r.tipo) {
-    case "falta":
-      return `<div class="psn-status alerta">A PSN conta <b>${r.psn}</b>, você marcou <b>${r.feitos}</b>. Falta marcar ${r.psn - r.feitos}.${meta}
-        <button class="btn pequeno" data-faltando="${esc(catId)}">Ver no mapa os que faltam</button></div>`;
-    case "sobra":
-      return `<div class="psn-status alerta">Você marcou <b>${r.feitos}</b>, mas a PSN só conta <b>${r.psn}</b>. Será que marcou algum sem querer?${meta}</div>`;
-    case "conquistado":
-      return `<div class="psn-status alerta">🏆 Troféu conquistado! Você marcou ${r.feitos} de ${r.total}.
-        <button class="btn pequeno" data-todos="${esc(catId)}">Marcar todos como pegos</button></div>`;
-    case "ok":
-      return `<div class="psn-status ok">✓ Bate com a PSN${r.psn != null ? ` (${r.psn}/${r.t.alvo})` : ""}.${meta}</div>`;
-    default:
-      return `<div class="psn-status texto-2">Esse troféu não tem contador: o app só fica sabendo quando você conquistar ele.</div>`;
-  }
-}
-
-function opcoesTrofeus(catId) {
-  const atual = S.progresso.psn.vinculos[catId];
-  const { total } = contagem(catId);
-  const pontos = (t) => (t.alvo === total ? 2 : 0) + (t.alvo ? 1 : 0);
-  const lista = [...(S.psn.trofeus || [])].sort((a, b) => pontos(b) - pontos(a));
-  const extra = atual != null && !lista.some((t) => String(t.id) === String(atual)) ? `<option value="${esc(atual)}" selected>Troféu #${esc(atual)}</option>` : "";
-  return (
-    `<option value="">— sem troféu —</option>${extra}` +
-    lista
-      .map((t) => {
-        const sel = String(t.id) === String(atual) ? "selected" : "";
-        const conta = t.alvo ? ` (${t.progresso ?? 0}/${t.alvo})` : "";
-        const combina = t.alvo && t.alvo === total ? " ★" : "";
-        return `<option value="${esc(t.id)}" ${sel}>${t.conquistado ? "🏆 " : ""}${esc(t.nome || "Troféu oculto")}${conta}${combina}</option>`;
-      })
-      .join("")
-  );
-}
-
-function renderPsn() {
-  const el = $("#psn");
-  const p = S.psn;
-
-  if (!PSN.conectado()) {
-    el.innerHTML = `
-      <h2 class="folha-titulo">Conectar a PSN</h2>
-      <p style="margin-top:0">Assim o app confere seus troféus e avisa quando você pega um coletável no PS5.</p>
-      ${PSN.nativo() ? `
-        <ol class="passos">
-          <li>Toque aqui para abrir o site da PlayStation e <b>faça login</b>:<br><a href="https://www.playstation.com/pt-br/" target="_blank" rel="noopener">playstation.com</a></li>
-          <li>Depois de entrar, abra este endereço:<br><a href="https://ca.account.sony.com/api/v1/ssocookie" target="_blank" rel="noopener">ca.account.sony.com/api/v1/ssocookie</a></li>
-          <li>Vai aparecer algo como <code>{"npsso":"abc123…"}</code>. Segure o dedo, <b>copie tudo</b> e cole aqui:</li>
-        </ol>
-        <textarea class="campo mono" id="npsso" placeholder='{"npsso":"..."}' autocomplete="off" spellcheck="false"></textarea>
-        <button class="btn primario largo" id="conectarPsn" style="margin-top:10px">Conectar</button>
-        ${p.erro ? `<div class="psn-status alerta">${esc(p.erro)}</div>` : ""}
-        <div class="caixa amarela">🔒 Esse código dá acesso à sua conta da PSN. <b>Não mande para ninguém.</b> Ele fica guardado só neste celular e é usado só para ler seus troféus.</div>
-      ` : `
-        <div class="caixa amarela">A conexão com a PSN só funciona no <b>app instalado</b> (APK). No navegador, a Sony bloqueia.</div>
-      `}
-      <button class="btn largo" id="usarDemo" style="margin-top:12px">🧪 Testar com uma PSN simulada</button>`;
-    if ($("#conectarPsn")) {
-      $("#conectarPsn").onclick = async () => {
-        const b = $("#conectarPsn");
-        b.disabled = true;
-        b.textContent = "Conectando…";
-        try {
-          await PSN.conectar($("#npsso").value);
-          p.erro = null;
-          aviso("PSN conectada! Agora escolha o jogo.", { tipo: "psn" });
-        } catch (e) {
-          p.erro = e.message;
-        }
-        renderPsn();
-      };
-    }
-    $("#usarDemo").onclick = async () => {
-      await PSN.usarDemo(true);
-      Object.assign(p, { jogos: null, trofeus: null, anterior: null, erro: null });
-      renderPsn();
-    };
-    return;
-  }
-
-  const jogo = S.progresso.psn.jogo;
-  const faixaDemo = PSN.demo ? `<div class="caixa amarela">🧪 PSN simulada: os contadores sobem 1 por minuto. Para usar a sua conta de verdade, toque em "Desconectar" lá embaixo.</div>` : "";
-
-  if (!jogo || p.escolhendo) {
-    el.innerHTML = `
-      <h2 class="folha-titulo">Escolha o jogo</h2>
-      ${faixaDemo}
-      <div id="jogos" class="opcoes" style="margin-top:12px"><p class="texto-2">Carregando seus jogos…</p></div>
-      ${jogo ? `<button class="btn largo" style="margin-top:12px" id="cancelarJogo">Cancelar</button>` : ""}
-      <button class="btn largo perigo" id="desconectarPsn" style="margin-top:12px">Desconectar PSN</button>`;
-    if ($("#cancelarJogo")) $("#cancelarJogo").onclick = () => { p.escolhendo = false; renderPsn(); };
-    $("#desconectarPsn").onclick = desconectarPsn;
-    carregarJogos();
-    return;
-  }
-
-  el.innerHTML = `
-    <h2 class="folha-titulo">PSN</h2>
-    ${faixaDemo}
-    <div class="caixa">
-      <div style="display:flex;align-items:center;gap:8px"><span style="font-size:22px">🎮</span><b style="flex:1">${esc(jogo.nome)}</b><button class="btn pequeno" id="trocarJogo">Trocar</button></div>
-      <button class="btn primario largo" id="sincronizar" style="margin-top:12px" ${p.carregando ? "disabled" : ""}>${p.carregando ? "Sincronizando…" : "🔄 Sincronizar agora"}</button>
-      <label class="chave pequena"><input type="checkbox" id="autoSync" ${S.ui.autoSync ? "checked" : ""}><span class="trilho"></span><span>Sincronizar sozinho a cada 2 min</span></label>
-      <div class="texto-2">${p.ultimoSync ? "Última vez: " + new Date(p.ultimoSync).toLocaleTimeString("pt-BR") : "Ainda não sincronizou."}</div>
-      ${p.erro ? `<div class="psn-status alerta">${esc(p.erro)}</div>` : ""}
-    </div>
-    <p style="margin-top:18px"><b>Ligue cada categoria ao troféu dela</b><br><span class="texto-2">Ex.: "Pacotes escondidos" → troféu "Encontre todos os pacotes". ★ = o número do troféu bate com o do seu mapa.</span></p>
-    ${categorias().map((c) => `
-      <div class="psn-cat">
-        <div class="psn-cat-topo"><span class="cat-icone" style="--cor:${esc(c.cor)}">${esc(c.icone)}</span>${esc(c.nome)}</div>
-        <select class="campo" data-vinculo="${esc(c.id)}" ${p.trofeus ? "" : "disabled"}>${opcoesTrofeus(c.id)}</select>
-        ${S.progresso.psn.vinculos[c.id] != null ? statusHtml(c.id) : ""}
-      </div>`).join("") || `<p class="texto-2">Crie categorias primeiro.</p>`}
-    <div class="caixa amarela" style="margin-top:16px">A PSN só informa <b>quantos</b> você pegou (nos troféus com contador), não <b>quais</b>. Por isso o app avisa quando o número sobe, e você toca no que pegou.</div>
-    <button class="btn largo perigo" id="desconectarPsn" style="margin-top:12px">Desconectar PSN</button>`;
-
-  $("#trocarJogo").onclick = () => { p.escolhendo = true; renderPsn(); };
-  $("#sincronizar").onclick = () => sincronizarPsn(true);
-  $("#autoSync").onchange = (e) => {
-    S.ui.autoSync = e.target.checked;
-    LS.set("autoSync", S.ui.autoSync);
-  };
-  for (const s of $$("[data-vinculo]")) {
-    s.onchange = () => {
-      const v = { ...S.progresso.psn.vinculos };
-      if (s.value === "") delete v[s.dataset.vinculo];
-      else v[s.dataset.vinculo] = Number.isNaN(Number(s.value)) ? s.value : Number(s.value);
-      S.progresso.psn.vinculos = v;
-      salvarProgresso();
-      renderTudo();
-    };
-  }
-  for (const b of $$("[data-faltando]")) b.onclick = () => mostrarFaltando(b.dataset.faltando);
-  for (const b of $$("[data-todos]")) {
-    b.onclick = () => {
-      const ids = itens().filter((i) => i.categoria === b.dataset.todos).map((i) => i.id);
-      marcar(ids, true, { texto: `🏆 ${ids.length} marcados como pegos.` });
-    };
-  }
-  $("#desconectarPsn").onclick = desconectarPsn;
-}
-
-async function desconectarPsn() {
-  if (!(await confirmar("Desconectar a PSN? Os troféus ligados às categorias continuam salvos.", "Desconectar"))) return;
-  await PSN.desconectar();
-  Object.assign(S.psn, { jogos: null, trofeus: null, anterior: null, ultimoSync: 0, erro: null, escolhendo: false });
-  renderTudo();
-}
-
-async function carregarJogos() {
-  const p = S.psn;
-  try {
-    if (!p.jogos) p.jogos = await PSN.jogos();
-    p.erro = null;
-  } catch (e) {
-    p.erro = e.message;
-    const el = $("#jogos");
-    if (el) {
-      el.innerHTML = `<div class="psn-status alerta">${esc(e.message)}</div><button class="btn largo" id="tentarDeNovo">Tentar de novo</button>`;
-      $("#tentarDeNovo").onclick = () => renderPsn();
-    }
-    return;
-  }
-  const el = $("#jogos");
-  if (!el) return;
-  const pareceGta = (j) => /grand theft auto|\bgta\b/i.test(j.nome);
-  const lista = [...p.jogos].sort((a, b) => pareceGta(b) - pareceGta(a));
-  el.innerHTML = lista.length
-    ? lista
-        .map((j) => `<button class="opcao" data-jogo="${esc(j.id)}">${j.icone ? `<img src="${esc(j.icone)}" alt="" width="44" height="44">` : `<span class="emoji">🎮</span>`}<span><b>${esc(j.nome)}</b><small>${esc(j.plataforma || "")}${j.progresso != null ? ` · ${j.progresso}% dos troféus` : ""}</small></span></button>`)
-        .join("")
-    : `<p class="texto-2">Nenhum jogo com troféus na sua conta ainda. Jogue um pouco e tente de novo.</p>`;
-  for (const b of $$("[data-jogo]", el)) {
-    b.onclick = () => {
-      const j = p.jogos.find((x) => x.id === b.dataset.jogo);
-      const mudou = S.progresso.psn.jogo?.id !== j.id;
-      S.progresso.psn.jogo = { id: j.id, nome: j.nome, servico: j.servico };
-      if (mudou) {
-        S.progresso.psn.vinculos = {};
-        Object.assign(p, { trofeus: null, anterior: null });
-      }
-      p.escolhendo = false;
-      salvarProgresso();
-      renderPsn();
-      sincronizarPsn(true);
-    };
-  }
-}
-
-async function sincronizarPsn(manual = false) {
-  const p = S.psn;
-  const jogo = S.progresso.psn.jogo;
-  if (!PSN.conectado() || !jogo || p.carregando) return;
-  p.carregando = true;
-  if (S.ui.aba === "psn") renderPsn();
-  try {
-    const trofeus = await PSN.trofeus(jogo.id, jogo.servico);
-    if (p.anterior) avisarMudancas(trofeus);
-    p.anterior = new Map(trofeus.map((t) => [String(t.id), t]));
-    p.trofeus = trofeus;
-    p.ultimoSync = Date.now();
-    p.erro = null;
-    if (manual) aviso("PSN sincronizada.", { tipo: "psn", duracao: 2500 });
-  } catch (e) {
-    p.erro = e.message;
-    p.ultimoSync = Date.now(); // não insiste a cada 20 s quando dá erro
-    if (manual) aviso("PSN: " + esc(e.message), { tipo: "erro", duracao: 8000 });
-  } finally {
-    p.carregando = false;
-    renderTudo();
-  }
-}
-
-function avisarMudancas(trofeus) {
-  for (const c of categorias()) {
-    const tid = S.progresso.psn.vinculos[c.id];
-    if (tid == null) continue;
-    const novo = trofeus.find((t) => String(t.id) === String(tid));
-    const velho = S.psn.anterior.get(String(tid));
-    if (!novo || !velho) continue;
-    if (novo.conquistado && !velho.conquistado) {
-      vibrar(true);
-      aviso(`🏆 Troféu <b>${esc(novo.nome)}</b> conquistado!`, {
-        tipo: "psn", duracao: 12000, acao: "Marcar todos",
-        aoClicar: () => marcar(itens().filter((i) => i.categoria === c.id).map((i) => i.id), true),
-      });
-    } else if (novo.progresso != null && velho.progresso != null && novo.progresso > velho.progresso) {
-      vibrar(true);
-      aviso(`🎮 PSN: <b>+${novo.progresso - velho.progresso}</b> em ${esc(c.nome)} (${novo.progresso}/${novo.alvo}). Toque no que você pegou.`, {
-        tipo: "psn", duracao: 12000, acao: "Ver", aoClicar: () => mostrarFaltando(c.id),
-      });
-    }
-  }
-}
-
-setInterval(() => {
-  if (S.ui.autoSync && !document.hidden && Date.now() - S.psn.ultimoSync >= 120000) sincronizarPsn();
-}, 20000);
-
 // ---------------------------------------------------------------- botão voltar do Android
 
 function voltar() {
@@ -1273,10 +984,6 @@ if (plugins().App && ehApp()) {
   plugins().App.addListener("backButton", () => {
     if (!voltar()) plugins().App.minimizeApp();
   });
-  // ao voltar para o app, sincroniza a PSN se já faz um tempo
-  plugins().App.addListener("resume", () => {
-    if (S.ui.autoSync && Date.now() - S.psn.ultimoSync >= 60000) sincronizarPsn();
-  });
 }
 
 // ---------------------------------------------------------------- início
@@ -1284,7 +991,7 @@ if (plugins().App && ehApp()) {
 async function iniciar() {
   renderModos();
   try {
-    const [m, p, img] = await Promise.all([Banco.get("mapa"), Banco.get("progresso"), Banco.get("imagem"), PSN.iniciar()]);
+    const [m, p, img] = await Promise.all([Banco.get("mapa"), Banco.get("progresso"), Banco.get("imagem")]);
     S.mapa = m ? normalizarMapa(m) : null;
     if (p) S.progresso = { encontrados: p.encontrados || {}, psn: { jogo: null, vinculos: {}, ...(p.psn || {}) } };
     S.imagem = img || null;
@@ -1294,7 +1001,6 @@ async function iniciar() {
   await montarFundo();
   renderTudo();
   if (!S.mapa || !S.mapa.categorias.length) abrirBoasVindas();
-  if (PSN.conectado() && S.progresso.psn.jogo) sincronizarPsn();
 }
 
 iniciar();
