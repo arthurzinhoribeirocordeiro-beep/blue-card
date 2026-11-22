@@ -365,38 +365,33 @@ const PACKS = [
 ];
 function shortName(n){ n=String(n).trim(); return n.length<=13 ? n : n.split(/\s+/).slice(-1)[0]; }
 const POSN = {GOL:'Goleiro',ZAG:'Zagueiro',LAT:'Lateral',VOL:'Volante',MEI:'Meia',ATA:'Atacante'};
-// jogadores fictícios
+// jogadores reais (as notas são do próprio jogo, não são oficiais)
 const P = [
- ['Cacá Nogueira','GOL',54,0],['Tonho Pereira','ZAG',52,0],['Lelê Siqueira','LAT',56,0],['Biro Matos','VOL',58,0],
- ['Nando Quaresma','MEI',60,0],['Zeca Brandão','ATA',62,0],['Gui Tavares','LAT',57,0],['Pitoco Lima','ZAG',53,0],
- ['Duzinho Fontes','MEI',59,0],['Marcão Teles','GOL',50,0],['Bira Campos','VOL',55,0],['Lucão Viana','ZAG',61,0],
- ['Pepeu Lacerda','ATA',64,0],['Chicão Rangel','ZAG',63,0],
- ['Rafa Monteiro','MEI',70,1],['Duda Prates','LAT',66,1],['Wesley Cardim','ATA',72,1],['Igor Valença','GOL',68,1],
- ['Kaio Bastos','VOL',67,1],['Tetê Albuquerque','MEI',73,1],['Jonas Ribas','ZAG',69,1],['Felipinho Duarte','ATA',74,1],
- ['Matheus Lobo','LAT',65,1],['Sandro Peixoto','ZAG',71,1],['Vadinho Medeiros','VOL',68,1],['Renan Cordovil','GOL',72,1],
- ['Thiago Serrano','MEI',80,2],['Ícaro Mendonça','ATA',82,2],['Breno Sampaio','ZAG',78,2],['Caio Varela','LAT',77,2],
- ['Rodrigão Leme','GOL',79,2],['Nicolas Barreto','VOL',76,2],['Juninho Paixão','MEI',81,2],['Davi Salvador','ATA',80,2],
- ['Elias Furtado','ZAG',75,2],['Pedrinho Galvão','LAT',78,2],
- ['Matías Ferreyra','ATA',86,3],['Lorenzo Bianchi','MEI',85,3],['Kwesi Ampofo','VOL',84,3],['Hugo Lacombe','ZAG',85,3],
- ['Sven Halvorsen','GOL',84,3],['Yuto Kaneda','MEI',83,3],['Anselmo Rivas','LAT',84,3],['Bruninho Távora','ATA',87,3],
- ['Diego Altamirano','MEI',91,4],['Kauã Relâmpago','ATA',92,4],['Viktor Draganov','ZAG',89,4],['Seydou Bakary','ATA',90,4],
- ['Tito Esquivel','GOL',88,4],['Muralha Bastião','ZAG',90,4],
- ['Maestro Valdivino','MEI',96,5],['Furacão Ximenes','ATA',98,5],['Rei Teodoro','ATA',99,5],['Paredão Anchieta','GOL',94,5],
-].map(([n,pos,o,r],i)=>({n,n0:n,pos,o,r,i,short:shortName(n)}));
+ ['Diego Costa','ATA',63,0],['Felipe Melo','VOL',58,0],['Marcelo','LAT',64,0],['Douglas Costa','ATA',60,0],
+ ['Willian','MEI',62,0],['Paulinho','VOL',59,0],['Philippe Coutinho','MEI',62,0,'Coutinho'],['Renato Augusto','MEI',57,0,'R. Augusto'],
+ ['Rafinha','LAT',55,0],['Fernandinho','VOL',56,0],['David Luiz','ZAG',57,0],['Fábio','GOL',54,0],
+ ['Fred','ATA',53,0],['Diego Alves','GOL',50,0],
+ ['Hulk','ATA',73,1],['Giorgian de Arrascaeta','MEI',74,1,'Arrascaeta'],['Pedro','ATA',72,1],['Weverton','GOL',70,1],
+ ['Gerson','VOL',71,1],['Everton Ribeiro','MEI',68,1,'E. Ribeiro'],['Thiago Silva','ZAG',73,1],['Gabigol','ATA',69,1],
+ ['Danilo','LAT',67,1],['Germán Cano','ATA',66,1],['Lucas Moura','MEI',68,1],['Cássio','GOL',65,1],
+ ['Raphinha','ATA',82,2],['Rodrygo','ATA',82,2],['Marquinhos','ZAG',81,2],['Éder Militão','ZAG',80,2],
+ ['Ederson','GOL',81,2],['Bruno Guimarães','VOL',81,2],['Lucas Paquetá','MEI',79,2],['Gabriel Martinelli','ATA',78,2,'Martinelli'],
+ ['Gabriel Magalhães','ZAG',80,2,'Gabriel'],['Estêvão','ATA',76,2],
+ ['Jude Bellingham','MEI',87,3,'Bellingham'],['Lamine Yamal','ATA',87,3],['Rodri','VOL',86,3],['Mohamed Salah','ATA',86,3,'Salah'],
+ ['Harry Kane','ATA',86,3,'Kane'],['Alisson','GOL',85,3],['Virgil van Dijk','ZAG',85,3,'Van Dijk'],['Neymar','ATA',83,3],
+ ['Lionel Messi','ATA',92,4,'Messi'],['Kylian Mbappé','ATA',92,4,'Mbappé'],['Erling Haaland','ATA',91,4,'Haaland'],['Vinícius Júnior','ATA',90,4,'Vini Jr.'],
+ ['Cristiano Ronaldo','ATA',89,4,'Cristiano'],['Kevin De Bruyne','MEI',88,4,'De Bruyne'],
+ ['Zinedine Zidane','MEI',96,5,'Zidane'],['Diego Maradona','MEI',98,5,'Maradona'],['Pelé','ATA',99,5],['Ronaldo Nazário','ATA',97,5,'Ronaldo'],
+].map(([n,pos,o,r,sh],i)=>({n,n0:n,sh0:sh||'',pos,o,r,i,short:sh||shortName(n)}));
 const BYR = RAR.map((_,r)=>P.filter(p=>p.r===r).map(p=>p.i));
 
 const KITS = [['#d62839','#ffffff'],['#1d4ed8','#fde047'],['#15803d','#ffffff'],['#1f2937','#f9fafb'],['#7c3aed','#fbbf24'],['#ea580c','#111827'],['#0ea5e9','#ffffff'],['#be123c','#111827'],['#facc15','#1d4ed8'],['#e5e7eb','#1f2937'],['#0f766e','#fef3c7']];
-const SKINS = ['#f1c7a5','#d9a37c','#b97f55','#8d5a3b','#5e3b26','#e8b98f'];
-const HAIR = ['#141414','#3b2416','#6b4423','#d9b26a','#2a2a2a','#8a3b12'];
 const kit = i => KITS[(i*7+3)%KITS.length];
 
 function artSVG(i){
-  const k=kit(i), sk=SKINS[(i*5+1)%SKINS.length], hc=HAIR[(i*3)%HAIR.length], hs=i%4, num=((i*37)%98)+1;
-  const hair = hs===0 ? `<path d="M35 39C33 20 67 20 65 39C61 30 39 30 35 39Z" fill="${hc}"/>`
-    : hs===1 ? `<path d="M36 35C37 24 63 24 64 35C58 30 42 30 36 35Z" fill="${hc}"/>`
-    : hs===2 ? `<g fill="${hc}"><circle cx="40" cy="29" r="6.5"/><circle cx="50" cy="25" r="7.5"/><circle cx="60" cy="29" r="6.5"/><circle cx="36" cy="35" r="4.5"/><circle cx="64" cy="35" r="4.5"/></g>`
-    : `<path d="M37 33C38 25 62 25 63 33C57 29 43 29 37 33Z" fill="${hc}"/><path d="M37 45C39 59 61 59 63 45C60 54 40 54 37 45Z" fill="${hc}"/>`;
-  return `<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M6 100C8 80 23 71 37 67L50 76L63 67C77 71 92 80 94 100Z" fill="${k[0]}"/><path d="M45 100V75L50 76L55 75V100Z" fill="${k[1]}" opacity=".85"/><path d="M37 67L50 76L63 67L59 64L50 71L41 64Z" fill="${k[1]}"/><rect x="44" y="50" width="12" height="17" rx="5" fill="${sk}"/><ellipse cx="50" cy="40" rx="14" ry="16" fill="${sk}"/>${hair}<text x="73" y="93" text-anchor="middle" font-family="Saira Condensed,Arial Narrow,sans-serif" font-weight="800" font-size="13" fill="${k[1]}">${num}</text></svg>`;
+  // silhueta neutra: sem cor de pele nem cabelo
+  const k=kit(i), num=((i*37)%98)+1;
+  return `<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M6 100C8 80 23 71 37 67L50 76L63 67C77 71 92 80 94 100Z" fill="${k[0]}"/><path d="M45 100V75L50 76L55 75V100Z" fill="${k[1]}" opacity=".85"/><path d="M37 67L50 76L63 67L59 64L50 71L41 64Z" fill="${k[1]}"/><rect x="44" y="50" width="12" height="17" rx="5" fill="#93a3b8"/><ellipse cx="50" cy="39" rx="14.5" ry="16.5" fill="#a9b7c9"/><ellipse cx="45" cy="33" rx="5" ry="7" fill="#fff" opacity=".12"/><text x="73" y="93" text-anchor="middle" font-family="Saira Condensed,Arial Narrow,sans-serif" font-weight="800" font-size="13" fill="${k[1]}">${num}</text></svg>`;
 }
 const ART = P.map((_,i)=>artSVG(i));
 const BACK = `<div class="cback"><span>DC</span></div>`;
@@ -433,7 +428,7 @@ function photoCSS(){
   if(!el){ el=document.createElement('style'); el.id='phcss'; (document.head||document.body).appendChild(el); }
   el.textContent=Object.keys(PHOTOS).filter(i=>P[i] && /^data:image\//.test(PHOTOS[i])).map(i=>`.ph${i}{background-image:url("${PHOTOS[i]}")}`).join('\n');
 }
-function applyNames(){ P.forEach(p=>{ const c=S.custom[p.i]; p.n=(c && c.n) || p.n0; p.short=shortName(p.n); }); }
+function applyNames(){ P.forEach(p=>{ const c=S.custom[p.i]; p.n=(c && c.n) || p.n0; p.short=(c && c.n) ? shortName(c.n) : (p.sh0 || shortName(p.n0)); }); }
 function processImage(file){
   return new Promise((res,rej)=>{
     const url=URL.createObjectURL(file), im=new Image();
@@ -486,7 +481,7 @@ const esc = s => String(s).replace(/[&<>"]/g, ch=>({'&':'&amp;','<':'&lt;','>':'
 function cardHTML(c, o){
   // o = rascunho da tela de personalizar {n, mode, img}
   const p=P[c.p], r=RAR[p.r];
-  const short = o ? shortName(o.n || p.n0) : p.short;
+  const short = o ? (o.n ? shortName(o.n) : (p.sh0 || shortName(p.n0))) : p.short;
   const has = o ? !!o.img : !!PHOTOS[c.p];
   const mode = has ? ((o ? o.mode : (S.custom[c.p]||{}).mode) || 'foto') : '';
   const ph = has ? (o ? `<div class="phf" style="background-image:url('${o.img}')"></div>` : `<div class="phf ph${c.p}"></div>`) : '';
