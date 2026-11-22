@@ -1,0 +1,71 @@
+# Gera o APK do Mapa de Coletáveis e publica em "Releases" para baixar no celular.
+name: APK do Mapa de Coletáveis
+
+on:
+  push:
+    paths:
+      - "gta6-mapa/**"
+      - ".github/workflows/apk-mapa-coletaveis.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apk-mapa-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: gta6-mapa
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: gta6-mapa/package-lock.json
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Preparar o app
+        run: |
+          npm ci
+          npm run android
+
+      - name: Montar o APK
+        working-directory: gta6-mapa/android
+        env:
+          VERSAO_CODIGO: ${{ github.run_number }}
+          VERSAO_NOME: 1.${{ github.run_number }}
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon
+          cp app/build/outputs/apk/release/app-release.apk ../MapaColetaveis.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MapaColetaveis-1.${{ github.run_number }}
+          path: gta6-mapa/MapaColetaveis.apk
+
+      - name: Publicar para download
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: mapa-v1.${{ github.run_number }}
+          name: Mapa de Coletáveis 1.${{ github.run_number }}
+          target_commitish: ${{ github.sha }}
+          make_latest: true
+          files: gta6-mapa/MapaColetaveis.apk
+          body: |
+            Baixe o arquivo **MapaColetaveis.apk** abaixo pelo celular e toque nele para instalar.
+            Se o Android avisar sobre "fontes desconhecidas", permita a instalação para o navegador que você usou.
+            Versões novas instalam por cima e mantêm o seu progresso.

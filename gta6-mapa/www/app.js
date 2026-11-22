@@ -1,8 +1,9 @@
 "use strict";
 
 // =====================================================================
-//  Mapa de Coletáveis — filtros estilo "mapa interativo", marcação rápida
-//  e conferência com os troféus da PSN.
+//  Mapa de Coletáveis — app para celular.
+//  Filtros por categoria, marcação com um toque e conferência pela PSN.
+//  Tudo fica guardado no próprio celular.
 // =====================================================================
 
 const $ = (s, el = document) => el.querySelector(s);
@@ -10,9 +11,10 @@ const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 const novoId = (p) => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 const limitar = (v) => Math.min(1, Math.max(0, v));
-const ehCelular = () => matchMedia("(max-width: 820px)").matches;
+const plugins = () => (window.Capacitor && Capacitor.Plugins) || {};
+const ehApp = () => !!(window.Capacitor && Capacitor.isNativePlatform && Capacitor.isNativePlatform());
 
-// preferências deste aparelho (filtros, zoom...). O progresso fica no PC.
+// preferências de tela (filtros, zoom...)
 const LS = {
   get(k, padrao) {
     try {
@@ -32,8 +34,8 @@ const LS = {
 const S = {
   mapa: null, // { nome, grupos, categorias, itens }
   progresso: { encontrados: {}, psn: { jogo: null, vinculos: {} } },
-  temImagem: false,
-  psn: { configurada: false, demo: false, jogos: null, trofeus: null, anterior: null, ultimoSync: 0, carregando: false, erro: null },
+  imagem: null, // Blob da imagem do mapa
+  psn: { jogos: null, trofeus: null, anterior: null, ultimoSync: 0, carregando: false, erro: null, escolhendo: false },
   ui: {
     ocultas: new Set(LS.get("ocultas", [])),
     esconderEncontrados: LS.get("esconderEncontrados", false),
@@ -42,28 +44,18 @@ const S = {
     autoSync: LS.get("autoSync", true),
     ultimaCategoria: LS.get("ultimaCategoria", null),
     editar: false,
-    aba: "filtros",
+    aba: "mapa",
     busca: "",
     destaque: null,
   },
-  pendentes: LS.get("pendentes", []),
 };
 
-// ---------------------------------------------------------------- API
+// ---------------------------------------------------------------- vibração
 
-async function api(metodo, url, corpo) {
-  const opcoes = { method: metodo, headers: {} };
-  if (corpo instanceof Blob) {
-    opcoes.body = corpo;
-    opcoes.headers["Content-Type"] = corpo.type;
-  } else if (corpo !== undefined) {
-    opcoes.body = JSON.stringify(corpo);
-    opcoes.headers["Content-Type"] = "application/json";
-  }
-  const r = await fetch(url, opcoes);
-  const dados = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error(dados.erro || `Erro ${r.status}`);
-  return dados;
+function vibrar(forte = true) {
+  const h = plugins().Haptics;
+  if (h && ehApp()) h.impact({ style: forte ? "MEDIUM" : "LIGHT" }).catch(() => {});
+  else if (navigator.vibrate) navigator.vibrate(forte ? 30 : 15);
 }
 
 // ---------------------------------------------------------------- dados
@@ -99,11 +91,11 @@ function gruposOrdenados() {
 }
 
 function normalizarMapa(m) {
-  if (!m || !Array.isArray(m.categorias) || !Array.isArray(m.itens)) throw new Error("Esse arquivo não tem 'categorias' e 'itens'.");
-  const grupos = Array.isArray(m.grupos) ? m.grupos.filter((g) => g && g.id) : [];
+  if (!m || !Array.isArray(m.categorias) || !Array.isArray(m.itens)) throw new Error("esse arquivo não tem 'categorias' e 'itens'.");
+  const grupos = Array.isArray(m.grupos) ? m.grupos.filter((g) => g && g.id).map((g) => ({ id: String(g.id), nome: String(g.nome || g.id) })) : [];
   const cats = m.categorias
     .filter((c) => c && c.id)
-    .map((c) => ({ id: String(c.id), nome: String(c.nome || c.id), icone: c.icone || "📍", cor: c.cor || "#ff4fa3", grupo: c.grupo || null }));
+    .map((c) => ({ id: String(c.id), nome: String(c.nome || c.id), icone: c.icone || "📍", cor: /^#[0-9a-f]{6}$/i.test(c.cor) ? c.cor : "#ff4fa3", grupo: c.grupo ? String(c.grupo) : null }));
   const ids = new Set(cats.map((c) => c.id));
   const vistos = new Set();
   const its = [];
@@ -114,102 +106,56 @@ function normalizarMapa(m) {
     let id = i.id ? String(i.id) : novoId("i");
     while (vistos.has(id)) id = novoId("i");
     vistos.add(id);
-    its.push({ id, categoria: String(i.categoria), x: limitar(x), y: limitar(y), nome: i.nome || "", descricao: i.descricao || "" });
+    its.push({ id, categoria: String(i.categoria), x: limitar(x), y: limitar(y), nome: String(i.nome || ""), descricao: String(i.descricao || "") });
   }
-  return { versao: 1, nome: m.nome || "Mapa de Coletáveis", grupos, categorias: cats, itens: its };
+  return { versao: 1, nome: String(m.nome || "Mapa de Coletáveis"), grupos, categorias: cats, itens: its };
 }
 
-let timerSalvar = null;
-function salvarMapa() {
-  clearTimeout(timerSalvar);
-  timerSalvar = setTimeout(async () => {
-    try {
-      await api("PUT", "/api/mapa", S.mapa);
-    } catch (e) {
-      aviso("Não consegui salvar o mapa: " + e.message, { tipo: "erro" });
-    }
-  }, 300);
+// gravação no celular (com um pequeno atraso para juntar várias mudanças)
+const timers = {};
+function gravar(chave, valor) {
+  clearTimeout(timers[chave]);
+  timers[chave] = setTimeout(() => {
+    Banco.set(chave, valor).catch((e) => aviso("Não consegui salvar no celular: " + esc(e.message), { tipo: "erro" }));
+  }, 150);
 }
+const salvarMapa = () => gravar("mapa", S.mapa);
+const salvarProgresso = () => gravar("progresso", S.progresso);
 
-// ---------------------------------------------------------------- progresso
-// Cada marcação vira uma operação pequena enviada ao PC. Se a conexão cair,
-// fica numa fila neste aparelho e é reenviada sozinha.
+// grava na hora quando o app vai para segundo plano
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) return;
+  for (const k of Object.keys(timers)) clearTimeout(timers[k]);
+  if (S.mapa) Banco.set("mapa", S.mapa).catch(() => {});
+  Banco.set("progresso", S.progresso).catch(() => {});
+});
 
-function aplicarOperacao(op) {
-  for (const id of op.ids) {
-    if (op.encontrado) S.progresso.encontrados[id] ||= Date.now();
-    else delete S.progresso.encontrados[id];
-  }
-}
-
-let enviando = false, avisouOffline = false;
-async function enviarPendentes() {
-  if (enviando || !S.pendentes.length) return;
-  enviando = true;
-  try {
-    while (S.pendentes.length) {
-      await api("POST", "/api/progresso/marcar", S.pendentes[0]);
-      S.pendentes.shift();
-      LS.set("pendentes", S.pendentes);
-    }
-    if (avisouOffline) aviso("Conexão de volta, tudo salvo no PC.");
-    avisouOffline = false;
-  } catch {
-    if (!avisouOffline) aviso("Sem conexão com o PC. Suas marcações ficam guardadas aqui e são enviadas quando voltar.", { tipo: "alerta", duracao: 7000 });
-    avisouOffline = true;
-    setTimeout(enviarPendentes, 5000);
-  } finally {
-    enviando = false;
-  }
-}
+// ---------------------------------------------------------------- marcar
 
 function marcar(ids, valor, { avisar = true, texto } = {}) {
   const mudados = ids.filter((id) => encontrado(id) !== valor);
   if (!mudados.length) return;
-  const op = { ids: mudados, encontrado: valor };
-  aplicarOperacao(op);
-  S.pendentes.push(op);
-  LS.set("pendentes", S.pendentes);
-  enviarPendentes();
-
+  for (const id of mudados) {
+    if (valor) S.progresso.encontrados[id] = Date.now();
+    else delete S.progresso.encontrados[id];
+  }
+  salvarProgresso();
   for (const id of mudados) atualizarMarcador(id, valor);
-  renderLateral();
-  if (navigator.vibrate) navigator.vibrate(valor ? 30 : [15, 40, 15]);
+  renderTudo();
+  vibrar(valor);
 
-  if (avisar) {
-    let msg = texto;
-    if (!msg) {
-      const item = itemPorId(mudados[0]);
-      const cat = item && categoriaPorId(item.categoria);
-      if (mudados.length === 1 && item) {
-        const c = contagem(item.categoria);
-        msg = `${valor ? "✓" : "↩"} <b>${esc(nomeItem(item))}</b> ${valor ? "marcado" : "desmarcado"} · ${cat ? esc(cat.nome) : ""} ${c.feitos}/${c.total}`;
-        if (valor && c.total && c.feitos === c.total) msg = `🎉 Você pegou todos de <b>${esc(cat.nome)}</b>! (${c.total}/${c.total})`;
-      } else msg = `${mudados.length} ${valor ? "marcados" : "desmarcados"}`;
-    }
-    aviso(msg, { acao: "Desfazer", aoClicar: () => marcar(mudados, !valor, { avisar: false }) });
+  if (!avisar) return;
+  let msg = texto;
+  if (!msg) {
+    const item = itemPorId(mudados[0]);
+    const cat = item && categoriaPorId(item.categoria);
+    if (mudados.length === 1 && item) {
+      const c = contagem(item.categoria);
+      msg = `${valor ? "✓" : "↩"} <b>${esc(nomeItem(item))}</b> ${valor ? "marcado" : "desmarcado"} · ${c.feitos}/${c.total}`;
+      if (valor && c.total && c.feitos === c.total) msg = `🎉 Você pegou todos de <b>${esc(cat.nome)}</b>! (${c.total}/${c.total})`;
+    } else msg = `${mudados.length} ${valor ? "marcados" : "desmarcados"}`;
   }
-}
-
-function assinatura(p) {
-  return Object.keys(p.encontrados).sort().join(",") + "|" + JSON.stringify(p.psn);
-}
-
-function receberProgresso(p) {
-  const antes = assinatura(S.progresso);
-  S.progresso = p;
-  for (const op of S.pendentes) aplicarOperacao(op);
-  if (assinatura(S.progresso) !== antes) {
-    renderMarcadores();
-    renderLateral();
-  }
-}
-
-async function buscarProgresso() {
-  if (enviando || S.pendentes.length || document.hidden) return;
-  try {
-    receberProgresso(await api("GET", "/api/progresso"));
-  } catch {}
+  aviso(msg, { acao: "Desfazer", aoClicar: () => marcar(mudados, !valor, { avisar: false }) });
 }
 
 // ---------------------------------------------------------------- mapa (Leaflet)
@@ -218,42 +164,38 @@ const mapa = L.map("mapa", {
   crs: L.CRS.Simple,
   zoomSnap: 0.25,
   zoomDelta: 0.5,
-  wheelPxPerZoomLevel: 90,
   minZoom: -6,
   maxZoom: 3,
   attributionControl: false,
   zoomControl: false,
   tapHold: true,
+  bounceAtZoomLimits: false,
 });
 L.control.zoom({ position: "topright" }).addTo(mapa);
 
 let dims = { w: 2000, h: 2000 };
 let fundo = null;
+let urlImagem = null;
 const marcadores = new Map(); // id -> L.Marker
 
 const paraLatLng = (x, y) => L.latLng(dims.h * (1 - y), dims.w * x);
 const deLatLng = (ll) => ({ x: limitar(ll.lng / dims.w), y: limitar(1 - ll.lat / dims.h) });
 
-// Mapa provisório (desenhado) para quando você ainda não enviou a imagem do mapa.
-// As "ilhas" aqui são as mesmas usadas para espalhar o exemplo fictício.
+// mapa desenhado para quando ainda não tem a imagem do mapa do jogo
 function imagemProvisoria() {
   const grade = [];
-  for (let i = 250; i < 2000; i += 250) {
-    grade.push(`<line x1="${i}" y1="0" x2="${i}" y2="2000"/><line x1="0" y1="${i}" x2="2000" y2="${i}"/>`);
-  }
+  for (let i = 250; i < 2000; i += 250) grade.push(`<line x1="${i}" y1="0" x2="${i}" y2="2000"/><line x1="0" y1="${i}" x2="2000" y2="${i}"/>`);
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="2000" height="2000" viewBox="0 0 2000 2000">
   <rect width="2000" height="2000" fill="#0c1d2b"/>
   <g fill="#1a2b22" stroke="#2c4536" stroke-width="6">
-    <ellipse cx="880" cy="1080" rx="640" ry="760"/>
-    <ellipse cx="1590" cy="520" rx="300" ry="250"/>
-    <ellipse cx="1560" cy="1520" rx="220" ry="320"/>
+    <ellipse cx="880" cy="1080" rx="640" ry="760"/><ellipse cx="1590" cy="520" rx="300" ry="250"/><ellipse cx="1560" cy="1520" rx="220" ry="320"/>
   </g>
   <g stroke="#34493c" stroke-width="10" fill="none" stroke-linecap="round">
     <path d="M420 1500 C700 1300 900 1250 1300 900"/><path d="M600 600 C800 900 900 1300 880 1780"/><path d="M1300 900 L1590 560"/>
   </g>
   <g stroke="#ffffff" stroke-opacity=".05" stroke-width="2">${grade.join("")}</g>
   <text x="1000" y="120" fill="#ffffff" fill-opacity=".55" font-family="sans-serif" font-size="54" font-weight="700" text-anchor="middle">MAPA PROVISÓRIO</text>
-  <text x="1000" y="185" fill="#ffffff" fill-opacity=".4" font-family="sans-serif" font-size="34" text-anchor="middle">Envie a imagem do mapa em ⚙ Configurações</text>
+  <text x="1000" y="185" fill="#ffffff" fill-opacity=".4" font-family="sans-serif" font-size="34" text-anchor="middle">Coloque a imagem do mapa em ⚙️ Mais</text>
 </svg>`;
   return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
 }
@@ -268,17 +210,19 @@ function carregarImagem(src) {
 }
 
 async function montarFundo({ manterVista = true } = {}) {
-  let info = S.temImagem ? await carregarImagem("/mapa-imagem?v=" + Date.now()) : null;
+  if (urlImagem) URL.revokeObjectURL(urlImagem);
+  urlImagem = S.imagem ? URL.createObjectURL(S.imagem) : null;
+  let info = urlImagem ? await carregarImagem(urlImagem) : null;
   if (!info) info = { src: imagemProvisoria(), w: 2000, h: 2000 };
   dims = { w: info.w, h: info.h };
   const limites = L.latLngBounds([0, 0], [dims.h, dims.w]);
   if (fundo) fundo.remove();
   fundo = L.imageOverlay(info.src, limites).addTo(mapa);
+  mapa.invalidateSize();
   mapa.setMaxBounds(limites.pad(0.3));
   mapa.setMinZoom(-6);
   mapa.fitBounds(limites);
   mapa.setMinZoom(mapa.getZoom() - 0.5);
-
   const vista = manterVista && LS.get("vista", null);
   if (vista && vista.w === dims.w && vista.h === dims.h) mapa.setView(vista.centro, vista.zoom, { animate: false });
   tamanhoIcones();
@@ -292,7 +236,6 @@ function tamanhoIcones() {
   el.classList.toggle("zoom-medio", z >= 0.9 && z < 1.9);
 }
 mapa.on("zoomend", tamanhoIcones);
-
 mapa.on("moveend", () => {
   const c = mapa.getCenter();
   LS.set("vista", { centro: [c.lat, c.lng], zoom: mapa.getZoom(), w: dims.w, h: dims.h });
@@ -305,8 +248,8 @@ function iconeDe(item) {
   if (S.ui.destaque === item.id) classes.push("selecionado");
   return L.divIcon({
     className: "marcador-wrap",
-    iconSize: [46, 46],
-    iconAnchor: [23, 23],
+    iconSize: [48, 48],
+    iconAnchor: [24, 24],
     html: `<div class="${classes.join(" ")}" style="--cor:${esc(cat.cor)}">${esc(cat.icone)}</div>`,
   });
 }
@@ -321,11 +264,14 @@ function visivel(item) {
 
 function criarMarcador(item) {
   const id = item.id;
-  const m = L.marker(paraLatLng(item.x, item.y), { icon: iconeDe(item), keyboard: true, title: nomeItem(item), riseOnHover: true });
+  const m = L.marker(paraLatLng(item.x, item.y), { icon: iconeDe(item), keyboard: false, riseOnHover: true });
   m.on("click", () => tocarItem(id));
   m.on("contextmenu", (e) => {
     if (e.originalEvent) e.originalEvent.preventDefault();
-    if (!S.ui.editar) abrirDetalhes(id);
+    if (!S.ui.editar) {
+      vibrar(false);
+      abrirDetalhes(id);
+    }
   });
   m.on("dragend", () => {
     const it = itemPorId(id);
@@ -340,7 +286,10 @@ function ajustarMarcador(m, item) {
   const deveAparecer = visivel(item);
   if (deveAparecer && !mapa.hasLayer(m)) m.addTo(mapa);
   if (!deveAparecer && mapa.hasLayer(m)) m.remove();
-  if (mapa.hasLayer(m) && m.dragging) S.ui.editar ? m.dragging.enable() : m.dragging.disable();
+  if (mapa.hasLayer(m) && m.dragging) {
+    if (S.ui.editar) m.dragging.enable();
+    else m.dragging.disable();
+  }
 }
 
 function renderMarcadores() {
@@ -380,8 +329,9 @@ function tocarItem(id) {
 }
 
 mapa.on("click", (e) => {
-  if (S.ui.editar) abrirEdicaoItem(null, deLatLng(e.latlng));
-  else if (!$("#painel").hidden) fecharPainel();
+  if (S.ui.editar) return abrirEdicaoItem(null, deLatLng(e.latlng));
+  if (!$("#painel").hidden) return fecharPainel();
+  if (!$("#folha").hidden) trocarAba("mapa");
 });
 
 function destacar(id) {
@@ -395,12 +345,15 @@ function irPara(id) {
   const item = itemPorId(id);
   if (!item) return;
   destacar(id);
-  mapa.flyTo(paraLatLng(item.x, item.y), Math.max(mapa.getZoom(), mapa.getMinZoom() + 2), { duration: 0.6 });
+  // deixa o coletável na parte de cima da tela, acima do painel
+  const zoom = Math.max(mapa.getZoom(), mapa.getMinZoom() + 2);
+  const alvo = mapa.project(paraLatLng(item.x, item.y), zoom).add([0, mapa.getSize().y * 0.22]);
+  mapa.flyTo(mapa.unproject(alvo, zoom), zoom, { duration: 0.6 });
 }
 
-// ---------------------------------------------------------------- barra lateral
+// ---------------------------------------------------------------- telas
 
-function renderLateral() {
+function renderTudo() {
   let total = 0, feitos = 0;
   for (const i of itens()) {
     if (!categoriaPorId(i.categoria)) continue;
@@ -408,35 +361,71 @@ function renderLateral() {
     if (encontrado(i.id)) feitos++;
   }
   const pct = total ? Math.round((feitos / total) * 100) : 0;
-  $("#nomeMapa").textContent = S.mapa?.nome || "Mapa de Coletáveis";
+  $("#textoTotal").textContent = `${feitos}/${total}`;
+  $("#pctTotal").textContent = pct + "%";
   $("#barraTotal").style.width = pct + "%";
-  $("#textoTotal").textContent = `${feitos} / ${total} · ${pct}%`;
-  $("#resumoTopo").textContent = `${feitos}/${total}`;
+
+  const escondidas = categorias().filter((c) => S.ui.ocultas.has(c.id)).length;
+  const chip = $("#chipFiltro");
+  const partes = [];
+  if (escondidas) partes.push(`${escondidas} ${escondidas === 1 ? "categoria escondida" : "categorias escondidas"}`);
+  if (S.ui.esconderEncontrados) partes.push("pegos escondidos");
+  chip.hidden = !partes.length;
+  chip.innerHTML = `${partes.join(" · ")} <b>✕</b>`;
+
   $("#esconderEncontrados").checked = S.ui.esconderEncontrados;
   $("#listaSoFaltando").checked = S.ui.soFaltando;
+  $("#psnBolinha").hidden = !psnTemDivergencia();
 
-  renderFiltros();
+  if (S.ui.aba === "filtros") renderFiltros();
   if (S.ui.aba === "lista") renderLista();
   if (S.ui.aba === "psn") renderPsn();
-  $("#psnBolinha").hidden = !psnTemDivergencia();
+  if (S.ui.aba === "mais") renderMais();
 }
+
+// ----- navegação
+
+function trocarAba(aba) {
+  if (S.ui.aba === aba && aba !== "mapa") aba = "mapa"; // tocar de novo fecha
+  S.ui.aba = aba;
+  for (const b of $$("#navegacao button")) b.classList.toggle("ativa", b.dataset.aba === aba);
+  for (const c of $$("#folha [data-conteudo]")) c.hidden = c.dataset.conteudo !== aba;
+  $("#folha").hidden = aba === "mapa";
+  document.body.classList.toggle("folha-aberta", aba !== "mapa");
+  if (aba !== "mapa") {
+    fecharPainel();
+    $(".folha-corpo").scrollTop = 0;
+  }
+  renderTudo();
+}
+for (const b of $$("#navegacao button")) b.onclick = () => trocarAba(b.dataset.aba);
+$("#chipProgresso").onclick = () => trocarAba("filtros");
+$("#chipFiltro").onclick = () => {
+  S.ui.ocultas.clear();
+  S.ui.esconderEncontrados = false;
+  LS.set("esconderEncontrados", false);
+  salvarOcultas();
+  aviso("Mostrando tudo de novo.");
+};
+
+// ----- filtros
 
 function renderFiltros() {
   const grupos = gruposOrdenados();
   if (!grupos.length) {
-    $("#grupos").innerHTML = `<p class="vazio">Nenhuma categoria ainda.<br>Abra <b>⚙ Configurações</b> para criar ou importar.</p>`;
+    $("#grupos").innerHTML = `<p class="vazio">Nenhuma categoria ainda.<br>Toque em <b>⚙️ Mais</b> para criar ou importar.</p>`;
     return;
   }
   $("#grupos").innerHTML = grupos
     .map((g) => {
-      const visiveis = g.cats.filter((c) => !S.ui.ocultas.has(c.id)).length;
+      const todasVisiveis = g.cats.every((c) => !S.ui.ocultas.has(c.id));
       return `<div class="grupo">
-        <button class="grupo-titulo" data-grupo="${esc(g.id)}">${esc(g.nome)} <small>${visiveis === g.cats.length ? "esconder grupo" : "mostrar grupo"}</small></button>
+        <button class="grupo-titulo" data-grupo="${esc(g.id)}">${esc(g.nome)} <small>${todasVisiveis ? "esconder grupo" : "mostrar grupo"}</small></button>
         <div class="categorias">${g.cats
           .map((c) => {
             const { total, feitos } = contagem(c.id);
-            const cls = ["cat", S.ui.ocultas.has(c.id) ? "oculta" : "", total && feitos === total ? "completa" : ""].join(" ");
-            return `<button class="${cls}" data-cat="${esc(c.id)}" aria-pressed="${!S.ui.ocultas.has(c.id)}" title="${esc(c.nome)}">
+            const oculta = S.ui.ocultas.has(c.id);
+            return `<button class="cat${oculta ? " oculta" : ""}${total && feitos === total ? " completa" : ""}" data-cat="${esc(c.id)}" aria-pressed="${!oculta}">
               <span class="cat-icone" style="--cor:${esc(c.cor)}">${esc(c.icone)}</span>
               <span class="cat-nome">${esc(c.nome)}</span>
               <span class="cat-conta">${feitos}/${total}</span>
@@ -451,21 +440,26 @@ function renderFiltros() {
 function salvarOcultas() {
   LS.set("ocultas", [...S.ui.ocultas]);
   renderMarcadores();
-  renderLateral();
+  renderTudo();
 }
 
 $("#grupos").addEventListener("click", (e) => {
   const cat = e.target.closest("[data-cat]");
   if (cat) {
     const id = cat.dataset.cat;
-    S.ui.ocultas.has(id) ? S.ui.ocultas.delete(id) : S.ui.ocultas.add(id);
+    if (S.ui.ocultas.has(id)) S.ui.ocultas.delete(id);
+    else S.ui.ocultas.add(id);
+    vibrar(false);
     return salvarOcultas();
   }
   const g = e.target.closest("[data-grupo]");
   if (g) {
     const grupo = gruposOrdenados().find((x) => x.id === g.dataset.grupo);
-    const todosVisiveis = grupo.cats.every((c) => !S.ui.ocultas.has(c.id));
-    for (const c of grupo.cats) todosVisiveis ? S.ui.ocultas.add(c.id) : S.ui.ocultas.delete(c.id);
+    const todasVisiveis = grupo.cats.every((c) => !S.ui.ocultas.has(c.id));
+    for (const c of grupo.cats) {
+      if (todasVisiveis) S.ui.ocultas.add(c.id);
+      else S.ui.ocultas.delete(c.id);
+    }
     salvarOcultas();
   }
 });
@@ -481,6 +475,7 @@ $("#esconderEncontrados").onchange = (e) => {
   S.ui.esconderEncontrados = e.target.checked;
   LS.set("esconderEncontrados", S.ui.esconderEncontrados);
   renderMarcadores();
+  renderTudo();
 };
 
 // ----- lista
@@ -501,14 +496,16 @@ function renderLista() {
         <h3><span class="cat-icone" style="--cor:${esc(c.cor)}">${esc(c.icone)}</span>${esc(c.nome)}<small>${feitos}/${total}</small></h3>
         ${lista
           .map((i) => `<div class="item-linha${encontrado(i.id) ? " feito" : ""}">
-            <button class="item-check" data-marcar="${esc(i.id)}" aria-label="Marcar ${esc(nomeItem(i))}"><span>${encontrado(i.id) ? "✓" : ""}</span></button>
+            <button class="item-check" data-marcar="${esc(i.id)}" aria-label="Marcar"><span>${encontrado(i.id) ? "✓" : ""}</span></button>
             <button class="item-ir" data-ir="${esc(i.id)}">${esc(i.nome || `${c.nome} #${numeros.get(i.id)}`)}${i.descricao ? `<small>${esc(i.descricao)}</small>` : ""}</button>
           </div>`)
           .join("")}
       </div>`);
     }
   }
-  $("#lista").innerHTML = blocos.join("") || `<p class="vazio">${busca ? "Nada encontrado." : S.ui.soFaltando ? "Nada faltando nas categorias visíveis. 🎉" : "Nenhum coletável nas categorias visíveis."}</p>`;
+  $("#lista").innerHTML =
+    blocos.join("") ||
+    `<p class="vazio">${busca ? "Nada encontrado." : S.ui.soFaltando ? "Nada faltando nas categorias visíveis. 🎉" : "Nenhum coletável nas categorias visíveis."}</p>`;
 }
 
 $("#lista").addEventListener("click", (e) => {
@@ -516,7 +513,7 @@ $("#lista").addEventListener("click", (e) => {
   if (m) return marcar([m.dataset.marcar], !encontrado(m.dataset.marcar));
   const ir = e.target.closest("[data-ir]");
   if (ir) {
-    if (ehCelular()) fecharMenu();
+    trocarAba("mapa");
     irPara(ir.dataset.ir);
     abrirDetalhes(ir.dataset.ir);
   }
@@ -531,30 +528,6 @@ $("#listaSoFaltando").onchange = (e) => {
   renderLista();
 };
 
-// ----- abas
-
-function trocarAba(aba) {
-  S.ui.aba = aba;
-  for (const b of $$(".abas button")) b.classList.toggle("ativa", b.dataset.aba === aba);
-  for (const a of ["filtros", "lista", "psn"]) $("#aba-" + a).hidden = a !== aba;
-  renderLateral();
-}
-for (const b of $$(".abas button")) b.onclick = () => trocarAba(b.dataset.aba);
-
-// ----- menu no celular
-
-function abrirMenu() {
-  $("#lateral").classList.add("aberto");
-  $("#fundoMenu").hidden = false;
-}
-function fecharMenu() {
-  $("#lateral").classList.remove("aberto");
-  $("#fundoMenu").hidden = true;
-}
-$("#abrirMenu").onclick = abrirMenu;
-$("#fecharMenu").onclick = fecharMenu;
-$("#fundoMenu").onclick = fecharMenu;
-
 // ---------------------------------------------------------------- toque rápido e modo edição
 
 function renderModos() {
@@ -562,20 +535,21 @@ function renderModos() {
   b.setAttribute("aria-pressed", String(S.ui.rapido));
   b.querySelector("b").textContent = `Toque rápido: ${S.ui.rapido ? "LIGADO" : "DESLIGADO"}`;
   $("#toqueRapidoDica").textContent = S.ui.rapido ? "tocou, marcou · segure = detalhes" : "tocar abre os detalhes";
-  $("#barraBaixo").hidden = S.ui.editar;
   $("#faixaEdicao").hidden = !S.ui.editar;
-  $("#mapa").style.cursor = S.ui.editar ? "crosshair" : "";
+  document.body.classList.toggle("editando", S.ui.editar);
 }
 $("#toqueRapido").onclick = () => {
   S.ui.rapido = !S.ui.rapido;
   LS.set("rapido", S.ui.rapido);
   renderModos();
+  vibrar(false);
   aviso(S.ui.rapido ? "⚡ Toque rápido ligado: tocou no ícone, marcou." : "Toque rápido desligado: tocar abre os detalhes.");
 };
 
 function entrarEdicao(ligar) {
   S.ui.editar = ligar;
   fecharPainel();
+  if (ligar) trocarAba("mapa");
   renderModos();
   renderMarcadores();
   if (ligar && !categorias().length) abrirEdicaoCategoria(null);
@@ -586,7 +560,7 @@ $("#sairEdicao").onclick = () => entrarEdicao(false);
 
 function aviso(html, { tipo = "", acao, aoClicar, duracao = 5000 } = {}) {
   const caixa = $("#avisos");
-  while (caixa.children.length >= 3) caixa.firstElementChild.remove();
+  while (caixa.children.length >= 2) caixa.firstElementChild.remove();
   const el = document.createElement("div");
   el.className = "aviso " + tipo;
   el.innerHTML = `<span class="aviso-texto">${html}</span>${acao ? `<button>${esc(acao)}</button>` : ""}`;
@@ -600,14 +574,16 @@ function aviso(html, { tipo = "", acao, aoClicar, duracao = 5000 } = {}) {
   setTimeout(() => el.remove(), duracao);
 }
 
-// ---------------------------------------------------------------- painel de baixo
+// ---------------------------------------------------------------- painel do coletável
 
 function abrirPainel(html) {
   $("#painelConteudo").innerHTML = html;
   $("#painel").hidden = false;
+  $("#painel").scrollTop = 0;
   document.body.classList.add("painel-aberto");
 }
 function fecharPainel() {
+  if ($("#painel").hidden) return;
   $("#painel").hidden = true;
   document.body.classList.remove("painel-aberto");
   destacar(null);
@@ -656,11 +632,11 @@ function abrirEdicaoItem(id, posicao) {
   const catSel = item?.categoria || (categoriaPorId(S.ui.ultimaCategoria) ? S.ui.ultimaCategoria : categorias()[0].id);
   destacar(id);
   abrirPainel(`
-    ${cabecalho(categoriaPorId(catSel), item ? "Editar coletável" : "Novo coletável", item ? "Arraste o ícone no mapa para mudar de lugar" : "Vai ficar onde você tocou")}
+    ${cabecalho(categoriaPorId(catSel), item ? "Editar coletável" : "Novo coletável", item ? "Segure e arraste o ícone para mudar de lugar" : "Vai ficar onde você tocou")}
     <form class="form" id="formItem">
       <label>Categoria <select class="campo" name="categoria">${opcoesCategorias(catSel)}</select></label>
-      <label>Nome (opcional, se vazio numera sozinho) <input class="campo" name="nome" value="${esc(item?.nome || "")}" maxlength="80"></label>
-      <label>Dica / descrição (opcional) <textarea class="campo" name="descricao" maxlength="500" placeholder="Ex.: no telhado, suba pela escada dos fundos">${esc(item?.descricao || "")}</textarea></label>
+      <label>Nome (opcional: se vazio, numera sozinho) <input class="campo" name="nome" value="${esc(item?.nome || "")}" maxlength="80" enterkeyhint="done"></label>
+      <label>Dica (opcional) <textarea class="campo" name="descricao" maxlength="500" placeholder="Ex.: no telhado, suba pela escada dos fundos">${esc(item?.descricao || "")}</textarea></label>
       <div class="linha-botoes">
         ${item ? `<button type="button" class="btn perigo" id="excluirItem">Excluir</button>` : ""}
         <button type="submit" class="btn primario">${item ? "Salvar" : "Adicionar"}</button>
@@ -682,40 +658,35 @@ function abrirEdicaoItem(id, posicao) {
     salvarMapa();
     fecharPainel();
     renderMarcadores();
-    renderLateral();
+    renderTudo();
+    vibrar(false);
   };
   if (item) {
     $("#excluirItem").onclick = () => {
       if (!confirm(`Excluir "${nomeItem(item)}"?`)) return;
       S.mapa.itens = S.mapa.itens.filter((i) => i.id !== id);
+      delete S.progresso.encontrados[id];
       salvarMapa();
+      salvarProgresso();
       fecharPainel();
       renderMarcadores();
-      renderLateral();
+      renderTudo();
     };
-  } else {
-    // no PC, já deixa o Enter pronto para adicionar rápido
-    if (!ehCelular()) form.querySelector("[type=submit]").focus();
   }
 }
 
-// ---------------------------------------------------------------- janela central
+// ---------------------------------------------------------------- janela (sobe de baixo)
 
 function abrirJanela(html) {
   $("#janela").innerHTML = html;
   $("#janelaFundo").hidden = false;
+  $("#janela").scrollTop = 0;
 }
 function fecharJanela() {
   $("#janelaFundo").hidden = true;
 }
 $("#janelaFundo").addEventListener("click", (e) => {
   if (e.target.id === "janelaFundo" || e.target.closest("[data-fechar-janela]")) fecharJanela();
-});
-document.addEventListener("keydown", (e) => {
-  if (e.key !== "Escape") return;
-  if (!$("#janelaFundo").hidden) fecharJanela();
-  else if (!$("#painel").hidden) fecharPainel();
-  else if (S.ui.editar) entrarEdicao(false);
 });
 
 const xJanela = `<button class="icone-btn" data-fechar-janela aria-label="Fechar">✕</button>`;
@@ -725,121 +696,141 @@ function abrirBoasVindas() {
     <h2>Bem-vindo! 👋</h2>
     <p class="sub">Seu mapa ainda está vazio. Como você quer começar?</p>
     <div class="opcoes">
-      <button class="opcao" data-acao="exemplo"><span class="emoji">🧪</span><span><b>Ver um exemplo para testar</b><small>Coletáveis fictícios, só para você ver como funciona</small></span></button>
+      <button class="opcao" data-acao="exemplo"><span class="emoji">🧪</span><span><b>Ver um exemplo para testar</b><small>Coletáveis inventados, só para ver como funciona</small></span></button>
       <button class="opcao" data-acao="importar"><span class="emoji">📥</span><span><b>Importar uma lista de coletáveis</b><small>Arquivo .json com as posições</small></span></button>
       <button class="opcao" data-acao="zero"><span class="emoji">✏️</span><span><b>Montar o meu do zero</b><small>Você toca no mapa e vai adicionando</small></span></button>
     </div>
-    <p class="dica">Dica: envie a imagem do mapa do jogo em ⚙ Configurações. Dá para fazer isso a qualquer momento.</p>
+    <p class="dica">Dá para colocar a imagem do mapa do jogo depois, em ⚙️ Mais.</p>
   `);
-  ligarAcoesJanela();
 }
 
-function abrirConfig() {
+$("#janela").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-acao]");
+  if (b) acoes[b.dataset.acao]();
+  const cat = e.target.closest("[data-editar-cat]");
+  if (cat) abrirEdicaoCategoria(cat.dataset.editarCat);
+});
+
+// ----- aba Mais
+
+function renderMais() {
   const cats = categorias();
-  abrirJanela(`
-    <div class="janela-cab"><h2>Configurações</h2>${xJanela}</div>
-
-    <h3>Coletáveis no mapa</h3>
-    <button class="btn largo" data-acao="editar">✏️ Entrar no modo edição (adicionar, mover, apagar)</button>
-
-    <h3>Categorias</h3>
-    ${cats.length ? cats.map((c) => {
-      const { total } = contagem(c.id);
-      return `<div class="cat-editar"><span class="cat-icone" style="--cor:${esc(c.cor)}">${esc(c.icone)}</span><span class="cat-nome">${esc(c.nome)}</span><span class="texto-2">${total}</span><button class="btn pequeno" data-editar-cat="${esc(c.id)}">Editar</button></div>`;
-    }).join("") : `<p class="texto-2">Nenhuma categoria ainda.</p>`}
-    <button class="btn largo" style="margin-top:10px" data-acao="novaCat">+ Nova categoria</button>
-
-    <h3>Mapa</h3>
-    <form class="form" id="formNome" style="margin-top:0"><label>Nome do mapa <input class="campo" name="nome" value="${esc(S.mapa?.nome || "")}" maxlength="60"></label></form>
-    <button class="btn largo" style="margin-top:10px" data-acao="imagem">🗺️ ${S.temImagem ? "Trocar" : "Enviar"} a imagem do mapa</button>
-    <p class="dica">As posições ficam guardadas em proporção. Se depois você trocar por uma imagem maior do mesmo mapa, nada sai do lugar.</p>
-
-    <h3>Arquivos</h3>
+  $("#mais").innerHTML = `
+    <h2 class="folha-titulo">Mais opções</h2>
     <div class="opcoes">
-      <button class="opcao" data-acao="importar"><span class="emoji">📥</span><span><b>Importar lista de coletáveis</b><small>Substitui a lista atual (o progresso dos itens com o mesmo id continua)</small></span></button>
-      <button class="opcao" data-acao="exportar"><span class="emoji">📤</span><span><b>Exportar lista de coletáveis</b><small>Para guardar ou compartilhar com amigos</small></span></button>
-      <button class="opcao" data-acao="backup"><span class="emoji">💾</span><span><b>Baixar backup completo</b><small>Lista + seu progresso</small></span></button>
+      <button class="opcao" data-acao="editar"><span class="emoji">✏️</span><span><b>Modo edição</b><small>Adicionar, mover e apagar coletáveis no mapa</small></span></button>
+      <button class="opcao" data-acao="imagem"><span class="emoji">🗺️</span><span><b>${S.imagem ? "Trocar" : "Colocar"} a imagem do mapa</b><small>Um print ou imagem do mapa do jogo (da galeria)</small></span></button>
+      <button class="opcao" data-acao="categorias"><span class="emoji">🏷️</span><span><b>Categorias</b><small>${cats.length} ${cats.length === 1 ? "categoria" : "categorias"}: criar, editar, apagar</small></span></button>
+    </div>
+
+    <h3 class="secao">Arquivos</h3>
+    <div class="opcoes">
+      <button class="opcao" data-acao="importar"><span class="emoji">📥</span><span><b>Importar lista de coletáveis</b><small>Arquivo .json (substitui a lista atual)</small></span></button>
+      <button class="opcao" data-acao="exportar"><span class="emoji">📤</span><span><b>Compartilhar minha lista</b><small>Mande para um amigo usar no app dele</small></span></button>
+      <button class="opcao" data-acao="backup"><span class="emoji">💾</span><span><b>Fazer backup</b><small>Lista + seu progresso. Guarde no Drive ou mande para você mesmo</small></span></button>
       <button class="opcao" data-acao="exemplo"><span class="emoji">🧪</span><span><b>Carregar o exemplo fictício</b><small>Substitui a lista atual</small></span></button>
     </div>
 
-    <h3>Progresso</h3>
+    <h3 class="secao">Mapa</h3>
+    <form class="form" id="formNome" style="margin-top:0"><label>Nome do mapa <input class="campo" name="nome" value="${esc(S.mapa?.nome || "")}" maxlength="60" enterkeyhint="done"></label></form>
+
+    <h3 class="secao">Progresso</h3>
     <button class="btn largo perigo" data-acao="zerar">Zerar meu progresso</button>
-  `);
-  ligarAcoesJanela();
-  $("#formNome").onsubmit = (e) => e.preventDefault();
+    <p class="dica" style="text-align:center">Mapa de Coletáveis · tudo fica salvo só neste celular</p>
+  `;
+  $("#formNome").onsubmit = (e) => {
+    e.preventDefault();
+    e.target.querySelector("input").blur();
+  };
   $("#formNome [name=nome]").onchange = (e) => {
+    S.mapa ||= mapaVazio();
     S.mapa.nome = e.target.value.trim() || "Mapa de Coletáveis";
     salvarMapa();
-    renderLateral();
   };
-  for (const b of $$("[data-editar-cat]")) b.onclick = () => abrirEdicaoCategoria(b.dataset.editarCat);
+}
+$("#mais").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-acao]");
+  if (b) acoes[b.dataset.acao]();
+});
+
+function abrirCategorias() {
+  const cats = categorias();
+  abrirJanela(`
+    <div class="janela-cab"><h2>Categorias</h2>${xJanela}</div>
+    ${cats.length
+      ? cats.map((c) => `<div class="cat-editar"><span class="cat-icone" style="--cor:${esc(c.cor)}">${esc(c.icone)}</span><span class="cat-nome">${esc(c.nome)}</span><span class="texto-2">${contagem(c.id).total}</span><button class="btn pequeno" data-editar-cat="${esc(c.id)}">Editar</button></div>`).join("")
+      : `<p class="texto-2">Nenhuma categoria ainda.</p>`}
+    <button class="btn largo primario" style="margin-top:14px" data-acao="novaCat">+ Nova categoria</button>
+  `);
 }
 
-function ligarAcoesJanela() {
-  for (const b of $$("#janela [data-acao]")) b.onclick = () => acoes[b.dataset.acao]();
-}
+const mapaVazio = () => ({ versao: 1, nome: "Meu mapa", grupos: [], categorias: [], itens: [] });
 
 const acoes = {
   editar() {
     fecharJanela();
-    if (ehCelular()) fecharMenu();
     entrarEdicao(true);
   },
+  categorias: abrirCategorias,
   novaCat: () => abrirEdicaoCategoria(null),
   imagem: () => $("#arquivoImagem").click(),
   importar: () => $("#arquivoJson").click(),
-  exportar() {
-    baixar("coletaveis.json", S.mapa);
-  },
-  backup() {
-    baixar(`backup-mapa-${new Date().toISOString().slice(0, 10)}.json`, { mapa: S.mapa, progresso: S.progresso });
-  },
+  exportar: () => compartilhar("coletaveis.json", S.mapa || mapaVazio(), "Lista de coletáveis"),
+  backup: () => compartilhar(`backup-mapa-${new Date().toISOString().slice(0, 10)}.json`, { mapa: S.mapa, progresso: S.progresso }, "Backup do Mapa de Coletáveis"),
   async exemplo() {
     if (itens().length && !confirm("Isso vai substituir a sua lista atual pelo exemplo fictício. Continuar?")) return;
     try {
       const r = await fetch("exemplo.json");
-      await trocarMapa(normalizarMapa(await r.json()));
+      trocarMapa(normalizarMapa(await r.json()));
       fecharJanela();
+      trocarAba("mapa");
       aviso("Exemplo carregado. Toque num ícone para marcar como pego!");
     } catch (e) {
       aviso("Não consegui carregar o exemplo: " + esc(e.message), { tipo: "erro" });
     }
   },
   zero() {
-    S.mapa = {
+    trocarMapa({
       versao: 1,
       nome: "Meu mapa",
       grupos: [{ id: "colecionaveis", nome: "Coletáveis" }],
       categorias: [{ id: "c_coletavel", nome: "Coletáveis", icone: "⭐", cor: "#ff4fa3", grupo: "colecionaveis" }],
       itens: [],
-    };
-    salvarMapa();
+    });
     fecharJanela();
-    renderLateral();
     entrarEdicao(true);
-    aviso("Toque no mapa onde fica cada coletável. Crie mais categorias em ⚙ Configurações.", { duracao: 8000 });
+    aviso("Toque no mapa onde fica cada coletável. Crie mais categorias em ⚙️ Mais.", { duracao: 8000 });
   },
-  async zerar() {
+  zerar() {
     if (!confirm("Zerar TODO o seu progresso? Isso desmarca todos os coletáveis.")) return;
-    S.pendentes = [];
-    LS.set("pendentes", []);
-    receberProgresso(await api("POST", "/api/progresso/zerar"));
-    fecharJanela();
-    aviso("Progresso zerado.");
+    const ids = Object.keys(S.progresso.encontrados);
+    marcar(ids, false, { texto: `Progresso zerado (${ids.length} desmarcados).` });
   },
 };
 
-async function trocarMapa(novo) {
+function trocarMapa(novo) {
   S.mapa = novo;
   S.ui.ocultas = new Set([...S.ui.ocultas].filter((id) => categoriaPorId(id)));
   LS.set("ocultas", [...S.ui.ocultas]);
-  await api("PUT", "/api/mapa", S.mapa);
+  salvarMapa();
   renderMarcadores();
-  renderLateral();
+  renderTudo();
 }
 
-function baixar(nome, dados) {
-  const url = URL.createObjectURL(new Blob([JSON.stringify(dados, null, 2)], { type: "application/json" }));
+// salvar/compartilhar arquivo: no app abre o menu de compartilhar do Android
+async function compartilhar(nome, dados, titulo) {
+  const texto = JSON.stringify(dados, null, 2);
+  const { Filesystem, Share } = plugins();
+  if (ehApp() && Filesystem && Share) {
+    try {
+      const arq = await Filesystem.writeFile({ path: nome, data: texto, directory: "CACHE", encoding: "utf8" });
+      await Share.share({ title: titulo, files: [arq.uri], dialogTitle: titulo });
+    } catch (e) {
+      if (!/cancel/i.test(e.message || "")) aviso("Não consegui compartilhar: " + esc(e.message), { tipo: "erro" });
+    }
+    return;
+  }
+  const url = URL.createObjectURL(new Blob([texto], { type: "application/json" }));
   const a = Object.assign(document.createElement("a"), { href: url, download: nome });
   document.body.append(a);
   a.click();
@@ -856,12 +847,14 @@ $("#arquivoJson").onchange = async (e) => {
     const ehBackup = dados.mapa && dados.progresso;
     const novo = normalizarMapa(ehBackup ? dados.mapa : dados);
     if (itens().length && !confirm(`Substituir a lista atual por "${novo.nome}" (${novo.itens.length} coletáveis)?`)) return;
-    await trocarMapa(novo);
+    trocarMapa(novo);
+    fecharJanela();
+    trocarAba("mapa");
     if (ehBackup) {
       const ids = Object.keys(dados.progresso.encontrados || {}).filter((id) => novo.itens.some((i) => i.id === id));
+      S.progresso.psn = { jogo: null, vinculos: {}, ...(dados.progresso.psn || {}) };
       marcar(ids, true, { texto: `Backup restaurado: ${ids.length} coletáveis marcados.` });
     } else aviso(`Lista importada: ${novo.itens.length} coletáveis em ${novo.categorias.length} categorias.`);
-    fecharJanela();
   } catch (err) {
     aviso("Não consegui importar: " + esc(err.message), { tipo: "erro", duracao: 8000 });
   }
@@ -871,15 +864,19 @@ $("#arquivoImagem").onchange = async (e) => {
   const arq = e.target.files[0];
   e.target.value = "";
   if (!arq) return;
+  if (!arq.type.startsWith("image/")) return aviso("Escolha uma imagem.", { tipo: "erro" });
   try {
-    aviso("Enviando a imagem…");
-    await api("POST", "/api/mapa-imagem", arq);
-    S.temImagem = true;
+    const teste = URL.createObjectURL(arq);
+    const ok = await carregarImagem(teste);
+    URL.revokeObjectURL(teste);
+    if (!ok) throw new Error("não consegui abrir essa imagem");
+    await Banco.set("imagem", arq);
+    S.imagem = arq;
+    trocarAba("mapa");
     await montarFundo({ manterVista: false });
-    fecharJanela();
     aviso("Imagem do mapa atualizada!");
   } catch (err) {
-    aviso("Não consegui enviar a imagem: " + esc(err.message), { tipo: "erro" });
+    aviso("Não consegui usar a imagem: " + esc(err.message), { tipo: "erro" });
   }
 };
 
@@ -894,16 +891,15 @@ function abrirEdicaoCategoria(id) {
     <form class="form" id="formCat">
       <label>Nome <input class="campo" name="nome" required maxlength="40" value="${esc(cat?.nome || "")}" placeholder="Ex.: Cartas de baralho"></label>
       <div class="dupla">
-        <label>Ícone (um emoji) <input class="campo" name="icone" maxlength="4" value="${esc(cat?.icone || "⭐")}"></label>
+        <label>Ícone (um emoji) <input class="campo" name="icone" maxlength="8" value="${esc(cat?.icone || "⭐")}"></label>
         <label>Cor <input class="campo" type="color" name="cor" value="${esc(cat?.cor || "#ff4fa3")}"></label>
       </div>
-      <label>Grupo (aparece como título no filtro)
+      <label>Grupo (o título que aparece no filtro)
         <input class="campo" name="grupo" list="listaGrupos" maxlength="30" value="${esc(grupoAtual)}">
         <datalist id="listaGrupos">${grupos.map((g) => `<option value="${esc(g.nome)}">`).join("")}</datalist>
       </label>
       <div class="linha-botoes">
         ${cat ? `<button type="button" class="btn perigo" id="excluirCat">Excluir</button>` : ""}
-        <button type="button" class="btn" data-fechar-janela>Cancelar</button>
         <button type="submit" class="btn primario">Salvar</button>
       </div>
     </form>
@@ -911,19 +907,19 @@ function abrirEdicaoCategoria(id) {
   $("#formCat").onsubmit = (e) => {
     e.preventDefault();
     const d = Object.fromEntries(new FormData(e.target));
-    if (!S.mapa) S.mapa = { versao: 1, nome: "Meu mapa", grupos: [], categorias: [], itens: [] };
+    S.mapa ||= mapaVazio();
     const nomeGrupo = d.grupo.trim() || "Outros";
     let grupo = S.mapa.grupos.find((g) => g.nome.toLowerCase() === nomeGrupo.toLowerCase());
     if (!grupo) S.mapa.grupos.push((grupo = { id: novoId("g"), nome: nomeGrupo }));
     const dados = { nome: d.nome.trim(), icone: d.icone.trim() || "📍", cor: d.cor, grupo: grupo.id };
     if (cat) Object.assign(cat, dados);
     else S.mapa.categorias.push({ id: novoId("c"), ...dados });
-    // apaga grupos que ficaram vazios
     S.mapa.grupos = S.mapa.grupos.filter((g) => S.mapa.categorias.some((c) => c.grupo === g.id));
     salvarMapa();
     renderMarcadores();
-    renderLateral();
-    abrirConfig();
+    renderTudo();
+    if (S.ui.editar) fecharJanela();
+    else abrirCategorias();
   };
   if (cat) {
     $("#excluirCat").onclick = () => {
@@ -933,16 +929,11 @@ function abrirEdicaoCategoria(id) {
       S.mapa.grupos = S.mapa.grupos.filter((g) => S.mapa.categorias.some((c) => c.grupo === g.id));
       salvarMapa();
       renderMarcadores();
-      renderLateral();
-      abrirConfig();
+      renderTudo();
+      abrirCategorias();
     };
   }
 }
-
-$("#abrirConfig").onclick = () => {
-  if (ehCelular()) fecharMenu();
-  abrirConfig();
-};
 
 // ---------------------------------------------------------------- PSN
 
@@ -952,7 +943,6 @@ function trofeuDe(catId) {
   return S.psn.trofeus.find((t) => String(t.id) === String(tid)) || null;
 }
 
-// compara o que a PSN diz com o que você marcou
 function comparar(catId) {
   const t = trofeuDe(catId);
   if (!t) return null;
@@ -975,19 +965,20 @@ function psnTemDivergencia() {
 
 function mostrarFaltando(catId) {
   const cat = categoriaPorId(catId);
+  if (!cat) return;
   S.ui.ocultas = new Set(categorias().filter((c) => c.id !== catId).map((c) => c.id));
   S.ui.esconderEncontrados = true;
   LS.set("esconderEncontrados", true);
+  trocarAba("mapa");
   salvarOcultas();
   const faltando = itens().filter((i) => i.categoria === catId && !encontrado(i.id));
-  if (faltando.length) mapa.flyToBounds(L.latLngBounds(faltando.map((i) => paraLatLng(i.x, i.y))).pad(0.3), { duration: 0.6, maxZoom: 1 });
-  if (ehCelular()) fecharMenu();
-  aviso(`Mostrando só os ${faltando.length} que faltam de <b>${esc(cat.nome)}</b>. Toque no que você pegou. Para voltar: Filtros → Mostrar todos.`, { tipo: "psn", duracao: 9000 });
+  if (faltando.length) mapa.flyToBounds(L.latLngBounds(faltando.map((i) => paraLatLng(i.x, i.y))).pad(0.3), { duration: 0.6, maxZoom: mapa.getMinZoom() + 2.5 });
+  aviso(`Mostrando só os ${faltando.length} que faltam de <b>${esc(cat.nome)}</b>. Toque no que você pegou.`, { tipo: "psn", duracao: 9000 });
 }
 
 function statusHtml(catId) {
-  const r = comparar(catId);
   if (!S.psn.trofeus) return `<div class="psn-status texto-2">Sincronize para comparar.</div>`;
+  const r = comparar(catId);
   if (!r) return "";
   const meta = r.t.alvo && r.t.alvo !== r.total ? `<div class="texto-2" style="margin-top:4px">O troféu pede ${r.t.alvo} e o seu mapa tem ${r.total} desse tipo.</div>` : "";
   switch (r.tipo) {
@@ -1009,83 +1000,101 @@ function statusHtml(catId) {
 function opcoesTrofeus(catId) {
   const atual = S.progresso.psn.vinculos[catId];
   const { total } = contagem(catId);
-  const lista = [...(S.psn.trofeus || [])].sort((a, b) => {
-    const pa = (a.alvo === total ? 2 : 0) + (a.alvo ? 1 : 0), pb = (b.alvo === total ? 2 : 0) + (b.alvo ? 1 : 0);
-    return pb - pa;
-  });
-  // se o troféu vinculado ainda não foi carregado, mantém ele na lista
+  const pontos = (t) => (t.alvo === total ? 2 : 0) + (t.alvo ? 1 : 0);
+  const lista = [...(S.psn.trofeus || [])].sort((a, b) => pontos(b) - pontos(a));
   const extra = atual != null && !lista.some((t) => String(t.id) === String(atual)) ? `<option value="${esc(atual)}" selected>Troféu #${esc(atual)}</option>` : "";
-  return `<option value="">— sem troféu —</option>${extra}` +
-    lista.map((t) => {
-      const sel = String(t.id) === String(atual) ? "selected" : "";
-      const conta = t.alvo ? ` (${t.progresso ?? 0}/${t.alvo})` : "";
-      const combina = t.alvo && t.alvo === total ? " ★" : "";
-      return `<option value="${esc(t.id)}" ${sel}>${t.conquistado ? "🏆 " : ""}${esc(t.nome || "Troféu oculto")}${conta}${combina}</option>`;
-    }).join("");
+  return (
+    `<option value="">— sem troféu —</option>${extra}` +
+    lista
+      .map((t) => {
+        const sel = String(t.id) === String(atual) ? "selected" : "";
+        const conta = t.alvo ? ` (${t.progresso ?? 0}/${t.alvo})` : "";
+        const combina = t.alvo && t.alvo === total ? " ★" : "";
+        return `<option value="${esc(t.id)}" ${sel}>${t.conquistado ? "🏆 " : ""}${esc(t.nome || "Troféu oculto")}${conta}${combina}</option>`;
+      })
+      .join("")
+  );
 }
 
 function renderPsn() {
   const el = $("#psn");
   const p = S.psn;
-  if (!p.configurada) {
+
+  if (!PSN.conectado()) {
     el.innerHTML = `
-      <p>Conecte sua conta da PSN para o app conferir seus troféus de coletáveis.</p>
-      <ol class="psn-passos">
-        <li>No navegador, entre em <a href="https://www.playstation.com" target="_blank" rel="noopener">playstation.com</a> e faça login.</li>
-        <li>Na mesma aba, abra:<br><a href="https://ca.account.sony.com/api/v1/ssocookie" target="_blank" rel="noopener">https://ca.account.sony.com/api/v1/ssocookie</a></li>
-        <li>Vai aparecer algo como <code>{"npsso":"abc123…"}</code>. Copie tudo e cole aqui:</li>
-      </ol>
-      <textarea class="campo" id="npsso" placeholder='{"npsso":"..."}' autocomplete="off" spellcheck="false"></textarea>
-      <button class="btn primario largo" id="conectarPsn" style="margin-top:10px">Conectar</button>
-      ${p.erro ? `<div class="psn-status alerta">${esc(p.erro)}</div>` : ""}
-      <div class="caixa aviso-caixa">🔒 Esse código dá acesso à sua conta da PSN. <b>Não mande para ninguém.</b> Ele fica salvo só no seu PC (na pasta <code>dados</code>) e só é usado para ler seus troféus. De tempos em tempos ele expira, e aí é só repetir estes passos.</div>`;
-    $("#conectarPsn").onclick = async () => {
-      const npsso = $("#npsso").value;
-      $("#conectarPsn").disabled = true;
-      $("#conectarPsn").textContent = "Conectando…";
-      try {
-        await api("POST", "/api/psn/token", { npsso });
-        p.configurada = true;
-        p.erro = null;
-        aviso("PSN conectada! Agora escolha o jogo.", { tipo: "psn" });
-      } catch (e) {
-        p.erro = e.message;
-      }
+      <h2 class="folha-titulo">Conectar a PSN</h2>
+      <p style="margin-top:0">Assim o app confere seus troféus e avisa quando você pega um coletável no PS5.</p>
+      ${PSN.nativo() ? `
+        <ol class="passos">
+          <li>Toque aqui para abrir o site da PlayStation e <b>faça login</b>:<br><a href="https://www.playstation.com/pt-br/" target="_blank" rel="noopener">playstation.com</a></li>
+          <li>Depois de entrar, abra este endereço:<br><a href="https://ca.account.sony.com/api/v1/ssocookie" target="_blank" rel="noopener">ca.account.sony.com/api/v1/ssocookie</a></li>
+          <li>Vai aparecer algo como <code>{"npsso":"abc123…"}</code>. Segure o dedo, <b>copie tudo</b> e cole aqui:</li>
+        </ol>
+        <textarea class="campo mono" id="npsso" placeholder='{"npsso":"..."}' autocomplete="off" spellcheck="false"></textarea>
+        <button class="btn primario largo" id="conectarPsn" style="margin-top:10px">Conectar</button>
+        ${p.erro ? `<div class="psn-status alerta">${esc(p.erro)}</div>` : ""}
+        <div class="caixa amarela">🔒 Esse código dá acesso à sua conta da PSN. <b>Não mande para ninguém.</b> Ele fica guardado só neste celular e é usado só para ler seus troféus.</div>
+      ` : `
+        <div class="caixa amarela">A conexão com a PSN só funciona no <b>app instalado</b> (APK). No navegador, a Sony bloqueia.</div>
+      `}
+      <button class="btn largo" id="usarDemo" style="margin-top:12px">🧪 Testar com uma PSN simulada</button>`;
+    if ($("#conectarPsn")) {
+      $("#conectarPsn").onclick = async () => {
+        const b = $("#conectarPsn");
+        b.disabled = true;
+        b.textContent = "Conectando…";
+        try {
+          await PSN.conectar($("#npsso").value);
+          p.erro = null;
+          aviso("PSN conectada! Agora escolha o jogo.", { tipo: "psn" });
+        } catch (e) {
+          p.erro = e.message;
+        }
+        renderPsn();
+      };
+    }
+    $("#usarDemo").onclick = async () => {
+      await PSN.usarDemo(true);
+      Object.assign(p, { jogos: null, trofeus: null, anterior: null, erro: null });
       renderPsn();
     };
     return;
   }
 
   const jogo = S.progresso.psn.jogo;
+  const faixaDemo = PSN.demo ? `<div class="caixa amarela">🧪 PSN simulada: os contadores sobem 1 por minuto. Para usar a sua conta de verdade, toque em "Desconectar" lá embaixo.</div>` : "";
+
   if (!jogo || p.escolhendo) {
     el.innerHTML = `
-      ${p.demo ? `<div class="caixa aviso-caixa">🧪 Modo demonstração: a PSN é simulada.</div>` : ""}
-      <p><b>Escolha o jogo</b></p>
-      <div id="jogos" class="opcoes"><p class="texto-2">Carregando seus jogos…</p></div>
-      ${p.erro ? `<div class="psn-status alerta">${esc(p.erro)}</div>` : ""}
-      ${jogo ? `<button class="btn largo" style="margin-top:10px" id="cancelarJogo">Cancelar</button>` : ""}`;
+      <h2 class="folha-titulo">Escolha o jogo</h2>
+      ${faixaDemo}
+      <div id="jogos" class="opcoes" style="margin-top:12px"><p class="texto-2">Carregando seus jogos…</p></div>
+      ${jogo ? `<button class="btn largo" style="margin-top:12px" id="cancelarJogo">Cancelar</button>` : ""}
+      <button class="btn largo perigo" id="desconectarPsn" style="margin-top:12px">Desconectar PSN</button>`;
     if ($("#cancelarJogo")) $("#cancelarJogo").onclick = () => { p.escolhendo = false; renderPsn(); };
+    $("#desconectarPsn").onclick = desconectarPsn;
     carregarJogos();
     return;
   }
 
   el.innerHTML = `
-    ${p.demo ? `<div class="caixa aviso-caixa">🧪 Modo demonstração: a PSN é simulada (os contadores sobem 1 por minuto).</div>` : ""}
+    <h2 class="folha-titulo">PSN</h2>
+    ${faixaDemo}
     <div class="caixa">
-      <div style="display:flex;align-items:center;gap:8px"><span>🎮</span><b style="flex:1">${esc(jogo.nome)}</b><button class="btn pequeno" id="trocarJogo">Trocar</button></div>
-      <button class="btn primario largo" id="sincronizar" style="margin-top:10px" ${p.carregando ? "disabled" : ""}>${p.carregando ? "Sincronizando…" : "🔄 Sincronizar agora"}</button>
+      <div style="display:flex;align-items:center;gap:8px"><span style="font-size:22px">🎮</span><b style="flex:1">${esc(jogo.nome)}</b><button class="btn pequeno" id="trocarJogo">Trocar</button></div>
+      <button class="btn primario largo" id="sincronizar" style="margin-top:12px" ${p.carregando ? "disabled" : ""}>${p.carregando ? "Sincronizando…" : "🔄 Sincronizar agora"}</button>
       <label class="chave pequena"><input type="checkbox" id="autoSync" ${S.ui.autoSync ? "checked" : ""}><span class="trilho"></span><span>Sincronizar sozinho a cada 2 min</span></label>
       <div class="texto-2">${p.ultimoSync ? "Última vez: " + new Date(p.ultimoSync).toLocaleTimeString("pt-BR") : "Ainda não sincronizou."}</div>
       ${p.erro ? `<div class="psn-status alerta">${esc(p.erro)}</div>` : ""}
     </div>
-    <p style="margin-top:16px"><b>Ligue cada categoria ao troféu dela</b><br><span class="texto-2">Ex.: "Pacotes escondidos" → troféu "Encontre todos os pacotes". ★ = o número do troféu bate com o do seu mapa.</span></p>
+    <p style="margin-top:18px"><b>Ligue cada categoria ao troféu dela</b><br><span class="texto-2">Ex.: "Pacotes escondidos" → troféu "Encontre todos os pacotes". ★ = o número do troféu bate com o do seu mapa.</span></p>
     ${categorias().map((c) => `
       <div class="psn-cat">
         <div class="psn-cat-topo"><span class="cat-icone" style="--cor:${esc(c.cor)}">${esc(c.icone)}</span>${esc(c.nome)}</div>
-        <select class="campo" data-vinculo="${esc(c.id)}" ${S.psn.trofeus ? "" : "disabled"}>${opcoesTrofeus(c.id)}</select>
+        <select class="campo" data-vinculo="${esc(c.id)}" ${p.trofeus ? "" : "disabled"}>${opcoesTrofeus(c.id)}</select>
         ${S.progresso.psn.vinculos[c.id] != null ? statusHtml(c.id) : ""}
       </div>`).join("") || `<p class="texto-2">Crie categorias primeiro.</p>`}
-    <div class="caixa aviso-caixa" style="margin-top:16px">A PSN só informa <b>quantos</b> você pegou (nos troféus com contador), não <b>quais</b>. Por isso o app avisa quando o número sobe, e você toca no que pegou.</div>
+    <div class="caixa amarela" style="margin-top:16px">A PSN só informa <b>quantos</b> você pegou (nos troféus com contador), não <b>quais</b>. Por isso o app avisa quando o número sobe, e você toca no que pegou.</div>
     <button class="btn largo perigo" id="desconectarPsn" style="margin-top:12px">Desconectar PSN</button>`;
 
   $("#trocarJogo").onclick = () => { p.escolhendo = true; renderPsn(); };
@@ -1095,17 +1104,13 @@ function renderPsn() {
     LS.set("autoSync", S.ui.autoSync);
   };
   for (const s of $$("[data-vinculo]")) {
-    s.onchange = async () => {
+    s.onchange = () => {
       const v = { ...S.progresso.psn.vinculos };
       if (s.value === "") delete v[s.dataset.vinculo];
       else v[s.dataset.vinculo] = Number.isNaN(Number(s.value)) ? s.value : Number(s.value);
       S.progresso.psn.vinculos = v;
-      renderLateral();
-      try {
-        receberProgresso(await api("POST", "/api/progresso/psn", { vinculos: v }));
-      } catch (e) {
-        aviso("Não consegui salvar: " + esc(e.message), { tipo: "erro" });
-      }
+      salvarProgresso();
+      renderTudo();
     };
   }
   for (const b of $$("[data-faltando]")) b.onclick = () => mostrarFaltando(b.dataset.faltando);
@@ -1115,84 +1120,65 @@ function renderPsn() {
       marcar(ids, true, { texto: `🏆 ${ids.length} marcados como pegos.` });
     };
   }
-  $("#desconectarPsn").onclick = async () => {
-    if (!confirm("Desconectar a PSN? (Seus vínculos de troféus continuam salvos.)")) return;
-    await api("DELETE", "/api/psn/token");
-    Object.assign(p, { configurada: false, trofeus: null, anterior: null, ultimoSync: 0, erro: null });
-    renderLateral();
-  };
+  $("#desconectarPsn").onclick = desconectarPsn;
+}
+
+async function desconectarPsn() {
+  if (!confirm("Desconectar a PSN? (Os troféus ligados às categorias continuam salvos.)")) return;
+  await PSN.desconectar();
+  Object.assign(S.psn, { jogos: null, trofeus: null, anterior: null, ultimoSync: 0, erro: null, escolhendo: false });
+  renderTudo();
 }
 
 async function carregarJogos() {
   const p = S.psn;
   try {
-    if (!p.jogos) p.jogos = await api("GET", "/api/psn/jogos");
+    if (!p.jogos) p.jogos = await PSN.jogos();
     p.erro = null;
   } catch (e) {
     p.erro = e.message;
     const el = $("#jogos");
-    if (el) el.innerHTML = "";
-    return renderPsnErro();
+    if (el) {
+      el.innerHTML = `<div class="psn-status alerta">${esc(e.message)}</div><button class="btn largo" id="tentarDeNovo">Tentar de novo</button>`;
+      $("#tentarDeNovo").onclick = () => renderPsn();
+    }
+    return;
   }
   const el = $("#jogos");
   if (!el) return;
   const pareceGta = (j) => /grand theft auto|\bgta\b/i.test(j.nome);
   const lista = [...p.jogos].sort((a, b) => pareceGta(b) - pareceGta(a));
   el.innerHTML = lista.length
-    ? lista.map((j) => `<button class="opcao" data-jogo="${esc(j.id)}">${j.icone ? `<img src="${esc(j.icone)}" alt="" width="40" height="40" style="border-radius:8px;object-fit:cover">` : `<span class="emoji">🎮</span>`}<span><b>${esc(j.nome)}</b><small>${esc(j.plataforma || "")}${j.progresso != null ? ` · ${j.progresso}% dos troféus` : ""}</small></span></button>`).join("")
+    ? lista
+        .map((j) => `<button class="opcao" data-jogo="${esc(j.id)}">${j.icone ? `<img src="${esc(j.icone)}" alt="" width="44" height="44">` : `<span class="emoji">🎮</span>`}<span><b>${esc(j.nome)}</b><small>${esc(j.plataforma || "")}${j.progresso != null ? ` · ${j.progresso}% dos troféus` : ""}</small></span></button>`)
+        .join("")
     : `<p class="texto-2">Nenhum jogo com troféus na sua conta ainda. Jogue um pouco e tente de novo.</p>`;
   for (const b of $$("[data-jogo]", el)) {
-    b.onclick = async () => {
+    b.onclick = () => {
       const j = p.jogos.find((x) => x.id === b.dataset.jogo);
       const mudou = S.progresso.psn.jogo?.id !== j.id;
-      p.escolhendo = false;
-      try {
-        receberProgresso(await api("POST", "/api/progresso/psn", { jogo: { id: j.id, nome: j.nome, servico: j.servico }, ...(mudou ? { vinculos: {} } : {}) }));
-      } catch (e) {
-        aviso("Não consegui salvar: " + esc(e.message), { tipo: "erro" });
+      S.progresso.psn.jogo = { id: j.id, nome: j.nome, servico: j.servico };
+      if (mudou) {
+        S.progresso.psn.vinculos = {};
+        Object.assign(p, { trofeus: null, anterior: null });
       }
-      if (mudou) Object.assign(p, { trofeus: null, anterior: null });
+      p.escolhendo = false;
+      salvarProgresso();
       renderPsn();
       sincronizarPsn(true);
     };
   }
 }
 
-function renderPsnErro() {
-  const el = $("#jogos");
-  if (el && S.psn.erro) el.innerHTML = `<div class="psn-status alerta">${esc(S.psn.erro)}</div><button class="btn largo" id="tentarDeNovo" style="margin-top:8px">Tentar de novo</button>`;
-  if ($("#tentarDeNovo")) $("#tentarDeNovo").onclick = () => { S.psn.jogos = null; renderPsn(); };
-}
-
 async function sincronizarPsn(manual = false) {
   const p = S.psn;
   const jogo = S.progresso.psn.jogo;
-  if (!p.configurada || !jogo || p.carregando) return;
+  if (!PSN.conectado() || !jogo || p.carregando) return;
   p.carregando = true;
   if (S.ui.aba === "psn") renderPsn();
   try {
-    const trofeus = await api("GET", `/api/psn/trofeus?jogo=${encodeURIComponent(jogo.id)}&servico=${encodeURIComponent(jogo.servico || "trophy2")}`);
-    // avisa o que mudou desde a última vez
-    if (p.anterior) {
-      for (const c of categorias()) {
-        const tid = S.progresso.psn.vinculos[c.id];
-        if (tid == null) continue;
-        const novo = trofeus.find((t) => String(t.id) === String(tid));
-        const velho = p.anterior.get(String(tid));
-        if (!novo || !velho) continue;
-        if (novo.conquistado && !velho.conquistado) {
-          aviso(`🏆 Troféu <b>${esc(novo.nome)}</b> conquistado!`, {
-            tipo: "psn", duracao: 12000, acao: "Marcar todos",
-            aoClicar: () => marcar(itens().filter((i) => i.categoria === c.id).map((i) => i.id), true),
-          });
-        } else if (novo.progresso != null && velho.progresso != null && novo.progresso > velho.progresso) {
-          const dif = novo.progresso - velho.progresso;
-          aviso(`🎮 PSN: <b>+${dif}</b> em ${esc(c.nome)} (${novo.progresso}/${novo.alvo}). Toque no que você pegou.`, {
-            tipo: "psn", duracao: 12000, acao: "Ver", aoClicar: () => mostrarFaltando(c.id),
-          });
-        }
-      }
-    }
+    const trofeus = await PSN.trofeus(jogo.id, jogo.servico);
+    if (p.anterior) avisarMudancas(trofeus);
     p.anterior = new Map(trofeus.map((t) => [String(t.id), t]));
     p.trofeus = trofeus;
     p.ultimoSync = Date.now();
@@ -1200,10 +1186,33 @@ async function sincronizarPsn(manual = false) {
     if (manual) aviso("PSN sincronizada.", { tipo: "psn", duracao: 2500 });
   } catch (e) {
     p.erro = e.message;
+    p.ultimoSync = Date.now(); // não insiste a cada 20 s quando dá erro
     if (manual) aviso("PSN: " + esc(e.message), { tipo: "erro", duracao: 8000 });
   } finally {
     p.carregando = false;
-    renderLateral();
+    renderTudo();
+  }
+}
+
+function avisarMudancas(trofeus) {
+  for (const c of categorias()) {
+    const tid = S.progresso.psn.vinculos[c.id];
+    if (tid == null) continue;
+    const novo = trofeus.find((t) => String(t.id) === String(tid));
+    const velho = S.psn.anterior.get(String(tid));
+    if (!novo || !velho) continue;
+    if (novo.conquistado && !velho.conquistado) {
+      vibrar(true);
+      aviso(`🏆 Troféu <b>${esc(novo.nome)}</b> conquistado!`, {
+        tipo: "psn", duracao: 12000, acao: "Marcar todos",
+        aoClicar: () => marcar(itens().filter((i) => i.categoria === c.id).map((i) => i.id), true),
+      });
+    } else if (novo.progresso != null && velho.progresso != null && novo.progresso > velho.progresso) {
+      vibrar(true);
+      aviso(`🎮 PSN: <b>+${novo.progresso - velho.progresso}</b> em ${esc(c.nome)} (${novo.progresso}/${novo.alvo}). Toque no que você pegou.`, {
+        tipo: "psn", duracao: 12000, acao: "Ver", aoClicar: () => mostrarFaltando(c.id),
+      });
+    }
   }
 }
 
@@ -1211,34 +1220,44 @@ setInterval(() => {
   if (S.ui.autoSync && !document.hidden && Date.now() - S.psn.ultimoSync >= 120000) sincronizarPsn();
 }, 20000);
 
+// ---------------------------------------------------------------- botão voltar do Android
+
+function voltar() {
+  if (!$("#janelaFundo").hidden) return fecharJanela(), true;
+  if (!$("#painel").hidden) return fecharPainel(), true;
+  if (S.ui.aba !== "mapa") return trocarAba("mapa"), true;
+  if (S.ui.editar) return entrarEdicao(false), true;
+  return false;
+}
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") voltar();
+});
+if (plugins().App && ehApp()) {
+  plugins().App.addListener("backButton", () => {
+    if (!voltar()) plugins().App.minimizeApp();
+  });
+  // ao voltar para o app, sincroniza a PSN se já faz um tempo
+  plugins().App.addListener("resume", () => {
+    if (S.ui.autoSync && Date.now() - S.psn.ultimoSync >= 60000) sincronizarPsn();
+  });
+}
+
 // ---------------------------------------------------------------- início
 
 async function iniciar() {
   renderModos();
   try {
-    const e = await api("GET", "/api/estado");
-    S.mapa = e.mapa ? normalizarMapa(e.mapa) : null;
-    S.temImagem = e.imagem;
-    S.psn.configurada = e.psn.configurada;
-    S.psn.demo = e.psn.demo;
-    receberProgresso(e.progresso);
+    const [m, p, img] = await Promise.all([Banco.get("mapa"), Banco.get("progresso"), Banco.get("imagem"), PSN.iniciar()]);
+    S.mapa = m ? normalizarMapa(m) : null;
+    if (p) S.progresso = { encontrados: p.encontrados || {}, psn: { jogo: null, vinculos: {}, ...(p.psn || {}) } };
+    S.imagem = img || null;
   } catch (err) {
-    aviso("Não consegui falar com o PC. O programa (npm start) está aberto? " + esc(err.message), { tipo: "erro", duracao: 15000 });
+    aviso("Não consegui ler os dados salvos: " + esc(err.message), { tipo: "erro", duracao: 15000 });
   }
   await montarFundo();
-  renderLateral();
-  enviarPendentes();
+  renderTudo();
   if (!S.mapa || !S.mapa.categorias.length) abrirBoasVindas();
-  if (S.psn.configurada && S.progresso.psn.jogo) sincronizarPsn();
-
-  // mantém PC e celular iguais: busca o progresso de tempos em tempos
-  setInterval(buscarProgresso, 10000);
-  document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) {
-      buscarProgresso();
-      enviarPendentes();
-    }
-  });
+  if (PSN.conectado() && S.progresso.psn.jogo) sincronizarPsn();
 }
 
 iniciar();

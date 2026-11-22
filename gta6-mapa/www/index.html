@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0f1115">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Mapa de Coletáveis</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icone.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="mapa" aria-label="Mapa"></div>
+
+  <!-- topo: progresso e aviso de filtro -->
+  <header id="topo">
+    <button id="chipProgresso" class="chip" aria-label="Progresso total">
+      <span class="chip-numeros"><b id="textoTotal">0/0</b> <small id="pctTotal">0%</small></span>
+      <span class="mini-barra"><span id="barraTotal"></span></span>
+    </button>
+    <button id="chipFiltro" class="chip chip-filtro" hidden></button>
+  </header>
+
+  <div id="faixaEdicao" hidden>
+    <span>✏️ <b>Modo edição</b><br><small>Toque no mapa para adicionar. Segure e arraste para mover.</small></span>
+    <button id="sairEdicao" class="btn pequeno">Concluir</button>
+  </div>
+
+  <div id="avisos" aria-live="polite"></div>
+
+  <button id="toqueRapido" class="pilula" aria-pressed="true">
+    <span class="pilula-icone">⚡</span>
+    <span class="pilula-texto"><b>Toque rápido</b><small id="toqueRapidoDica"></small></span>
+  </button>
+
+  <!-- folha que sobe de baixo (Filtros, Lista, PSN, Mais) -->
+  <section id="folha" hidden>
+    <div class="folha-alca"></div>
+    <div class="folha-corpo">
+      <div data-conteudo="filtros">
+        <div class="linha-botoes">
+          <button id="mostrarTodos" class="btn">Mostrar todos</button>
+          <button id="esconderTodos" class="btn">Esconder todos</button>
+        </div>
+        <label class="chave">
+          <input type="checkbox" id="esconderEncontrados">
+          <span class="trilho"></span>
+          <span>Esconder os que já peguei</span>
+        </label>
+        <div id="grupos"></div>
+      </div>
+      <div data-conteudo="lista">
+        <input id="busca" type="search" class="campo" placeholder="🔍 Buscar coletável…" autocomplete="off" enterkeyhint="search">
+        <label class="chave pequena">
+          <input type="checkbox" id="listaSoFaltando">
+          <span class="trilho"></span>
+          <span>Só os que faltam</span>
+        </label>
+        <div id="lista"></div>
+      </div>
+      <div data-conteudo="psn"><div id="psn"></div></div>
+      <div data-conteudo="mais"><div id="mais"></div></div>
+    </div>
+  </section>
+
+  <!-- detalhes / edição de um coletável -->
+  <section id="painel" hidden>
+    <div class="folha-alca"></div>
+    <div id="painelConteudo"></div>
+  </section>
+
+  <!-- barra de navegação -->
+  <nav id="navegacao">
+    <button data-aba="mapa" class="ativa"><span class="nav-icone">🗺️</span><span>Mapa</span></button>
+    <button data-aba="filtros"><span class="nav-icone">🎛️</span><span>Filtros</span></button>
+    <button data-aba="lista"><span class="nav-icone">📋</span><span>Lista</span></button>
+    <button data-aba="psn"><span class="nav-icone">🎮<i id="psnBolinha" class="bolinha" hidden></i></span><span>PSN</span></button>
+    <button data-aba="mais"><span class="nav-icone">⚙️</span><span>Mais</span></button>
+  </nav>
+
+  <!-- janela central -->
+  <div id="janelaFundo" hidden>
+    <div id="janela" role="dialog" aria-modal="true"></div>
+  </div>
+
+  <input type="file" id="arquivoImagem" accept="image/*" hidden>
+  <input type="file" id="arquivoJson" accept="application/json,.json,text/plain" hidden>
+
+  <script src="vendor/leaflet/leaflet.js"></script>
+  <script src="armazenamento.js"></script>
+  <script src="psn.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

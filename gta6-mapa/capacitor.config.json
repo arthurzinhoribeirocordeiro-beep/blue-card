@@ -1,0 +1,14 @@
+{
+  "appId": "com.mapacoletaveis.app",
+  "appName": "Mapa de Coletáveis",
+  "webDir": "www",
+  "android": {
+    "backgroundColor": "#0f1115"
+  },
+  "plugins": {
+    "SystemBars": {
+      "style": "DARK",
+      "insetsHandling": "css"
+    }
+  }
+}
