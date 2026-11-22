@@ -16,8 +16,19 @@ const Banco = (() => {
     return conexao;
   }
 
+  const memoria = new Map();
+  let usarMemoria = false;
+
   async function operar(modo, fn) {
-    const db = await abrir();
+    let db;
+    try {
+      if (usarMemoria) throw new Error("memória");
+      db = await abrir();
+    } catch {
+      usarMemoria = true; // sem IndexedDB (modo privado, prévia): funciona, mas não guarda
+      const loja = { get: (k) => ({ result: memoria.get(k) }), put: (v, k) => (memoria.set(k, v), { result: k }), delete: (k) => (memoria.delete(k), { result: undefined }) };
+      return fn(loja).result;
+    }
     return new Promise((ok, erro) => {
       const tx = db.transaction("kv", modo);
       const req = fn(tx.objectStore("kv"));
@@ -28,9 +39,14 @@ const Banco = (() => {
   }
 
   // pede ao sistema para não apagar os dados quando faltar espaço
-  if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+  try {
+    if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+  } catch {}
 
   return {
+    get semMemoriaPermanente() {
+      return usarMemoria;
+    },
     get: (k) => operar("readonly", (s) => s.get(k)),
     set: (k, v) => operar("readwrite", (s) => s.put(v, k)),
     del: (k) => operar("readwrite", (s) => s.delete(k)),

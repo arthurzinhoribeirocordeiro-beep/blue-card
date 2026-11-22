@@ -275,3 +275,8 @@ h3.secao { margin: 22px 0 8px; font-size: 12px; color: var(--texto-2); text-tran
 .psn-status.alerta { color: var(--alerta); }
 .psn-status .btn { margin-top: 10px; width: 100%; }
 .texto-2 { color: var(--texto-2); font-size: 14px; }
+
+/* caixa de confirmação */
+.confirmar-fundo { position: fixed; inset: 0; z-index: 1400; background: rgba(0,0,0,.65); display: grid; place-items: center; padding: 20px; }
+.confirmar { width: min(400px, 100%); background: var(--painel); border: 1px solid var(--borda); border-radius: 18px; padding: 20px; animation: entra .18s ease-out; }
+.confirmar p { margin: 0 0 18px; font-size: 17px; }

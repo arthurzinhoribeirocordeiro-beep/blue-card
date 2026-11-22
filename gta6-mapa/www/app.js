@@ -662,8 +662,8 @@ function abrirEdicaoItem(id, posicao) {
     vibrar(false);
   };
   if (item) {
-    $("#excluirItem").onclick = () => {
-      if (!confirm(`Excluir "${nomeItem(item)}"?`)) return;
+    $("#excluirItem").onclick = async () => {
+      if (!(await confirmar(`Excluir "${esc(nomeItem(item))}"?`, "Excluir"))) return;
       S.mapa.itens = S.mapa.itens.filter((i) => i.id !== id);
       delete S.progresso.encontrados[id];
       salvarMapa();
@@ -688,6 +688,30 @@ function fecharJanela() {
 $("#janelaFundo").addEventListener("click", (e) => {
   if (e.target.id === "janelaFundo" || e.target.closest("[data-fechar-janela]")) fecharJanela();
 });
+
+// caixa de confirmação própria: resolve true (confirmou) ou false
+function confirmar(html, botao = "Confirmar") {
+  return new Promise((ok) => {
+    const fundo = document.createElement("div");
+    fundo.className = "confirmar-fundo";
+    fundo.innerHTML = `<div class="confirmar" role="alertdialog" aria-modal="true">
+      <p>${html}</p>
+      <div class="linha-botoes"><button class="btn" data-r="0">Cancelar</button><button class="btn primario" data-r="1">${esc(botao)}</button></div>
+    </div>`;
+    const fechar = (r) => {
+      fundo.remove();
+      ok(r);
+    };
+    fundo.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-r]");
+      if (b) fechar(b.dataset.r === "1");
+      else if (e.target === fundo) fechar(false);
+    });
+    fundo.fecharConfirmacao = () => fechar(false);
+    document.body.append(fundo);
+    fundo.querySelector("[data-r='1']").focus();
+  });
+}
 
 const xJanela = `<button class="icone-btn" data-fechar-janela aria-label="Fechar">✕</button>`;
 
@@ -778,10 +802,10 @@ const acoes = {
   exportar: () => compartilhar("coletaveis.json", S.mapa || mapaVazio(), "Lista de coletáveis"),
   backup: () => compartilhar(`backup-mapa-${new Date().toISOString().slice(0, 10)}.json`, { mapa: S.mapa, progresso: S.progresso }, "Backup do Mapa de Coletáveis"),
   async exemplo() {
-    if (itens().length && !confirm("Isso vai substituir a sua lista atual pelo exemplo fictício. Continuar?")) return;
+    if (itens().length && !(await confirmar("Isso vai substituir a sua lista atual pelo exemplo fictício.", "Substituir"))) return;
     try {
-      const r = await fetch("exemplo.json");
-      trocarMapa(normalizarMapa(await r.json()));
+      const dados = window.EXEMPLO || (await (await fetch("exemplo.json")).json());
+      trocarMapa(normalizarMapa(dados));
       fecharJanela();
       trocarAba("mapa");
       aviso("Exemplo carregado. Toque num ícone para marcar como pego!");
@@ -801,8 +825,8 @@ const acoes = {
     entrarEdicao(true);
     aviso("Toque no mapa onde fica cada coletável. Crie mais categorias em ⚙️ Mais.", { duracao: 8000 });
   },
-  zerar() {
-    if (!confirm("Zerar TODO o seu progresso? Isso desmarca todos os coletáveis.")) return;
+  async zerar() {
+    if (!(await confirmar("Zerar TODO o seu progresso? Isso desmarca todos os coletáveis.", "Zerar"))) return;
     const ids = Object.keys(S.progresso.encontrados);
     marcar(ids, false, { texto: `Progresso zerado (${ids.length} desmarcados).` });
   },
@@ -830,12 +854,23 @@ async function compartilhar(nome, dados, titulo) {
     }
     return;
   }
-  const url = URL.createObjectURL(new Blob([texto], { type: "application/json" }));
-  const a = Object.assign(document.createElement("a"), { href: url, download: nome });
-  document.body.append(a);
-  a.click();
-  a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  abrirJanela(`
+    <div class="janela-cab"><h2>${esc(titulo)}</h2>${xJanela}</div>
+    <p class="sub">Copie o texto abaixo e guarde (num bloco de notas, no Drive, numa conversa com você mesmo). Para usar depois, salve como <code>${esc(nome)}</code> e importe em ⚙️ Mais.</p>
+    <textarea class="campo mono" id="textoArquivo" readonly style="min-height:200px">${esc(texto)}</textarea>
+    <button class="btn primario largo" id="copiarArquivo" style="margin-top:10px">Copiar</button>
+  `);
+  $("#copiarArquivo").onclick = async () => {
+    const campo = $("#textoArquivo");
+    try {
+      await navigator.clipboard.writeText(texto);
+      aviso("Copiado!");
+    } catch {
+      campo.focus();
+      campo.select();
+      aviso("Segure no texto selecionado e toque em Copiar.", { tipo: "alerta" });
+    }
+  };
 }
 
 $("#arquivoJson").onchange = async (e) => {
@@ -846,7 +881,7 @@ $("#arquivoJson").onchange = async (e) => {
     const dados = JSON.parse(await arq.text());
     const ehBackup = dados.mapa && dados.progresso;
     const novo = normalizarMapa(ehBackup ? dados.mapa : dados);
-    if (itens().length && !confirm(`Substituir a lista atual por "${novo.nome}" (${novo.itens.length} coletáveis)?`)) return;
+    if (itens().length && !(await confirmar(`Substituir a lista atual por <b>${esc(novo.nome)}</b> (${novo.itens.length} coletáveis)?`, "Substituir"))) return;
     trocarMapa(novo);
     fecharJanela();
     trocarAba("mapa");
@@ -922,8 +957,8 @@ function abrirEdicaoCategoria(id) {
     else abrirCategorias();
   };
   if (cat) {
-    $("#excluirCat").onclick = () => {
-      if (!confirm(`Excluir a categoria "${cat.nome}" e os ${total} coletáveis dela?`)) return;
+    $("#excluirCat").onclick = async () => {
+      if (!(await confirmar(`Excluir a categoria <b>${esc(cat.nome)}</b> e os ${total} coletáveis dela?`, "Excluir"))) return;
       S.mapa.categorias = S.mapa.categorias.filter((c) => c.id !== id);
       S.mapa.itens = S.mapa.itens.filter((i) => i.categoria !== id);
       S.mapa.grupos = S.mapa.grupos.filter((g) => S.mapa.categorias.some((c) => c.grupo === g.id));
@@ -1124,7 +1159,7 @@ function renderPsn() {
 }
 
 async function desconectarPsn() {
-  if (!confirm("Desconectar a PSN? (Os troféus ligados às categorias continuam salvos.)")) return;
+  if (!(await confirmar("Desconectar a PSN? Os troféus ligados às categorias continuam salvos.", "Desconectar"))) return;
   await PSN.desconectar();
   Object.assign(S.psn, { jogos: null, trofeus: null, anterior: null, ultimoSync: 0, erro: null, escolhendo: false });
   renderTudo();
@@ -1223,6 +1258,8 @@ setInterval(() => {
 // ---------------------------------------------------------------- botão voltar do Android
 
 function voltar() {
+  const conf = $(".confirmar-fundo");
+  if (conf) return conf.fecharConfirmacao(), true;
   if (!$("#janelaFundo").hidden) return fecharJanela(), true;
   if (!$("#painel").hidden) return fecharPainel(), true;
   if (S.ui.aba !== "mapa") return trocarAba("mapa"), true;
