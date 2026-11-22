@@ -243,6 +243,20 @@ main{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scro
 .toasts{position:fixed;left:0;right:0;top:calc(74px + env(safe-area-inset-top,0px));z-index:80;display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .toast{max-width:420px;background:var(--panel2);border:1px solid var(--line);color:var(--fg);padding:10px 14px;border-radius:12px;font-weight:600;font-size:.9rem;box-shadow:0 8px 24px rgba(0,0,0,.5);animation:toast 3.2s ease forwards;text-align:center}
 
+/* imagens do jogador */
+.card .phf{position:absolute;inset:0;background-size:cover;background-position:center top;background-color:#0b1220}
+.card.hasph .in::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(180deg,rgba(0,0,0,.6) 0,transparent 30%,transparent 55%,rgba(0,0,0,.88) 100%)}
+.card.hasph .ovr,.card.hasph .pos,.card.hasph .nm,.card.hasph .rl,.card.hasph .mb{z-index:2}
+.card.full .in{inset:.2em}
+.card.full .in::before{display:none}
+.field{display:flex;flex-direction:column;gap:6px}
+.field>label{font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.inp{width:100%;padding:11px 12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--fg);font:inherit;font-size:16px;user-select:text;-webkit-user-select:text}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.seg button{border:1px solid var(--line);background:var(--panel2);border-radius:10px;padding:9px 6px;font-weight:700;font-size:.88rem;color:var(--muted)}
+.seg button[aria-pressed=true]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.cw .edit{position:absolute;right:-4px;top:-6px;z-index:3;width:22px;height:22px;border-radius:50%;background:var(--money);color:#1d1503;display:grid;place-items:center;font-size:.7rem;font-weight:800}
+
 @keyframes spin{to{transform:rotateY(360deg)}}
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
 @keyframes sheen{0%{transform:translateX(-60%)}60%,100%{transform:translateX(60%)}}
@@ -310,6 +324,7 @@ const PACKS = [
   {n:'Lenda',  price:550000, odds:[0,0,0,50,44,6],   luck:2.5, stock:[.12,1,1]},
   {n:'Ícone',  price:6.5e6,  odds:[0,0,0,0,70,30],   luck:3,   stock:[.04,1,1]},
 ];
+function shortName(n){ n=String(n).trim(); return n.length<=13 ? n : n.split(/\s+/).slice(-1)[0]; }
 const POSN = {GOL:'Goleiro',ZAG:'Zagueiro',LAT:'Lateral',VOL:'Volante',MEI:'Meia',ATA:'Atacante'};
 // jogadores fictícios
 const P = [
@@ -328,7 +343,7 @@ const P = [
  ['Diego Altamirano','MEI',91,4],['Kauã Relâmpago','ATA',92,4],['Viktor Draganov','ZAG',89,4],['Seydou Bakary','ATA',90,4],
  ['Tito Esquivel','GOL',88,4],['Muralha Bastião','ZAG',90,4],
  ['Maestro Valdivino','MEI',96,5],['Furacão Ximenes','ATA',98,5],['Rei Teodoro','ATA',99,5],['Paredão Anchieta','GOL',94,5],
-].map(([n,pos,o,r],i)=>({n,pos,o,r,i,short:n.split(' ').slice(-1)[0]}));
+].map(([n,pos,o,r],i)=>({n,n0:n,pos,o,r,i,short:shortName(n)}));
 const BYR = RAR.map((_,r)=>P.filter(p=>p.r===r).map(p=>p.i));
 
 const KITS = [['#d62839','#ffffff'],['#1d4ed8','#fde047'],['#15803d','#ffffff'],['#1f2937','#f9fafb'],['#7c3aed','#fbbf24'],['#ea580c','#111827'],['#0ea5e9','#ffffff'],['#be123c','#111827'],['#facc15','#1d4ed8'],['#e5e7eb','#1f2937'],['#0f766e','#fef3c7']];
@@ -352,7 +367,7 @@ const RESTOCK = 75000, OFFCAP = 8*3600, MAXS = 20, MAXC = 500, SELLX = 30, LS = 
 /* ---------- estado ---------- */
 function newState(){
   return {v:1, money:100, earned:0, slots:4, ped:[null,null,null,null], cards:[], nu:1,
-    stock:[6,3,1,0,0,0], restockAt:Date.now()+RESTOCK, disc:{}, opened:0, last:Date.now(), savedAt:0, mute:false};
+    stock:[6,3,1,0,0,0], restockAt:Date.now()+RESTOCK, disc:{}, opened:0, last:Date.now(), savedAt:0, mute:false, custom:{}};
 }
 function migrate(o){
   if(!o || typeof o!=='object' || !Array.isArray(o.cards)) return null;
@@ -363,9 +378,40 @@ function migrate(o){
   s.ped = Array.from({length:s.slots},(_,i)=>{ const u=(o.ped||[])[i]; return u && ids.has(u) ? u : null; });
   if(!Array.isArray(s.stock) || s.stock.length!==PACKS.length) s.stock=[6,3,1,0,0,0];
   if(typeof s.disc!=='object' || !s.disc) s.disc={};
+  if(typeof s.custom!=='object' || !s.custom) s.custom={};
   return s;
 }
-let S = null, tab = 'field', invFilter = -1, pendingSlot = null, OP = null;
+let S = null, tab = 'field', invFilter = -1, pendingSlot = null, OP = null, CUST = null;
+
+/* ---------- imagens dos jogadores (do próprio aparelho) ---------- */
+const LSP = 'deposito-craques-fotos-v1';
+let PHOTOS = {};
+try{ PHOTOS = JSON.parse(localStorage.getItem(LSP) || '{}') || {}; }catch(e){ PHOTOS = {}; }
+function savePhotosLocal(){ try{ localStorage.setItem(LSP, JSON.stringify(PHOTOS)); return true; }catch(e){ return false; } }
+function photoCSS(){
+  let el=document.getElementById('phcss');
+  if(!el){ el=document.createElement('style'); el.id='phcss'; (document.head||document.body).appendChild(el); }
+  el.textContent=Object.keys(PHOTOS).filter(i=>P[i] && /^data:image\//.test(PHOTOS[i])).map(i=>`.ph${i}{background-image:url("${PHOTOS[i]}")}`).join('\n');
+}
+function applyNames(){ P.forEach(p=>{ const c=S.custom[p.i]; p.n=(c && c.n) || p.n0; p.short=shortName(p.n); }); }
+function processImage(file){
+  return new Promise((res,rej)=>{
+    const url=URL.createObjectURL(file), im=new Image();
+    im.onload=()=>{
+      try{
+        const W=300, H=420, cv=document.createElement('canvas'); cv.width=W; cv.height=H;
+        const ctx=cv.getContext('2d'), sc=Math.max(W/im.naturalWidth, H/im.naturalHeight);
+        const w=im.naturalWidth*sc, h=im.naturalHeight*sc;
+        ctx.fillStyle='#0b1220'; ctx.fillRect(0,0,W,H);
+        ctx.drawImage(im,(W-w)/2,(H-h)/2,w,h);
+        URL.revokeObjectURL(url);
+        res(cv.toDataURL('image/jpeg',0.8));
+      }catch(e){ rej(e); }
+    };
+    im.onerror=()=>{ URL.revokeObjectURL(url); rej(new Error('img')); };
+    im.src=url;
+  });
+}
 
 const card = u => S.cards.find(c=>c.u===u);
 const onField = u => S.ped.includes(u);
@@ -390,9 +436,17 @@ const mmss = ms => { const s=Math.max(0,Math.ceil(ms/1000)); return Math.floor(s
 const esc = s => String(s).replace(/[&<>"]/g, ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
 
 /* ---------- html ---------- */
-function cardHTML(c){
+function cardHTML(c, o){
+  // o = rascunho da tela de personalizar {n, mode, img}
   const p=P[c.p], r=RAR[p.r];
-  return `<div class="card r${p.r} m${c.m}" style="--k1:${kit(c.p)[0]};--rc:${r.c}"><div class="in"><div class="art">${ART[c.p]}</div><b class="ovr">${p.o}</b><span class="pos">${p.pos}</span>${c.m?`<span class="mb">${MUT[c.m].n}</span>`:''}<div class="nm">${esc(p.short)}</div><div class="rl">${r.n}</div></div></div>`;
+  const short = o ? shortName(o.n || p.n0) : p.short;
+  const has = o ? !!o.img : !!PHOTOS[c.p];
+  const mode = has ? ((o ? o.mode : (S.custom[c.p]||{}).mode) || 'foto') : '';
+  const ph = has ? (o ? `<div class="phf" style="background-image:url('${o.img}')"></div>` : `<div class="phf ph${c.p}"></div>`) : '';
+  const mb = c.m ? `<span class="mb">${MUT[c.m].n}</span>` : '';
+  const st = `style="--k1:${kit(c.p)[0]};--rc:${r.c}"`;
+  if(mode==='full') return `<div class="card r${p.r} m${c.m} hasph full" ${st}><div class="in">${ph}${mb}</div></div>`;
+  return `<div class="card r${p.r} m${c.m}${has?' hasph':''}" ${st}><div class="in">${has?ph:`<div class="art">${ART[c.p]}</div>`}<b class="ovr">${p.o}</b><span class="pos">${p.pos}</span>${mb}<div class="nm">${esc(short)}</div><div class="rl">${r.n}</div></div></div>`;
 }
 function unknownHTML(r){
   return `<div class="card unk" style="--rc:${RAR[r].c}"><div class="in"><div class="q">?</div><div class="rl">${RAR[r].n}</div></div></div>`;
@@ -464,7 +518,7 @@ function renderCards(){
 
 function renderAlbum(){
   const b=albumBonus(), found=Object.values(S.disc).filter(Boolean).length;
-  let h=`<div class="wrap"><section class="alhead"><div class="eyebrow">Álbum de craques</div><h1>${found} de ${P.length} descobertos</h1><div class="bar"><i style="width:${(found/P.length*100).toFixed(1)}%"></i></div><p class="sub">Cada jogador descoberto dá +3% de renda, e cada mutação nova dele dá mais +1%. Bônus atual: <b style="color:var(--money)">+${Math.round((b-1)*100)}%</b>. Vender a carta não apaga o álbum.</p></section>`;
+  let h=`<div class="wrap"><section class="alhead"><div class="eyebrow">Álbum de craques</div><h1>${found} de ${P.length} descobertos</h1><div class="bar"><i style="width:${(found/P.length*100).toFixed(1)}%"></i></div><p class="sub">Cada jogador descoberto dá +3% de renda, e cada mutação nova dele dá mais +1%. Bônus atual: <b style="color:var(--money)">+${Math.round((b-1)*100)}%</b>. Vender a carta não apaga o álbum.</p><p class="sub">Toque em qualquer jogador para colocar uma imagem sua nele ou mudar o nome.</p></section>`;
   RAR.forEach((r,ri)=>{
     const ids=BYR[ri], got=ids.filter(i=>S.disc[i]).length;
     h+=`<section class="alsec" style="--rc:${r.c}"><h2>${r.n}<span>${got}/${ids.length}</span></h2><div class="cgrid">`;
@@ -472,8 +526,8 @@ function renderAlbum(){
       const bits=S.disc[i]||0;
       if(bits){
         let best=0; for(let m=MUT.length-1;m>=0;m--) if(bits&(1<<m)){ best=m; break; }
-        h+=`<div class="cw">${cardHTML({p:i,m:best})}<div class="dots">${[1,2,3,4,5].map(m=>`<i class="d${m}${bits&(1<<m)?' on':''}" title="${MUT[m].n}"></i>`).join('')}</div></div>`;
-      } else h+=`<div class="cw">${unknownHTML(ri)}<div class="dots">${[1,2,3,4,5].map(m=>`<i class="d${m}"></i>`).join('')}</div></div>`;
+        h+=`<button class="cw" data-act="custom:${i}" aria-label="Personalizar ${esc(P[i].n)}">${PHOTOS[i]||S.custom[i]?'':'<span class="edit">✎</span>'}${cardHTML({p:i,m:best})}<div class="dots">${[1,2,3,4,5].map(m=>`<i class="d${m}${bits&(1<<m)?' on':''}" title="${MUT[m].n}"></i>`).join('')}</div></button>`;
+      } else h+=`<button class="cw" data-act="custom:${i}" aria-label="Personalizar jogador ainda não descoberto">${unknownHTML(ri)}<div class="dots">${[1,2,3,4,5].map(m=>`<i class="d${m}"></i>`).join('')}</div></button>`;
     });
     h+=`</div></section>`;
   });
@@ -507,6 +561,7 @@ function openDetail(u){
   const p=P[c.p], b=albumBonus(), f=onField(u);
   sheet(`<div class="detail" style="--cw:132px">${cardHTML(c)}<div class="dinfo"><h2>${esc(p.n)}</h2><span class="sub">${POSN[p.pos]} · ${p.o} de geral</span><span class="sub">${RAR[p.r].n}${c.m?` · mutação ${MUT[c.m].n} (×${MUT[c.m].x})`:''}</span><span class="big">+$${fmt(inc(c)*b)}/s</span>${f?'<span class="sub" style="color:var(--pitch);font-weight:700">Está em um pedestal</span>':''}</div></div>
   <div class="acts">${f?`<button class="btn ghost wide" data-act="unplace:${S.ped.indexOf(u)}">Tirar do pedestal</button>`:`<button class="btn green wide" data-act="place:${u}">Colocar em um pedestal</button>`}
+  <button class="btn ghost wide" data-act="custom:${c.p}">Personalizar imagem e nome</button>
   <div class="row"><button class="btn danger" data-act="sell:${u}">Vender por $${fmt(sellValue(c))}</button><button class="btn ghost" data-act="close">Fechar</button></div></div>`);
 }
 
@@ -525,8 +580,39 @@ function openSellWeak(){
   sheet(`<h2>Vender ${list.length} cartas?</h2><p class="sub">Todas as cartas fora dos pedestais que rendem menos que a sua pior carta em campo.${muts?` Inclui ${muts} com mutação.`:''} O álbum continua registrado.</p><p class="detail"><span class="big">+$${fmt(total)}</span></p><div class="acts"><button class="btn danger wide" data-act="sellweak-ok">Vender ${list.length} cartas</button><button class="btn ghost wide" data-act="close">Cancelar</button></div>`);
 }
 
+function openCustom(i){
+  const c=S.custom[i]||{};
+  CUST={i, n:c.n||'', mode:c.mode||'foto', img:PHOTOS[i]||null};
+  renderCustom();
+}
+function previewHTML(){ return cardHTML({p:CUST.i, m:0}, CUST); }
+function renderCustom(){
+  const i=CUST.i, p=P[i], known=!!S.disc[i];
+  sheet(`<h2>Personalizar jogador</h2>
+  <div class="detail"><div style="--cw:132px" id="cprev">${previewHTML()}</div><div class="dinfo"><span class="sub">${RAR[p.r].n} · ${POSN[p.pos]} · ${p.o} de geral</span>${known?'':'<span class="sub">Você ainda não tirou este jogador.</span>'}<span class="sub">A imagem fica salva só no seu jogo.</span></div></div>
+  <div class="field"><label for="cname">Nome</label><input class="inp" id="cname" maxlength="28" autocomplete="off" placeholder="${esc(p.n0)}" value="${esc(CUST.n)}"></div>
+  <div class="field"><label>Como usar a imagem</label><div class="seg"><button data-act="cmode:foto" aria-pressed="${CUST.mode==='foto'}">Foto do jogador</button><button data-act="cmode:full" aria-pressed="${CUST.mode==='full'}">Carta inteira</button></div><p class="sub">${CUST.mode==='full'?'A imagem cobre a carta toda. Use para um print ou foto de uma carta.':'A imagem vira o fundo e o jogo escreve geral, posição e nome por cima.'}</p></div>
+  <div class="acts"><label class="btn ghost wide" for="photoIn" role="button" tabindex="0">${CUST.img?'Trocar imagem':'Escolher imagem do aparelho'}</label><input type="file" id="photoIn" accept="image/*" hidden>
+  ${CUST.img?'<button class="btn danger wide" data-act="cnoimg">Remover imagem</button>':''}
+  <div class="row"><button class="btn green" data-act="csave">Salvar</button><button class="btn ghost" data-act="close">Cancelar</button></div></div>`);
+}
+function saveCustom(){
+  const i=CUST.i, inp=document.getElementById('cname');
+  let n=((inp && inp.value) || CUST.n || '').trim().slice(0,28);
+  if(n===P[i].n0) n='';
+  const imgChanged = (CUST.img||null) !== (PHOTOS[i]||null);
+  if(n || CUST.img) S.custom[i]={n, mode:CUST.mode, at:Date.now()}; else delete S.custom[i];
+  if(imgChanged){
+    if(CUST.img) PHOTOS[i]=CUST.img; else delete PHOTOS[i];
+    if(!savePhotosLocal()) toast(REMOTE_COL?'O aparelho está sem espaço; a imagem fica salva só na sua conta.':'O aparelho está sem espaço para mais imagens.');
+    photoCSS(); pushPhoto(i);
+  }
+  applyNames(); save(); CUST=null; closeSheet(); render();
+  toast('Jogador personalizado.');
+}
+
 function openSettings(){
-  sheet(`<h2>Ajustes</h2><p class="sub">${REMOTE?'Seu progresso é salvo na sua conta e neste aparelho.':'Seu progresso é salvo neste aparelho.'} Pacotes abertos: ${S.opened}. Total ganho: $${fmt(S.earned)}.</p>
+  sheet(`<h2>Ajustes</h2><p class="sub">${REMOTE?'Seu progresso e as imagens dos jogadores são salvos na sua conta e neste aparelho.':'Seu progresso é salvo neste aparelho.'} Pacotes abertos: ${S.opened}. Total ganho: $${fmt(S.earned)}.</p>
   <div class="acts"><button class="btn ghost wide" data-act="mute">Som: ${S.mute?'desligado':'ligado'}</button><button class="btn danger wide" data-act="reset">Apagar progresso e recomeçar</button><button class="btn ghost wide" data-act="close">Fechar</button></div>`);
 }
 
@@ -760,10 +846,14 @@ function act(a, el, ev){
     case 'again': { if(!OP) break; const i=OP.i; if(S.money<PACKS[i].price){ toast(`Falta $${fmt(PACKS[i].price-S.money)}.`); break; } buyPack(i); break; }
     case 'done': closeOpen(); break;
     case 'done-mont': OP=null; layer.innerHTML=''; autoMont(); tab='field'; render(); toast('Campo montado com as melhores cartas.'); break;
+    case 'custom': openCustom(+v); break;
+    case 'cmode': if(CUST){ const inp=document.getElementById('cname'); if(inp) CUST.n=inp.value; CUST.mode=v; renderCustom(); } break;
+    case 'cnoimg': if(CUST){ const inp=document.getElementById('cname'); if(inp) CUST.n=inp.value; CUST.img=null; renderCustom(); } break;
+    case 'csave': if(CUST) saveCustom(); break;
     case 'settings': openSettings(); break;
     case 'mute': S.mute=!S.mute; save(); openSettings(); break;
-    case 'reset': sheet(`<h2>Apagar tudo?</h2><p class="sub">Você perde todas as cartas, dinheiro, pedestais e o álbum. Não dá para desfazer.</p><div class="acts"><button class="btn danger wide" data-act="reset-ok">Sim, apagar e recomeçar</button><button class="btn ghost wide" data-act="close">Cancelar</button></div>`); break;
-    case 'reset-ok': { const mute=S.mute; S=newState(); S.mute=mute; save(true); closeSheet(); tab='field'; render(); toast('Jogo recomeçado.'); break; }
+    case 'reset': sheet(`<h2>Apagar tudo?</h2><p class="sub">Você perde todas as cartas, dinheiro, pedestais e o álbum. As imagens e nomes que você colocou nos jogadores continuam. Não dá para desfazer.</p><div class="acts"><button class="btn danger wide" data-act="reset-ok">Sim, apagar e recomeçar</button><button class="btn ghost wide" data-act="close">Cancelar</button></div>`); break;
+    case 'reset-ok': { const mute=S.mute, cu=S.custom; S=newState(); S.mute=mute; S.custom=cu; applyNames(); save(true); closeSheet(); tab='field'; render(); toast('Jogo recomeçado.'); break; }
   }
 }
 document.addEventListener('click', ev=>{
@@ -771,13 +861,45 @@ document.addEventListener('click', ev=>{
   if(el.disabled) return;
   act(el.dataset.act, el, ev);
 });
+document.addEventListener('input', ev=>{
+  if(ev.target.id==='cname' && CUST){ CUST.n=ev.target.value; const pv=document.getElementById('cprev'); if(pv) pv.innerHTML=previewHTML(); }
+});
+document.addEventListener('change', async ev=>{
+  if(ev.target.id!=='photoIn' || !CUST) return;
+  const f=ev.target.files && ev.target.files[0]; if(!f) return;
+  const inp=document.getElementById('cname'); if(inp) CUST.n=inp.value;
+  try{ CUST.img=await processImage(f); renderCustom(); }
+  catch(e){ toast('Não consegui abrir essa imagem. Tente um arquivo JPG ou PNG.'); }
+});
 document.addEventListener('keydown', ev=>{
-  if(ev.key==='Escape'){ if(layer.querySelector('.sheet')) closeSheet(); return; }
+  if(ev.key==='Escape'){ if(layer.querySelector('.sheet')){ CUST=null; closeSheet(); } return; }
+  if((ev.key==='Enter'||ev.key===' ') && ev.target.matches('label[for=photoIn]')){ ev.preventDefault(); ev.target.click(); return; }
   if((ev.key==='Enter'||ev.key===' ') && ev.target.matches('[role=button][data-act]')){ ev.preventDefault(); act(ev.target.dataset.act, ev.target, ev); }
 });
 
 /* ---------- salvar ---------- */
-let REMOTE=null, dirty=false, remoteBusy=false;
+let REMOTE=null, REMOTE_COL=null, dirty=false, remoteBusy=false;
+async function pushPhoto(i){
+  if(!REMOTE_COL) return;
+  try{
+    const ref=REMOTE_COL.doc('foto-'+i);
+    if(PHOTOS[i]) await ref.set({img:PHOTOS[i], at:(S.custom[i]||{}).at||Date.now()});
+    else await ref.delete();
+  }catch(e){ toast('Não consegui salvar a imagem na sua conta. Ela ficou salva neste aparelho.'); }
+}
+async function syncPhotos(){
+  try{
+    const qs=await REMOTE_COL.get(); const seen=new Set(); let changed=false;
+    qs.docs.forEach(d=>{
+      const m=/^foto-(\d+)$/.exec(d.id); if(!m || !d.exists) return;
+      const i=+m[1], body=d.data()||{}; if(!P[i] || typeof body.img!=='string' || !/^data:image\//.test(body.img)) return;
+      seen.add(i);
+      if(!PHOTOS[i] || (body.at||0) > ((S.custom[i]||{}).at||0)){ if(PHOTOS[i]!==body.img){ PHOTOS[i]=body.img; changed=true; } }
+    });
+    for(const k of Object.keys(PHOTOS)){ if(!seen.has(+k)) pushPhoto(+k); }
+    if(changed){ savePhotosLocal(); photoCSS(); if(!OP && !CUST) render(); }
+  }catch(e){}
+}
 function save(){
   S.savedAt=Date.now();
   try{ localStorage.setItem(LS, JSON.stringify(S)); }catch(e){}
@@ -803,7 +925,7 @@ async function connectCloud(){
       const d=snap.data()||{}; let r=null;
       try{ r=migrate(JSON.parse(d.s)); }catch(e){}
       if(r && (((d.savedAt||0) > (S.savedAt||0)) || (S.opened===0 && r.opened>0))){
-        S=r; if(!OP){ closeSheet(); }
+        S=r; applyNames(); if(!OP){ CUST=null; closeSheet(); }
         const now=Date.now(); let dt=Math.min(Math.max(0,(now-S.last)/1000),OFFCAP); const g=totalRate()*dt;
         S.money+=g; S.earned+=g; S.last=now; checkRestock(now,true);
         if(!OP) render();
@@ -811,7 +933,7 @@ async function connectCloud(){
         if(dt>60 && g>0 && !OP) welcome(dt,g);
       }
     }
-    REMOTE=ref; dirty=true; saveRemote();
+    REMOTE=ref; REMOTE_COL=db.collection('data/users/'+id); dirty=true; saveRemote(); syncPhotos();
   }catch(e){}
 }
 
@@ -819,6 +941,7 @@ async function connectCloud(){
 function start(data){
   S = (data && data.S && migrate(data.S)) || (()=>{ try{ const t=localStorage.getItem(LS); return t ? migrate(JSON.parse(t)) : null; }catch(e){ return null; } })() || newState();
   if(data && data.tab) tab=data.tab;
+  applyNames(); photoCSS();
   const now=Date.now();
   let dt=Math.min(Math.max(0,(now-S.last)/1000),OFFCAP);
   const g=totalRate()*dt; S.money+=g; S.earned+=g; S.last=now;
