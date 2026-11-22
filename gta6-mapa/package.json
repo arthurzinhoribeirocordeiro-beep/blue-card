@@ -1,0 +1,16 @@
+{
+  "name": "gta6-mapa",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Mapa de coletáveis com marcação rápida e conferência pelos troféus da PSN",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "demo": "node server.js --demo-psn"
+  },
+  "engines": { "node": ">=18" },
+  "dependencies": {
+    "leaflet": "1.9.4",
+    "psn-api": "2.18.1"
+  }
+}

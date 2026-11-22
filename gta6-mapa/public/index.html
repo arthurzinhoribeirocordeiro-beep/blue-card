@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0f1115">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>Mapa de Coletáveis</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icone.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="mapa" aria-label="Mapa"></div>
+
+  <!-- botão do menu (celular) -->
+  <button id="abrirMenu" class="flutuante topo-esq" aria-label="Abrir menu">☰ <span id="resumoTopo">0/0</span></button>
+
+  <!-- barra lateral -->
+  <aside id="lateral" aria-label="Filtros">
+    <header class="lat-topo">
+      <div class="lat-titulo">
+        <h1 id="nomeMapa">Mapa de Coletáveis</h1>
+        <button id="fecharMenu" class="icone-btn so-celular" aria-label="Fechar menu">✕</button>
+      </div>
+      <div class="progresso-total">
+        <div class="barra"><div id="barraTotal"></div></div>
+        <span id="textoTotal">0 / 0</span>
+      </div>
+    </header>
+
+    <nav class="abas" role="tablist">
+      <button role="tab" data-aba="filtros" class="ativa">Filtros</button>
+      <button role="tab" data-aba="lista">Lista</button>
+      <button role="tab" data-aba="psn">PSN <span id="psnBolinha" class="bolinha" hidden></span></button>
+    </nav>
+
+    <section id="aba-filtros" class="aba-conteudo">
+      <div class="linha-botoes">
+        <button id="mostrarTodos" class="btn">Mostrar todos</button>
+        <button id="esconderTodos" class="btn">Esconder todos</button>
+      </div>
+      <label class="chave">
+        <input type="checkbox" id="esconderEncontrados">
+        <span class="trilho"></span>
+        <span>Esconder os que já peguei</span>
+      </label>
+      <div id="grupos"></div>
+    </section>
+
+    <section id="aba-lista" class="aba-conteudo" hidden>
+      <input id="busca" type="search" class="campo" placeholder="Buscar coletável…" autocomplete="off">
+      <label class="chave pequena">
+        <input type="checkbox" id="listaSoFaltando">
+        <span class="trilho"></span>
+        <span>Só os que faltam</span>
+      </label>
+      <div id="lista"></div>
+    </section>
+
+    <section id="aba-psn" class="aba-conteudo" hidden>
+      <div id="psn"></div>
+    </section>
+
+    <footer class="lat-rodape">
+      <button id="abrirConfig" class="btn largo">⚙ Configurações e edição</button>
+    </footer>
+  </aside>
+  <div id="fundoMenu" hidden></div>
+
+  <!-- controles de baixo -->
+  <div id="barraBaixo">
+    <button id="toqueRapido" class="pilula" aria-pressed="true">
+      <span class="pilula-icone">⚡</span>
+      <span class="pilula-texto"><b>Toque rápido</b><small id="toqueRapidoDica">tocou, marcou</small></span>
+    </button>
+  </div>
+
+  <div id="faixaEdicao" hidden>
+    <span>✏️ <b>Modo edição</b> — toque no mapa para adicionar. Arraste para mover.</span>
+    <button id="sairEdicao" class="btn pequeno">Concluir</button>
+  </div>
+
+  <div id="avisos" aria-live="polite"></div>
+
+  <!-- painel de baixo (detalhes / edição de um coletável) -->
+  <div id="painel" class="painel" hidden>
+    <div class="painel-alca"></div>
+    <div id="painelConteudo"></div>
+  </div>
+
+  <!-- janela central -->
+  <div id="janelaFundo" hidden>
+    <div id="janela" role="dialog" aria-modal="true"></div>
+  </div>
+
+  <input type="file" id="arquivoImagem" accept="image/jpeg,image/png,image/webp" hidden>
+  <input type="file" id="arquivoJson" accept="application/json,.json" hidden>
+
+  <script src="/vendor/leaflet/leaflet.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

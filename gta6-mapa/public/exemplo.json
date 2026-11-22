@@ -1,0 +1,551 @@
+{
+ "versao": 1,
+ "nome": "Exemplo fictício (não é o mapa real)",
+ "grupos": [
+  {
+   "id": "colecionaveis",
+   "nome": "Coletáveis"
+  },
+  {
+   "id": "atividades",
+   "nome": "Atividades"
+  },
+  {
+   "id": "locais",
+   "nome": "Locais"
+  }
+ ],
+ "categorias": [
+  {
+   "id": "reliquias",
+   "nome": "Relíquias",
+   "icone": "🏺",
+   "cor": "#f5b041",
+   "grupo": "colecionaveis"
+  },
+  {
+   "id": "fotos",
+   "nome": "Pontos de foto",
+   "icone": "📷",
+   "cor": "#5dade2",
+   "grupo": "colecionaveis"
+  },
+  {
+   "id": "pacotes",
+   "nome": "Pacotes escondidos",
+   "icone": "📦",
+   "cor": "#af7ac5",
+   "grupo": "colecionaveis"
+  },
+  {
+   "id": "corridas",
+   "nome": "Corridas de rua",
+   "icone": "🏁",
+   "cor": "#ec7063",
+   "grupo": "atividades"
+  },
+  {
+   "id": "missoes",
+   "nome": "Missões secundárias",
+   "icone": "⭐",
+   "cor": "#f4d03f",
+   "grupo": "atividades"
+  },
+  {
+   "id": "lojas",
+   "nome": "Lojas de roupa",
+   "icone": "👕",
+   "cor": "#48c9b0",
+   "grupo": "locais"
+  },
+  {
+   "id": "garagens",
+   "nome": "Garagens",
+   "icone": "🚗",
+   "cor": "#a6acaf",
+   "grupo": "locais"
+  }
+ ],
+ "itens": [
+  {
+   "id": "reliquias-1",
+   "categoria": "reliquias",
+   "x": 0.2548,
+   "y": 0.7143,
+   "nome": "Relíquia 1",
+   "descricao": "No meio do mato, ao lado da pedra grande."
+  },
+  {
+   "id": "reliquias-2",
+   "categoria": "reliquias",
+   "x": 0.6013,
+   "y": 0.7339,
+   "nome": "Relíquia 2",
+   "descricao": "No meio do mato, ao lado da pedra grande."
+  },
+  {
+   "id": "reliquias-3",
+   "categoria": "reliquias",
+   "x": 0.8358,
+   "y": 0.3392,
+   "nome": "Relíquia 3",
+   "descricao": "Embaixo do píer."
+  },
+  {
+   "id": "reliquias-4",
+   "categoria": "reliquias",
+   "x": 0.5731,
+   "y": 0.6905,
+   "nome": "Relíquia 4",
+   "descricao": "Atrás do galpão abandonado."
+  },
+  {
+   "id": "reliquias-5",
+   "categoria": "reliquias",
+   "x": 0.7854,
+   "y": 0.3656,
+   "nome": "Relíquia 5",
+   "descricao": ""
+  },
+  {
+   "id": "reliquias-6",
+   "categoria": "reliquias",
+   "x": 0.4484,
+   "y": 0.8616,
+   "nome": "Relíquia 6",
+   "descricao": "Na varanda da casa azul."
+  },
+  {
+   "id": "reliquias-7",
+   "categoria": "reliquias",
+   "x": 0.8182,
+   "y": 0.363,
+   "nome": "Relíquia 7",
+   "descricao": ""
+  },
+  {
+   "id": "reliquias-8",
+   "categoria": "reliquias",
+   "x": 0.3346,
+   "y": 0.7962,
+   "nome": "Relíquia 8",
+   "descricao": "Dentro do posto, no balcão."
+  },
+  {
+   "id": "reliquias-9",
+   "categoria": "reliquias",
+   "x": 0.3105,
+   "y": 0.4856,
+   "nome": "Relíquia 9",
+   "descricao": "Embaixo do píer."
+  },
+  {
+   "id": "reliquias-10",
+   "categoria": "reliquias",
+   "x": 0.7926,
+   "y": 0.8334,
+   "nome": "Relíquia 10",
+   "descricao": ""
+  },
+  {
+   "id": "reliquias-11",
+   "categoria": "reliquias",
+   "x": 0.295,
+   "y": 0.5861,
+   "nome": "Relíquia 11",
+   "descricao": "No meio do mato, ao lado da pedra grande."
+  },
+  {
+   "id": "reliquias-12",
+   "categoria": "reliquias",
+   "x": 0.3402,
+   "y": 0.665,
+   "nome": "Relíquia 12",
+   "descricao": ""
+  },
+  {
+   "id": "fotos-1",
+   "categoria": "fotos",
+   "x": 0.226,
+   "y": 0.4683,
+   "nome": "Ponto de foto 1",
+   "descricao": "Embaixo do píer."
+  },
+  {
+   "id": "fotos-2",
+   "categoria": "fotos",
+   "x": 0.3913,
+   "y": 0.4128,
+   "nome": "Ponto de foto 2",
+   "descricao": "No meio do mato, ao lado da pedra grande."
+  },
+  {
+   "id": "fotos-3",
+   "categoria": "fotos",
+   "x": 0.7824,
+   "y": 0.3508,
+   "nome": "Ponto de foto 3",
+   "descricao": "Na varanda da casa azul."
+  },
+  {
+   "id": "fotos-4",
+   "categoria": "fotos",
+   "x": 0.7999,
+   "y": 0.2612,
+   "nome": "Ponto de foto 4",
+   "descricao": "Na varanda da casa azul."
+  },
+  {
+   "id": "fotos-5",
+   "categoria": "fotos",
+   "x": 0.7573,
+   "y": 0.8266,
+   "nome": "Ponto de foto 5",
+   "descricao": "Embaixo do píer."
+  },
+  {
+   "id": "fotos-6",
+   "categoria": "fotos",
+   "x": 0.3444,
+   "y": 0.4113,
+   "nome": "Ponto de foto 6",
+   "descricao": "Dentro do posto, no balcão."
+  },
+  {
+   "id": "fotos-7",
+   "categoria": "fotos",
+   "x": 0.767,
+   "y": 0.1734,
+   "nome": "Ponto de foto 7",
+   "descricao": "Atrás do galpão abandonado."
+  },
+  {
+   "id": "fotos-8",
+   "categoria": "fotos",
+   "x": 0.7184,
+   "y": 0.8024,
+   "nome": "Ponto de foto 8",
+   "descricao": "No telhado, suba pela escada dos fundos."
+  },
+  {
+   "id": "fotos-9",
+   "categoria": "fotos",
+   "x": 0.4995,
+   "y": 0.2647,
+   "nome": "Ponto de foto 9",
+   "descricao": ""
+  },
+  {
+   "id": "fotos-10",
+   "categoria": "fotos",
+   "x": 0.7209,
+   "y": 0.8372,
+   "nome": "Ponto de foto 10",
+   "descricao": "Perto da placa da rodovia."
+  },
+  {
+   "id": "pacotes-1",
+   "categoria": "pacotes",
+   "x": 0.7155,
+   "y": 0.2285,
+   "nome": "Pacote 1",
+   "descricao": ""
+  },
+  {
+   "id": "pacotes-2",
+   "categoria": "pacotes",
+   "x": 0.7043,
+   "y": 0.6441,
+   "nome": "Pacote 2",
+   "descricao": ""
+  },
+  {
+   "id": "pacotes-3",
+   "categoria": "pacotes",
+   "x": 0.5548,
+   "y": 0.3624,
+   "nome": "Pacote 3",
+   "descricao": "Embaixo do píer."
+  },
+  {
+   "id": "pacotes-4",
+   "categoria": "pacotes",
+   "x": 0.6124,
+   "y": 0.6925,
+   "nome": "Pacote 4",
+   "descricao": "Dentro do barco encalhado."
+  },
+  {
+   "id": "pacotes-5",
+   "categoria": "pacotes",
+   "x": 0.5602,
+   "y": 0.8387,
+   "nome": "Pacote 5",
+   "descricao": "Atrás do galpão abandonado."
+  },
+  {
+   "id": "pacotes-6",
+   "categoria": "pacotes",
+   "x": 0.7623,
+   "y": 0.6794,
+   "nome": "Pacote 6",
+   "descricao": "Dentro do barco encalhado."
+  },
+  {
+   "id": "pacotes-7",
+   "categoria": "pacotes",
+   "x": 0.7576,
+   "y": 0.6751,
+   "nome": "Pacote 7",
+   "descricao": "Perto da placa da rodovia."
+  },
+  {
+   "id": "pacotes-8",
+   "categoria": "pacotes",
+   "x": 0.7929,
+   "y": 0.7125,
+   "nome": "Pacote 8",
+   "descricao": "Na varanda da casa azul."
+  },
+  {
+   "id": "pacotes-9",
+   "categoria": "pacotes",
+   "x": 0.7455,
+   "y": 0.3163,
+   "nome": "Pacote 9",
+   "descricao": "Perto da placa da rodovia."
+  },
+  {
+   "id": "pacotes-10",
+   "categoria": "pacotes",
+   "x": 0.2477,
+   "y": 0.6504,
+   "nome": "Pacote 10",
+   "descricao": "No telhado, suba pela escada dos fundos."
+  },
+  {
+   "id": "pacotes-11",
+   "categoria": "pacotes",
+   "x": 0.4767,
+   "y": 0.7463,
+   "nome": "Pacote 11",
+   "descricao": ""
+  },
+  {
+   "id": "pacotes-12",
+   "categoria": "pacotes",
+   "x": 0.2398,
+   "y": 0.4995,
+   "nome": "Pacote 12",
+   "descricao": "No telhado, suba pela escada dos fundos."
+  },
+  {
+   "id": "pacotes-13",
+   "categoria": "pacotes",
+   "x": 0.8015,
+   "y": 0.2754,
+   "nome": "Pacote 13",
+   "descricao": "No meio do mato, ao lado da pedra grande."
+  },
+  {
+   "id": "pacotes-14",
+   "categoria": "pacotes",
+   "x": 0.7537,
+   "y": 0.3227,
+   "nome": "Pacote 14",
+   "descricao": "Atrás do galpão abandonado."
+  },
+  {
+   "id": "pacotes-15",
+   "categoria": "pacotes",
+   "x": 0.4667,
+   "y": 0.3141,
+   "nome": "Pacote 15",
+   "descricao": "Dentro do barco encalhado."
+  },
+  {
+   "id": "corridas-1",
+   "categoria": "corridas",
+   "x": 0.2709,
+   "y": 0.6613,
+   "nome": "Corrida 1",
+   "descricao": "Perto da placa da rodovia."
+  },
+  {
+   "id": "corridas-2",
+   "categoria": "corridas",
+   "x": 0.6146,
+   "y": 0.7854,
+   "nome": "Corrida 2",
+   "descricao": ""
+  },
+  {
+   "id": "corridas-3",
+   "categoria": "corridas",
+   "x": 0.8022,
+   "y": 0.8317,
+   "nome": "Corrida 3",
+   "descricao": ""
+  },
+  {
+   "id": "corridas-4",
+   "categoria": "corridas",
+   "x": 0.5519,
+   "y": 0.3449,
+   "nome": "Corrida 4",
+   "descricao": "Perto da placa da rodovia."
+  },
+  {
+   "id": "corridas-5",
+   "categoria": "corridas",
+   "x": 0.763,
+   "y": 0.8156,
+   "nome": "Corrida 5",
+   "descricao": "Dentro do barco encalhado."
+  },
+  {
+   "id": "corridas-6",
+   "categoria": "corridas",
+   "x": 0.2673,
+   "y": 0.7738,
+   "nome": "Corrida 6",
+   "descricao": ""
+  },
+  {
+   "id": "missoes-1",
+   "categoria": "missoes",
+   "x": 0.7123,
+   "y": 0.5466,
+   "nome": "Missão 1",
+   "descricao": "No telhado, suba pela escada dos fundos."
+  },
+  {
+   "id": "missoes-2",
+   "categoria": "missoes",
+   "x": 0.5057,
+   "y": 0.2896,
+   "nome": "Missão 2",
+   "descricao": "Atrás do galpão abandonado."
+  },
+  {
+   "id": "missoes-3",
+   "categoria": "missoes",
+   "x": 0.5338,
+   "y": 0.5826,
+   "nome": "Missão 3",
+   "descricao": "Perto da placa da rodovia."
+  },
+  {
+   "id": "missoes-4",
+   "categoria": "missoes",
+   "x": 0.6866,
+   "y": 0.7323,
+   "nome": "Missão 4",
+   "descricao": "Dentro do posto, no balcão."
+  },
+  {
+   "id": "missoes-5",
+   "categoria": "missoes",
+   "x": 0.6089,
+   "y": 0.492,
+   "nome": "Missão 5",
+   "descricao": ""
+  },
+  {
+   "id": "missoes-6",
+   "categoria": "missoes",
+   "x": 0.8462,
+   "y": 0.8118,
+   "nome": "Missão 6",
+   "descricao": "No meio do mato, ao lado da pedra grande."
+  },
+  {
+   "id": "missoes-7",
+   "categoria": "missoes",
+   "x": 0.3805,
+   "y": 0.5377,
+   "nome": "Missão 7",
+   "descricao": "Perto da placa da rodovia."
+  },
+  {
+   "id": "missoes-8",
+   "categoria": "missoes",
+   "x": 0.5819,
+   "y": 0.6655,
+   "nome": "Missão 8",
+   "descricao": "Na varanda da casa azul."
+  },
+  {
+   "id": "lojas-1",
+   "categoria": "lojas",
+   "x": 0.9098,
+   "y": 0.3121,
+   "nome": "Loja 1",
+   "descricao": "Dentro do barco encalhado."
+  },
+  {
+   "id": "lojas-2",
+   "categoria": "lojas",
+   "x": 0.8431,
+   "y": 0.6663,
+   "nome": "Loja 2",
+   "descricao": "Embaixo do píer."
+  },
+  {
+   "id": "lojas-3",
+   "categoria": "lojas",
+   "x": 0.8851,
+   "y": 0.2938,
+   "nome": "Loja 3",
+   "descricao": "Dentro do barco encalhado."
+  },
+  {
+   "id": "lojas-4",
+   "categoria": "lojas",
+   "x": 0.4035,
+   "y": 0.8228,
+   "nome": "Loja 4",
+   "descricao": "No meio do mato, ao lado da pedra grande."
+  },
+  {
+   "id": "lojas-5",
+   "categoria": "lojas",
+   "x": 0.7295,
+   "y": 0.8197,
+   "nome": "Loja 5",
+   "descricao": "Perto da placa da rodovia."
+  },
+  {
+   "id": "garagens-1",
+   "categoria": "garagens",
+   "x": 0.24,
+   "y": 0.6077,
+   "nome": "Garagem 1",
+   "descricao": "Embaixo do píer."
+  },
+  {
+   "id": "garagens-2",
+   "categoria": "garagens",
+   "x": 0.8509,
+   "y": 0.7082,
+   "nome": "Garagem 2",
+   "descricao": "Na varanda da casa azul."
+  },
+  {
+   "id": "garagens-3",
+   "categoria": "garagens",
+   "x": 0.6955,
+   "y": 0.6985,
+   "nome": "Garagem 3",
+   "descricao": ""
+  },
+  {
+   "id": "garagens-4",
+   "categoria": "garagens",
+   "x": 0.2044,
+   "y": 0.4619,
+   "nome": "Garagem 4",
+   "descricao": "Atrás do galpão abandonado."
+  }
+ ]
+}

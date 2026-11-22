@@ -1,0 +1,9 @@
+node_modules/
+# seu progresso, seu token da PSN e a imagem do mapa ficam só no seu PC
+dados/progresso.json
+dados/.psn-token
+dados/*.tmp
+dados/mapa.jpg
+dados/mapa.jpeg
+dados/mapa.png
+dados/mapa.webp
