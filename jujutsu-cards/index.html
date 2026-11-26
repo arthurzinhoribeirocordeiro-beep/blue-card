@@ -2,7 +2,12 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b0714">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="JJK Cards">
 <title>Jujutsu Cards</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,99 +17,106 @@
   --bg:#0b0714; --panel:#150e26; --panel2:#1d1433; --line:#2e2250;
   --text:#efe9ff; --muted:#9a8fbf; --accent:#7b5cff; --cursed:#3fd0ff; --money:#5dff9a;
   --rB:#8fa3b8; --rA:#3fa9ff; --rS:#b45cff; --rSS:#ffb020; --rSSP:#ff2e4d;
+  --sat:env(safe-area-inset-top,0px); --sab:env(safe-area-inset-bottom,0px);
+  --tabh:64px; --hdrh:56px;
 }
-*{box-sizing:border-box}
-html,body{margin:0}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+html,body{margin:0; height:100%; overscroll-behavior:none}
 body{
-  font-family:Nunito,system-ui,sans-serif; color:var(--text); min-height:100vh;
+  font-family:Nunito,system-ui,sans-serif; color:var(--text); background:#05030a;
+  -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; touch-action:manipulation;
+  -webkit-text-size-adjust:100%;
+}
+button{font:inherit; cursor:pointer; border:0; border-radius:14px; color:var(--text); touch-action:manipulation; transition:transform .08s}
+button:active:not(:disabled){transform:scale(.96)}
+button:disabled{opacity:.4; cursor:not-allowed}
+
+/* ---------- app frame (celular no centro em telas grandes) ---------- */
+#app{
+  position:relative; max-width:520px; margin:0 auto; min-height:100%;
   background:
-    radial-gradient(1200px 600px at 80% -10%, #3a1d6e55, transparent 60%),
-    radial-gradient(900px 500px at -10% 110%, #0b4d6e44, transparent 60%),
+    radial-gradient(600px 400px at 100% -5%, #3a1d6e66, transparent 60%),
+    radial-gradient(500px 400px at -20% 100%, #0b4d6e44, transparent 60%),
     var(--bg);
 }
-button{font:inherit; cursor:pointer; border:0; border-radius:10px; color:var(--text)}
-button:disabled{opacity:.45; cursor:not-allowed}
-.btn{background:var(--panel2); border:1px solid var(--line); padding:8px 12px; font-weight:700}
-.btn:hover:not(:disabled){border-color:var(--accent)}
-.btn.primary{background:linear-gradient(135deg,#7b5cff,#3fd0ff); border:0; color:#0b0714}
-.btn.danger{background:#3a1020; border-color:#6a1d33}
+@media (min-width:560px){ #app{border-left:1px solid var(--line); border-right:1px solid var(--line); box-shadow:0 0 80px #0008} }
 
-/* ---------- header ---------- */
-header{
-  position:sticky; top:0; z-index:20; display:flex; flex-wrap:wrap; align-items:center; gap:12px;
-  padding:10px 16px; background:#0b0714e6; backdrop-filter:blur(8px); border-bottom:1px solid var(--line);
+/* ---------- top bar ---------- */
+.top{
+  position:sticky; top:0; z-index:30; padding:calc(var(--sat) + 8px) 12px 8px;
+  display:flex; align-items:center; gap:10px; background:#0b0714ee; backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
 }
-.logo{font-family:Bangers; font-size:30px; letter-spacing:1px; line-height:1;
-  background:linear-gradient(90deg,#3fd0ff,#b45cff,#ff2e4d); -webkit-background-clip:text; background-clip:text; color:transparent}
-.logo small{display:block; font-family:Nunito; font-size:11px; color:var(--muted); letter-spacing:3px; -webkit-text-fill-color:var(--muted)}
-.money{margin-left:auto; text-align:right}
-.money b{font-family:Bangers; font-size:32px; color:var(--money); letter-spacing:1px; text-shadow:0 0 14px #5dff9a55}
-.money small{display:block; color:var(--muted); font-size:12px}
-.hbtns{display:flex; gap:8px; flex-wrap:wrap}
+.logo{width:40px; height:40px; border-radius:12px; display:grid; place-items:center; flex:none; font-weight:900; font-size:22px;
+  background:linear-gradient(135deg,#3fd0ff,#7b5cff 50%,#ff2e4d); color:#0b0714}
+.wallet{flex:1; min-width:0; line-height:1}
+.wallet b{font-family:Bangers; font-size:30px; color:var(--money); letter-spacing:.5px; text-shadow:0 0 14px #5dff9a44; display:block}
+.wallet small{color:var(--muted); font-size:12px; font-weight:700}
+.chip{display:flex; align-items:center; gap:6px; padding:8px 10px; background:var(--panel2); border:1px solid var(--line); border-radius:12px; font-weight:800; font-size:13px; min-height:40px}
+.iconbtn{width:40px; height:40px; padding:0; display:grid; place-items:center; background:var(--panel2); border:1px solid var(--line); font-size:18px; flex:none}
+.restock-line{position:absolute; left:0; bottom:-1px; height:2px; background:linear-gradient(90deg,#3fd0ff,#7b5cff); transition:width .2s linear}
 
-/* ---------- layout ---------- */
-.layout{display:grid; grid-template-columns:390px 1fr; gap:16px; padding:16px; max-width:1500px; margin:0 auto}
-@media (max-width:900px){ .layout{grid-template-columns:1fr; padding:12px} header{padding:10px 12px} }
-@media (max-width:600px){
-  header{gap:8px} .logo{font-size:24px} .money b{font-size:26px}
-  .hbtns{order:3; width:100%} .hbtns .btn{padding:6px 9px; font-size:12px}
+/* ---------- views ---------- */
+main{padding:12px 12px calc(var(--tabh) + var(--sab) + 84px)}
+.view{display:none; animation:vin .2s}
+.view.on{display:block}
+@keyframes vin{from{opacity:0; transform:translateY(6px)}}
+.vh{display:flex; align-items:baseline; gap:8px; margin:2px 2px 10px}
+.vh h2{font-family:Bangers; font-weight:400; letter-spacing:1px; font-size:26px; margin:0}
+.vh span{margin-left:auto; color:var(--muted); font-size:13px; font-weight:700}
+.hint{color:var(--muted); font-size:13px; margin:-4px 2px 12px}
+
+/* ---------- tab bar ---------- */
+.tabbar{
+  position:fixed; z-index:40; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:520px;
+  display:grid; grid-template-columns:repeat(4,1fr); background:#0e0920f2; backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+  border-top:1px solid var(--line); padding-bottom:var(--sab);
 }
-.panel{background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:14px}
-.panel h2{font-family:Bangers; letter-spacing:1px; font-weight:400; font-size:24px; margin:0 0 4px; display:flex; align-items:center; gap:8px; flex-wrap:wrap}
-.panel h2 .sub{font-family:Nunito; font-size:13px; color:var(--muted); margin-left:auto; letter-spacing:0}
-.hint{color:var(--muted); font-size:13px; margin:0 0 12px}
-.col{display:flex; flex-direction:column; gap:16px; min-width:0}
+.tab{background:none; border-radius:0; height:var(--tabh); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; color:var(--muted); font-size:11px; font-weight:800; position:relative}
+.tab i{font-style:normal; font-size:23px; line-height:1; filter:grayscale(.7); transition:transform .15s}
+.tab.on{color:var(--text)}
+.tab.on i{filter:none; transform:translateY(-2px) scale(1.1)}
+.tab.on::before{content:''; position:absolute; top:0; left:28%; right:28%; height:3px; border-radius:0 0 4px 4px; background:linear-gradient(90deg,#3fd0ff,#7b5cff)}
+.tbadge{position:absolute; top:7px; left:calc(50% + 8px); min-width:18px; height:18px; padding:0 5px; border-radius:9px; background:var(--accent); color:#fff; font-size:11px; font-weight:900; display:none; place-items:center; line-height:18px}
+.tbadge.show{display:grid}
+.tbadge.hot{background:#ff2e4d; animation:pulse 1s infinite}
+@keyframes pulse{50%{transform:scale(1.15)}}
 
-/* ---------- shop ---------- */
-.restock{display:flex; align-items:center; gap:10px; margin-bottom:12px; font-size:13px; color:var(--muted)}
-.bar{flex:1; height:8px; background:#0006; border-radius:6px; overflow:hidden}
-.bar i{display:block; height:100%; background:linear-gradient(90deg,#3fd0ff,#7b5cff)}
-.pack{
-  --pc:#555; display:grid; grid-template-columns:58px 1fr auto; gap:10px; align-items:center;
-  padding:10px; border-radius:14px; margin-bottom:10px; border:1px solid color-mix(in srgb,var(--pc) 55%, transparent);
-  background:linear-gradient(120deg, color-mix(in srgb,var(--pc) 28%, transparent), transparent 70%), var(--panel2);
-}
-.pack.empty{filter:grayscale(.85); opacity:.6}
-.pack-art{width:58px; height:74px; border-radius:10px; display:grid; place-items:center; font-size:30px;
-  background:linear-gradient(160deg,var(--pc),#000); box-shadow:0 0 14px color-mix(in srgb,var(--pc) 60%, transparent); position:relative}
-.pack-art::after{content:'呪'; position:absolute; bottom:2px; right:5px; font-size:12px; opacity:.6}
-.pack-name{font-weight:900}
-.pack-odds{font-size:11px; display:flex; flex-wrap:wrap; gap:4px; margin:4px 0}
-.pack-odds span{padding:0 5px; border-radius:5px; background:#0005; border:1px solid currentColor}
-.pack-stock{font-size:11px; color:var(--muted)}
-.pack-stock b{color:var(--text)}
-.buy{background:linear-gradient(135deg,#2ad17a,#13a35a); color:#04130b; font-weight:900; padding:10px 12px; min-width:76px}
+/* ---------- bottom action bar (por cima da tabbar) ---------- */
+.actbar{position:fixed; z-index:35; left:50%; transform:translateX(-50%); width:100%; max-width:520px; bottom:calc(var(--tabh) + var(--sab)); padding:10px 12px;
+  display:none; gap:10px; background:linear-gradient(transparent,#0b0714 35%)}
+.actbar.on{display:flex}
+.big{flex:1; min-height:52px; font-weight:900; font-size:16px; padding:0 14px; display:flex; align-items:center; justify-content:center; gap:6px}
+.big.primary{background:linear-gradient(135deg,#7b5cff,#3fd0ff); color:#0b0714}
+.big.money{background:linear-gradient(135deg,#2ad17a,#13a35a); color:#04130b}
+.big.ghost{background:var(--panel2); border:1px solid var(--line)}
+.big.danger{background:#ff2e4d; color:#fff}
 
-/* ---------- rarity colors ---------- */
+/* ---------- rarity ---------- */
 .r-B{--rc:var(--rB)} .r-A{--rc:var(--rA)} .r-S{--rc:var(--rS)} .r-SS{--rc:var(--rSS)} .r-SSP{--rc:var(--rSSP)}
 .t-B{color:var(--rB)} .t-A{color:var(--rA)} .t-S{color:var(--rS)} .t-SS{color:var(--rSS)} .t-SSP{color:var(--rSSP)}
 
-/* ---------- cards ---------- */
+/* ---------- cards (tamanho relativo à largura da carta) ---------- */
 .card{
-  --cc:#666; width:120px; aspect-ratio:3/4.2; border-radius:12px; position:relative; flex:none;
-  background:linear-gradient(160deg,#1a1230,#0d0818); border:3px solid var(--rc);
-  box-shadow:0 0 12px color-mix(in srgb,var(--rc) 45%, transparent);
-  overflow:hidden; display:flex; flex-direction:column; user-select:none;
+  --cc:#666; container-type:inline-size; width:100%; aspect-ratio:3/4.2; border-radius:10px; position:relative;
+  background:linear-gradient(160deg,#1a1230,#0d0818); border:2px solid var(--rc);
+  box-shadow:0 0 10px color-mix(in srgb,var(--rc) 40%, transparent);
+  overflow:hidden; display:flex; flex-direction:column;
 }
+.card.big{border-width:4px; border-radius:16px}
 .card .art{flex:1; position:relative; display:grid; place-items:center; overflow:hidden;
   background:radial-gradient(circle at 50% 50%, color-mix(in srgb,var(--cc) 85%, transparent) 0%, transparent 68%), linear-gradient(180deg,#0000,#0008)}
-.card .art::before{content:'呪'; position:absolute; font-size:110px; font-weight:900; opacity:.07; line-height:1}
-.card .emo{font-size:48px; filter:drop-shadow(0 4px 8px #000a); position:relative}
+.card .art::before{content:'呪'; position:absolute; font-size:90cqw; font-weight:900; opacity:.07; line-height:1}
+.card .emo{font-size:40cqw; line-height:1; filter:drop-shadow(0 4px 8px #000a); position:relative}
 .card .art img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover}
-.card .badge{position:absolute; top:4px; left:4px; font-family:Bangers; font-size:15px; letter-spacing:.5px;
-  background:var(--rc); color:#0b0714; padding:1px 6px; border-radius:6px; z-index:2}
-.card .vtag{position:absolute; bottom:3px; left:3px; right:3px; text-align:center; font-size:9px; font-weight:900;
-  border-radius:5px; padding:1px 2px; z-index:2}
-.card .name{font-weight:900; font-size:12px; text-align:center; padding:4px 4px 0; line-height:1.1; min-height:28px; display:grid; place-items:center}
-.card .inc{font-size:11px; color:var(--money); text-align:center; padding:1px 0 5px; font-weight:700}
-.card.sm{width:86px; border-width:2px; border-radius:10px}
-.card.sm .emo{font-size:32px} .card.sm .name{font-size:10px; min-height:24px} .card.sm .badge{font-size:12px} .card.sm .inc{font-size:10px}
-.card.sm .art::before{font-size:70px}
-.card.lg{width:190px; border-width:4px} .card.lg .emo{font-size:82px} .card.lg .name{font-size:16px; min-height:40px} .card.lg .inc{font-size:14px} .card.lg .badge{font-size:20px}
-.card.lg .art::before{font-size:170px} .card.lg .vtag{font-size:12px}
+.card .badge{position:absolute; top:3cqw; left:3cqw; font-family:Bangers; font-size:13cqw; line-height:1.15; letter-spacing:.5px;
+  background:var(--rc); color:#0b0714; padding:0 4cqw; border-radius:5cqw; z-index:2}
+.card .vtag{position:absolute; bottom:3cqw; left:3cqw; right:3cqw; text-align:center; font-size:8cqw; font-weight:900; border-radius:4cqw; padding:1px 2px; z-index:2; white-space:nowrap}
+.card .name{font-weight:900; font-size:10.5cqw; text-align:center; padding:3cqw 3cqw 0; line-height:1.1; min-height:26cqw; display:grid; place-items:center}
+.card .inc{font-size:9.5cqw; color:var(--money); text-align:center; padding:0 0 4cqw; font-weight:800}
 .card.r-SS{animation:glow 2.4s ease-in-out infinite}
 .card.r-SSP{animation:glow 1.4s ease-in-out infinite}
-@keyframes glow{50%{box-shadow:0 0 26px var(--rc), 0 0 4px #fff inset}}
+@keyframes glow{50%{box-shadow:0 0 22px var(--rc), 0 0 4px #fff inset}}
 .card.v-gold{border-color:#ffd54a; background:linear-gradient(160deg,#3a2c05,#120c00)}
 .card.v-gold .vtag{background:#ffd54a; color:#2a1d00}
 .card.v-gold::after{content:''; position:absolute; inset:0; pointer-events:none;
@@ -116,143 +128,222 @@ header{
   background:repeating-linear-gradient(60deg,transparent 0 14px,#ff1f3d55 14px 16px,transparent 16px 30px); animation:sparks .6s steps(3) infinite}
 @keyframes shine{from{background-position:150% 0}to{background-position:-100% 0}}
 @keyframes sparks{50%{opacity:.3; transform:translateX(3px)}}
-.cnt{position:absolute; top:4px; right:4px; z-index:3; background:#000c; border:1px solid var(--line); border-radius:8px; padding:0 6px; font-weight:900; font-size:12px}
-.new{position:absolute; top:-8px; right:-8px; z-index:5; background:#ff2e4d; color:#fff; font-family:Bangers; padding:2px 8px; border-radius:8px; transform:rotate(8deg); font-size:16px}
+.cnt{position:absolute; top:4px; right:4px; z-index:3; background:#000c; border:1px solid var(--line); border-radius:8px; padding:0 6px; font-weight:900; font-size:12px; line-height:18px}
+.newtag{position:absolute; top:-8px; right:-6px; z-index:5; background:#ff2e4d; color:#fff; font-family:Bangers; padding:2px 8px; border-radius:8px; transform:rotate(8deg); font-size:16px}
+.unknown .emo{filter:brightness(0) drop-shadow(0 0 1px #fff4)}
+.unknown .name,.unknown .inc{color:#5a4f80}
 
-/* ---------- podiums ---------- */
-.pods{display:grid; grid-template-columns:repeat(auto-fill,minmax(118px,1fr)); gap:14px 10px; align-items:end}
-.podium{position:relative; display:flex; flex-direction:column; align-items:center}
-.pod-top{height:142px; display:flex; align-items:flex-end; justify-content:center; cursor:pointer; padding-bottom:4px}
+/* ---------- base / pódios ---------- */
+.pods{display:grid; grid-template-columns:repeat(3,1fr); gap:16px 10px}
+.podium{display:flex; flex-direction:column; align-items:center; min-width:0}
+.pod-top{width:100%; display:flex; justify-content:center; padding:0 9% 4px}
 .pod-top .card{animation:bob 3s ease-in-out infinite}
 .pod-top .card.r-SS,.pod-top .card.r-SSP{animation:bob 3s ease-in-out infinite, glow 1.6s ease-in-out infinite}
-@keyframes bob{50%{transform:translateY(-7px)}}
-.pod-empty{width:86px; height:120px; border:2px dashed #4a3a80; border-radius:10px; display:grid; place-items:center; align-content:center; color:#6f5fb0; font-size:34px; line-height:1}
-.pod-empty small{font-size:11px; font-weight:700}
-.pod-top:hover .pod-empty{border-color:var(--accent); color:var(--accent)}
-.pod-base{--rc:#4a3a80; width:100%; background:linear-gradient(#3a2a66,#170f2e); cursor:pointer;
-  border-radius:50% 50% 10px 10px / 16px 16px 10px 10px; padding:12px 4px 8px; text-align:center; border-top:3px solid var(--rc)}
+@keyframes bob{50%{transform:translateY(-6px)}}
+.pod-empty{width:100%; aspect-ratio:3/4.2; border:2px dashed #4a3a80; border-radius:10px; display:grid; place-items:center; align-content:center; gap:4px; color:#8a7bd0; font-size:30px; line-height:1; background:#ffffff05}
+.pod-empty small{font-size:11px; font-weight:800}
+.pod-base{--rc:#4a3a80; width:100%; min-height:58px; background:linear-gradient(#3a2a66,#170f2e);
+  border-radius:50% 50% 12px 12px / 14px 14px 12px 12px; padding:12px 4px 7px; text-align:center; border-top:3px solid var(--rc); line-height:1.15}
 .podium.filled .pod-base{box-shadow:0 -8px 20px -8px var(--rc)}
-.pod-base b{display:block; color:var(--money); font-size:15px}
-.pod-base small{color:var(--muted); font-size:11px}
-.pod-x{position:absolute; top:0; right:4px; width:24px; height:24px; padding:0; background:#000a; border:1px solid var(--line); font-size:12px; z-index:4}
-.podium.locked .pod-top{cursor:default}
-.podium.locked .pod-empty{border-style:solid; border-color:#2a2048; color:#4a3f70}
-.podium.next .pod-empty{border-color:#5a4a20; color:#ffcf5a}
-.collect-all{margin-left:auto}
+.pod-base b{display:block; color:var(--money); font-size:16px; font-weight:900}
+.pod-base small{color:var(--muted); font-size:11px; font-weight:700}
+.pod-base.ready{animation:ready 1.2s ease-in-out infinite}
+@keyframes ready{50%{filter:brightness(1.35)}}
+.podium.lockednext .pod-empty{border-style:solid; border-color:#6a5420; color:#ffcf5a}
+.podium.lockednext .pod-base b{color:#ffcf5a}
+.upgrade{margin-top:18px; display:flex; align-items:center; gap:12px; padding:12px; border-radius:16px; background:var(--panel); border:1px solid var(--line)}
+.upgrade .ic{font-size:30px}
+.upgrade div{flex:1; min-width:0}
+.upgrade b{display:block}
+.upgrade small{color:var(--muted)}
+.upgrade button{min-height:44px; padding:0 14px; font-weight:900; background:linear-gradient(135deg,#2ad17a,#13a35a); color:#04130b}
 
-/* ---------- inventory ---------- */
-.inv{display:flex; flex-wrap:wrap; gap:10px}
-.inv .slot{position:relative; cursor:pointer; transition:transform .1s}
-.inv .slot:hover{transform:translateY(-3px)}
-.empty-msg{color:var(--muted); font-size:14px; padding:20px; text-align:center; width:100%}
-.inv-tools{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px}
+/* ---------- loja ---------- */
+.restock-card{display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:16px; margin-bottom:12px; background:var(--panel); border:1px solid var(--line)}
+.restock-card .clock{font-family:Bangers; font-size:32px; min-width:58px; text-align:center; color:var(--cursed)}
+.restock-card div{flex:1}
+.restock-card small{color:var(--muted); font-size:12px}
+.bar{height:8px; background:#0006; border-radius:6px; overflow:hidden; margin-top:6px}
+.bar i{display:block; height:100%; background:linear-gradient(90deg,#3fd0ff,#7b5cff); transition:width .2s linear}
+.pack{--pc:#555; padding:12px; border-radius:18px; margin-bottom:12px; border:1px solid color-mix(in srgb,var(--pc) 55%, transparent);
+  background:linear-gradient(120deg, color-mix(in srgb,var(--pc) 30%, transparent), transparent 70%), var(--panel2)}
+.pack.empty{filter:grayscale(.9); opacity:.55}
+.pack.instock.rare{box-shadow:0 0 22px color-mix(in srgb,var(--pc) 55%, transparent); animation:rarepulse 1.6s ease-in-out infinite}
+@keyframes rarepulse{50%{box-shadow:0 0 34px var(--pc)}}
+.pack-row{display:flex; gap:12px; align-items:center}
+.pack-art{width:56px; height:72px; border-radius:12px; display:grid; place-items:center; font-size:30px; flex:none;
+  background:linear-gradient(160deg,var(--pc),#000); box-shadow:0 0 14px color-mix(in srgb,var(--pc) 60%, transparent); position:relative}
+.pack-art::after{content:'呪'; position:absolute; bottom:2px; right:5px; font-size:12px; opacity:.6}
+.pack-name{font-weight:900; font-size:16px}
+.pack-stock{font-size:12px; color:var(--muted); margin-top:2px}
+.pack-stock b{color:var(--text)}
+.stock-pill{display:inline-block; padding:1px 8px; border-radius:20px; background:#2ad17a22; color:#5dff9a; font-weight:900}
+.stock-pill.out{background:#ff2e4d22; color:#ff6a80}
+.pack-odds{font-size:11.5px; display:flex; flex-wrap:wrap; gap:5px; margin:10px 0}
+.pack-odds span{padding:2px 7px; border-radius:7px; background:#0005; border:1px solid currentColor; font-weight:800}
+.buy{width:100%; min-height:50px; font-weight:900; font-size:17px; background:linear-gradient(135deg,#2ad17a,#13a35a); color:#04130b}
+.buy.cant{background:var(--panel); color:var(--muted); border:1px solid var(--line)}
 
-/* ---------- modal ---------- */
-.modal{position:fixed; inset:0; z-index:100; background:#05020cdd; display:none; align-items:center; justify-content:center; padding:16px}
-.modal.open{display:flex}
-.mbox{background:var(--panel); border:1px solid var(--line); border-radius:18px; padding:18px; max-width:min(960px,100%); max-height:92vh; overflow:auto; position:relative; width:100%}
-.mbox.narrow{max-width:420px}
-.mclose{position:absolute; top:10px; right:10px; width:34px; height:34px; padding:0; background:var(--panel2); border:1px solid var(--line)}
-.mbox h3{font-family:Bangers; font-weight:400; font-size:28px; letter-spacing:1px; margin:0 0 10px}
-.detail{display:flex; gap:16px; flex-wrap:wrap; align-items:flex-start; justify-content:center}
-.detail .info{flex:1; min-width:180px}
-.detail .info p{margin:4px 0; color:var(--muted)}
-.detail .info p b{color:var(--text)}
-.actions{display:flex; flex-direction:column; gap:8px; margin-top:12px}
-.pick{display:flex; flex-wrap:wrap; gap:10px; justify-content:center}
-.pick .slot{position:relative; cursor:pointer}
+/* ---------- inventário ---------- */
+.chips{display:flex; gap:8px; overflow-x:auto; padding:2px 2px 10px; margin:0 -12px 2px; padding-left:14px; padding-right:14px; scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.fchip{flex:none; min-height:38px; padding:0 14px; border-radius:20px; background:var(--panel2); border:1px solid var(--line); font-weight:900; font-size:14px}
+.fchip.on{background:var(--text); color:#0b0714; border-color:var(--text)}
+.grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px}
+.slot{position:relative; min-width:0}
+.empty-msg{color:var(--muted); font-size:15px; padding:40px 20px; text-align:center; grid-column:1/-1}
+.empty-msg .e{font-size:44px; display:block; margin-bottom:8px}
+.linkbtn{background:none; color:var(--cursed); font-weight:800; padding:8px; font-size:14px}
 
-/* ---------- pack opening ---------- */
-.opening{text-align:center}
-.bigpack{width:170px; height:230px; margin:20px auto; border-radius:18px; display:grid; place-items:center; font-size:80px; cursor:pointer;
-  background:linear-gradient(160deg,var(--pc),#000); box-shadow:0 0 40px var(--pc); animation:shake .5s ease-in-out infinite; position:relative}
-.bigpack::after{content:'呪'; position:absolute; bottom:10px; right:14px; font-size:30px; opacity:.6}
+/* ---------- coleção ---------- */
+.dexhead{padding:14px; border-radius:16px; background:var(--panel); border:1px solid var(--line); margin-bottom:14px}
+.dexhead b{font-family:Bangers; font-size:28px; letter-spacing:1px}
+.dexhead p{margin:4px 0 0; color:var(--muted); font-size:13px}
+.tier{margin-bottom:18px}
+.tier h4{font-family:Bangers; font-weight:400; font-size:22px; letter-spacing:1px; margin:0 0 8px; display:flex; align-items:center; gap:8px}
+.tier h4 .bar{flex:1; margin:0}
+.tier h4 small{font-family:Nunito; font-size:12px; color:var(--muted)}
+.grid4{display:grid; grid-template-columns:repeat(4,1fr); gap:8px}
+
+/* ---------- bottom sheet ---------- */
+.sheet-wrap{position:fixed; inset:0; z-index:100; background:#05020c00; pointer-events:none; transition:background .25s}
+.sheet-wrap.open{background:#05020cc4; pointer-events:auto}
+.sheet{position:absolute; left:50%; bottom:0; width:100%; max-width:520px; max-height:88vh; overflow-y:auto; overscroll-behavior:contain;
+  transform:translate(-50%,105%); transition:transform .28s cubic-bezier(.2,.9,.3,1);
+  background:var(--panel); border:1px solid var(--line); border-bottom:0; border-radius:24px 24px 0 0; padding:8px 16px calc(var(--sab) + 18px)}
+.sheet-wrap.open .sheet{transform:translate(-50%,0)}
+.sheet.dragging{transition:none}
+.handle{width:44px; height:5px; border-radius:3px; background:#4a3a80; margin:4px auto 12px}
+.sheet h3{font-family:Bangers; font-weight:400; font-size:28px; letter-spacing:1px; margin:0 0 6px}
+.sheet p{margin:4px 0; color:var(--muted)}
+.sheet p b{color:var(--text)}
+.sdetail{display:flex; gap:14px; align-items:flex-start}
+.sdetail .cw{width:42%; flex:none}
+.sdetail .info{flex:1; min-width:0}
+.sactions{display:flex; flex-direction:column; gap:10px; margin-top:16px}
+.row2{display:flex; gap:10px}
+.setting{display:flex; align-items:center; justify-content:space-between; padding:14px 0; border-bottom:1px solid var(--line); font-weight:800}
+.toggle{width:52px; height:30px; border-radius:15px; background:#3a2a66; position:relative; padding:0}
+.toggle::after{content:''; position:absolute; top:3px; left:3px; width:24px; height:24px; border-radius:50%; background:#fff; transition:left .15s}
+.toggle.on{background:#2ad17a}
+.toggle.on::after{left:25px}
+
+/* ---------- abertura de pacote (tela cheia) ---------- */
+.opening{position:fixed; inset:0; z-index:150; display:none; flex-direction:column; align-items:center; justify-content:center; text-align:center;
+  padding:calc(var(--sat) + 16px) 16px calc(var(--sab) + 16px); background:radial-gradient(circle at 50% 40%, color-mix(in srgb,var(--pc,#7b5cff) 35%, #0b0714), #05020c 75%)}
+.opening.open{display:flex}
+.opening h3{font-family:Bangers; font-weight:400; font-size:30px; letter-spacing:1px; margin:0}
+.ohint{color:#fffa; font-weight:800; font-size:15px; margin:10px 0 0; min-height:22px}
+.oskip{position:absolute; top:calc(var(--sat) + 12px); right:12px; background:#0006; border:1px solid #fff3; padding:10px 14px; font-weight:800; font-size:14px}
+.ocount{position:absolute; top:calc(var(--sat) + 18px); left:16px; font-weight:900; color:#fffa}
+.bigpack{width:min(52vw,220px); aspect-ratio:3/4; margin:26px auto 8px; border-radius:22px; display:grid; place-items:center; font-size:min(24vw,100px);
+  background:linear-gradient(160deg,var(--pc),#000); box-shadow:0 0 50px var(--pc); animation:shake .5s ease-in-out infinite; position:relative}
+.bigpack::after{content:'呪'; position:absolute; bottom:12px; right:16px; font-size:32px; opacity:.6}
 .bigpack.burst{animation:burst .45s forwards}
 @keyframes shake{0%,100%{transform:rotate(0)}25%{transform:rotate(-3deg) scale(1.02)}75%{transform:rotate(3deg) scale(1.02)}}
-@keyframes burst{to{transform:scale(1.6); opacity:0; filter:brightness(3)}}
-.pulls{display:flex; flex-wrap:wrap; gap:16px; justify-content:center; margin:16px 0}
-.flip{width:190px; aspect-ratio:3/4.2; perspective:900px; cursor:pointer; position:relative; animation:dealIn .4s backwards}
-@keyframes dealIn{from{transform:translateY(40px) scale(.8); opacity:0}}
-.flip-inner{position:absolute; inset:0; transition:transform .6s; transform-style:preserve-3d}
+@keyframes burst{to{transform:scale(1.7); opacity:0; filter:brightness(3)}}
+.stage{width:min(66vw,280px); aspect-ratio:3/4.2; position:relative; margin-top:20px; perspective:1000px}
+.flip{position:absolute; inset:0; transition:transform .35s, opacity .35s}
+.flip.enter{animation:dealIn .35s backwards}
+.flip.leave{transform:translateX(-120%) rotate(-14deg); opacity:0}
+@keyframes dealIn{from{transform:translateY(60px) scale(.85); opacity:0}}
+.flip-inner{position:absolute; inset:0; transition:transform .55s; transform-style:preserve-3d}
 .flip.flipped .flip-inner{transform:rotateY(180deg)}
 .flip .back,.flip .front{position:absolute; inset:0; backface-visibility:hidden; -webkit-backface-visibility:hidden}
 .flip .front{transform:rotateY(180deg)}
-.flip .back{border-radius:12px; border:4px solid #3a2a66; display:grid; place-items:center; font-size:90px; color:#7b5cff;
-  background:repeating-linear-gradient(45deg,#160d2b 0 10px,#1d1238 10px 20px); text-shadow:0 0 20px #7b5cff}
-.flip.flipped.r-SS .back,.flip.flipped.r-SSP .back{display:none}
-.flip:not(.flipped):hover .back{border-color:var(--accent)}
-.open-actions{display:flex; gap:10px; justify-content:center; flex-wrap:wrap}
+.flip .back{border-radius:16px; border:4px solid #4a3a80; display:grid; place-items:center; font-size:min(30vw,120px); color:#7b5cff;
+  background:repeating-linear-gradient(45deg,#160d2b 0 12px,#1d1238 12px 24px); text-shadow:0 0 24px #7b5cff}
+.flip .back.tease{animation:tease .8s ease-in-out infinite}
+@keyframes tease{50%{box-shadow:0 0 40px var(--rc); border-color:var(--rc)}}
+.rinfo{margin-top:14px; min-height:44px}
+.rinfo b{font-family:Bangers; font-size:24px; letter-spacing:1px; display:block}
+.rinfo small{color:#fffa; font-weight:700}
+.summary{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; width:100%; max-width:420px; margin:18px 0}
+.oacts{display:flex; flex-direction:column; gap:10px; width:100%; max-width:420px}
 
-/* ---------- domain expansion ---------- */
-.domain{position:fixed; inset:0; z-index:300; display:grid; place-items:center; align-content:center; text-align:center; pointer-events:none;
+/* ---------- domínio / flash ---------- */
+.domain{position:fixed; inset:0; z-index:300; display:grid; place-items:center; align-content:center; text-align:center; pointer-events:none; padding:20px;
   background:radial-gradient(circle, var(--dc) 0%, #000 72%); animation:dom 2.6s forwards}
-.domain .k{font-size:clamp(54px,13vw,150px); font-weight:900; color:#fff; text-shadow:0 0 30px var(--dc), 0 0 60px var(--dc); letter-spacing:6px}
-.domain .t{font-family:Bangers; font-size:clamp(26px,6vw,58px); letter-spacing:2px; color:#fff}
-.domain .n{font-size:clamp(16px,3vw,24px); color:#fffc; font-weight:700}
+.domain .k{font-size:clamp(44px,15vw,140px); font-weight:900; color:#fff; text-shadow:0 0 30px var(--dc), 0 0 60px var(--dc); letter-spacing:4px; line-height:1.1}
+.domain .t{font-family:Bangers; font-size:clamp(26px,8vw,58px); letter-spacing:2px; color:#fff}
+.domain .n{font-size:clamp(15px,4vw,24px); color:#fffc; font-weight:700}
 @keyframes dom{0%{opacity:0; transform:scale(1.3)} 12%{opacity:1; transform:scale(1)} 80%{opacity:1} 100%{opacity:0}}
 .flash{position:fixed; inset:0; z-index:250; pointer-events:none; background:var(--dc); animation:flash .5s forwards}
 @keyframes flash{from{opacity:.75}to{opacity:0}}
 
-/* ---------- collection ---------- */
-.tier{margin-bottom:16px}
-.tier h4{font-family:Bangers; font-weight:400; font-size:22px; letter-spacing:1px; margin:0 0 8px}
-.tier .row{display:flex; flex-wrap:wrap; gap:10px}
-.mystery{filter:brightness(0) drop-shadow(0 0 1px #fff3)}
-.card.unknown .name,.card.unknown .inc{color:#5a4f80}
+/* ---------- toasts / floaty ---------- */
+.toasts{position:fixed; top:calc(var(--sat) + 64px); left:50%; transform:translateX(-50%); z-index:400; display:flex; flex-direction:column; gap:8px; align-items:center; pointer-events:none; width:min(92vw,460px)}
+.toast{background:#1d1433f5; border:1px solid var(--line); border-radius:14px; padding:11px 14px; font-weight:800; font-size:14px; animation:tin .25s; box-shadow:0 8px 30px #000a; text-align:center}
+.toast.hot{border-color:#ff2e4d; background:#2a0a14f5}
+@keyframes tin{from{transform:translateY(-16px); opacity:0}}
+.floaty{position:fixed; z-index:350; pointer-events:none; font-family:Bangers; font-size:26px; color:var(--money); text-shadow:0 2px 6px #000; animation:floaty 1s forwards; transform:translateX(-50%)}
+@keyframes floaty{to{margin-top:-70px; opacity:0}}
 
-/* ---------- toasts & floating text ---------- */
-.toasts{position:fixed; bottom:16px; left:50%; transform:translateX(-50%); z-index:400; display:flex; flex-direction:column; gap:8px; align-items:center; pointer-events:none; width:min(92vw,460px)}
-.toast{background:#1d1433f2; border:1px solid var(--line); border-radius:12px; padding:10px 14px; font-weight:700; font-size:14px; animation:tin .25s; box-shadow:0 8px 30px #0008; text-align:center}
-.toast.hot{border-color:#ff2e4d; background:#2a0a14f2}
-@keyframes tin{from{transform:translateY(20px); opacity:0}}
-.floaty{position:fixed; z-index:350; pointer-events:none; font-family:Bangers; font-size:24px; color:var(--money); text-shadow:0 2px 6px #000; animation:floaty 1s forwards}
-@keyframes floaty{to{transform:translateY(-60px); opacity:0}}
+@media (max-width:350px){ .pods{gap:12px 6px} .wallet b{font-size:26px} .grid4{grid-template-columns:repeat(3,1fr)} }
+@media (prefers-reduced-motion:reduce){ *{animation-duration:.01s !important; animation-iteration-count:1 !important} }
 </style>
 </head>
 <body>
+<div id="app">
 
-<header>
-  <div class="logo">JUJUTSU CARDS<small>呪術カード · PROTÓTIPO</small></div>
-  <div class="hbtns">
-    <button class="btn" id="btnDex">📖 Coleção <span id="dexCount"></span></button>
-    <button class="btn" id="btnAuto"></button>
-    <button class="btn" id="btnSound">🔊</button>
-    <button class="btn danger" id="btnReset" title="Apagar progresso">↺</button>
-  </div>
-  <div class="money"><b id="money">$0</b><small id="income">+$0/s</small></div>
-</header>
+  <header class="top">
+    <div class="logo">呪</div>
+    <div class="wallet"><b id="money">$0</b><small id="income">+$0/s</small></div>
+    <button class="chip" data-a="tab" data-t="shop" aria-label="Próxima reposição">📦 <span id="rsChip">30s</span></button>
+    <button class="iconbtn" data-a="settings" aria-label="Configurações">⚙️</button>
+    <i class="restock-line" id="rsLine"></i>
+  </header>
 
-<main class="layout">
-  <section class="panel">
-    <h2>🏪 Loja de Pacotes</h2>
-    <p class="hint">Os pacotes aparecem a cada reposição. Os simples chegam sempre; os raros quase nunca. Compre rápido!</p>
-    <div class="restock"><span id="restockTxt">Reposição em 30s</span><div class="bar"><i id="restockBar"></i></div></div>
-    <div id="shop"></div>
-  </section>
-
-  <div class="col">
-    <section class="panel">
-      <h2>🏯 Sua Base <span class="sub" id="podInfo"></span></h2>
-      <p class="hint">Coloque cartas nos pódios para gerar dinheiro. Clique no pódio para coletar.</p>
-      <div class="inv-tools">
-        <button class="btn primary" id="btnBest">⚡ Colocar as melhores</button>
-        <button class="btn collect-all" id="btnCollect">💰 Coletar tudo</button>
-      </div>
+  <main>
+    <!-- BASE -->
+    <section class="view" id="v-base">
+      <div class="vh"><h2>🏯 Sua Base</h2><span id="podInfo"></span></div>
+      <p class="hint">Toque no dinheiro do pódio para coletar. Toque na carta para trocar.</p>
       <div class="pods" id="pods"></div>
+      <div id="upgrades"></div>
     </section>
 
-    <section class="panel">
-      <h2>🎴 Inventário <span class="sub" id="invInfo"></span></h2>
-      <div class="inv-tools">
-        <button class="btn" id="sellB">Vender todas as B</button>
-        <button class="btn" id="sellA">Vender todas as A</button>
+    <!-- LOJA -->
+    <section class="view" id="v-shop">
+      <div class="vh"><h2>🏪 Loja</h2><span>3 cartas por pacote</span></div>
+      <div class="restock-card">
+        <div class="clock" id="rsBig">30s</div>
+        <div><b>Próxima reposição</b><br><small>Os pacotes simples sempre chegam. Os raros, quase nunca!</small>
+          <div class="bar"><i id="rsBar"></i></div></div>
       </div>
-      <div class="inv" id="inv"></div>
+      <div id="shop"></div>
     </section>
-  </div>
-</main>
 
-<div class="modal" id="modal"><div class="mbox" id="mbox"></div></div>
+    <!-- INVENTÁRIO -->
+    <section class="view" id="v-inv">
+      <div class="vh"><h2>🎴 Cartas</h2><span id="invInfo"></span></div>
+      <div class="chips" id="chips"></div>
+      <div class="grid" id="inv"></div>
+      <div style="text-align:center;margin-top:14px"><button class="linkbtn" data-a="massSell">💰 Vender cartas em massa</button></div>
+    </section>
+
+    <!-- COLEÇÃO -->
+    <section class="view" id="v-dex">
+      <div class="vh"><h2>📖 Coleção</h2><span>ranking de força</span></div>
+      <div id="dex"></div>
+    </section>
+  </main>
+
+  <div class="actbar" id="actbar">
+    <button class="big ghost" data-a="best">⚡ Organizar</button>
+    <button class="big money" data-a="collectAll" id="collectBtn">💰 Coletar</button>
+  </div>
+
+  <nav class="tabbar">
+    <button class="tab" data-a="tab" data-t="base"><i>🏯</i>Base</button>
+    <button class="tab" data-a="tab" data-t="shop"><i>🏪</i>Loja<span class="tbadge" id="bShop"></span></button>
+    <button class="tab" data-a="tab" data-t="inv"><i>🎴</i>Cartas<span class="tbadge" id="bInv"></span></button>
+    <button class="tab" data-a="tab" data-t="dex"><i>📖</i>Coleção</button>
+  </nav>
+</div>
+
+<div class="sheet-wrap" id="sheetWrap"><div class="sheet" id="sheet"></div></div>
+<div class="opening" id="opening"></div>
 <div class="toasts" id="toasts"></div>
 
 <script>
@@ -363,8 +454,8 @@ const SAVE_KEY = 'jjk_cards_v1';
    ===================================================================== */
 function newState(){
   return {money:150, cards:[], pods:Array(POD_MAX).fill(null), banks:Array(POD_MAX).fill(0), unlocked:POD_START,
-    stock:{g4:4, g2:1}, nextRestock:Date.now()+RESTOCK_MS, seen:{}, auto:false, sound:true,
-    opened:0, earned:0, last:Date.now(), uid:1};
+    stock:{g4:4, g2:1}, nextRestock:Date.now()+RESTOCK_MS, seen:{}, auto:false, sound:true, vibe:true,
+    opened:0, earned:0, last:Date.now(), uid:1, tab:'shop', filter:'all', newCards:0};
 }
 let state = load();
 function load(){
@@ -392,11 +483,13 @@ const incOf = cd => CH[cd.c].inc * VARS[cd.v||'n'].mult;
 const sellOf = cd => Math.max(1, Math.floor(incOf(cd) * SELL_MULT));
 const cardByU = u => state.cards.find(c => c.u === u);
 const onPods = () => new Set(state.pods.filter(u => u != null));
+const rcss = r => RAR[r].css;
 function totalIncome(){
   let t = 0;
   for(let i=0;i<state.unlocked;i++){ const u = state.pods[i]; if(u!=null){ const cd = cardByU(u); if(cd) t += incOf(cd); } }
   return t;
 }
+function totalBank(){ let t = 0; for(let i=0;i<state.unlocked;i++) t += state.banks[i]; return t; }
 function rollRarity(odds){
   const keys = R_ORDER.filter(k => odds[k]);
   const total = keys.reduce((s,k) => s + odds[k], 0);
@@ -417,50 +510,73 @@ function imgFail(el, id){ BAD_IMG[id] = 1; el.remove(); }
 function imgTag(id){
   if(BAD_IMG[id]) return '';
   const src = IMAGENS[id] || `img/${id}.png`;
-  return `<img src="${src}" alt="" loading="lazy" onerror="imgFail(this,'${id}')">`;
+  return `<img src="${src}" alt="" loading="lazy" draggable="false" onerror="imgFail(this,'${id}')">`;
 }
 
-/* ---------- som ---------- */
+/* ---------- som e vibração ---------- */
 let AC;
 function beep(f, d=0.12, type='sine', vol=0.06, delay=0){
   if(!state.sound) return;
   try{
     AC = AC || new (window.AudioContext||window.webkitAudioContext)();
+    if(AC.state === 'suspended') AC.resume();
     const t = AC.currentTime + delay, o = AC.createOscillator(), g = AC.createGain();
     o.type = type; o.frequency.setValueAtTime(f, t);
     g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
     o.connect(g).connect(AC.destination); o.start(t); o.stop(t + d);
   }catch(e){}
 }
+function vibe(p){ if(state.vibe && navigator.vibrate) try{ navigator.vibrate(p); }catch(e){} }
 function sfxRarity(r){
   const i = R_ORDER.indexOf(r);
-  if(i <= 1){ beep(440 + i*120, .15, 'triangle'); return; }
+  if(i <= 1){ beep(440 + i*120, .15, 'triangle'); vibe(15); return; }
   [523,659,784,1047,1319].slice(0, i+2).forEach((f,k) => beep(f, .25, i>=3?'sawtooth':'triangle', .05, k*.07));
+  vibe(i === 2 ? [30,40,30] : i === 3 ? [60,50,60,50,120] : [100,60,100,60,300]);
 }
 
 /* ---------- card html ---------- */
-function cardHTML(cd, size='md', extra=''){
-  const ch = CH[cd.c], R = RAR[ch.r], v = cd.v || 'n', V = VARS[v];
-  const tag = V.tag ? `<span class="vtag">${size==='sm' ? (v==='bf'?'⚡ ×6':'✨ ×3') : V.tag}</span>` : '';
-  return `<div class="card ${size} r-${R.css} v-${v}" style="--cc:${ch.col}">
+function cardHTML(cd, extra='', cls=''){
+  const ch = CH[cd.c], v = cd.v || 'n', V = VARS[v];
+  const tag = V.tag ? `<span class="vtag">${V.tag}</span>` : '';
+  return `<div class="card ${cls} r-${rcss(ch.r)} v-${v}" style="--cc:${ch.col}">
     <div class="art"><span class="emo">${ch.e}</span>${imgTag(ch.id)}<span class="badge">${ch.r}</span>${tag}${extra}</div>
     <div class="name">${ch.name}</div><div class="inc">$${fmt(incOf(cd))}/s</div></div>`;
+}
+function unknownCard(c){
+  return `<div class="card unknown r-${rcss(c.r)}"><div class="art"><span class="emo">${c.e}</span><span class="badge">${c.r}</span></div><div class="name">???</div><div class="inc">$${fmt(c.inc)}/s</div></div>`;
 }
 
 /* ---------- toasts / floaty ---------- */
 function toast(msg, hot=false){
+  const box = $('toasts');
+  while(box.children.length > 2) box.firstChild.remove();
   const t = document.createElement('div'); t.className = 'toast' + (hot ? ' hot' : ''); t.innerHTML = msg;
-  $('toasts').appendChild(t); setTimeout(() => t.remove(), hot ? 4500 : 2600);
+  box.appendChild(t); setTimeout(() => t.remove(), hot ? 4000 : 2400);
 }
 function floaty(x, y, txt){
   const f = document.createElement('div'); f.className = 'floaty'; f.textContent = txt;
-  f.style.left = (x - 20) + 'px'; f.style.top = (y - 20) + 'px';
+  f.style.left = x + 'px'; f.style.top = (y - 20) + 'px';
   document.body.appendChild(f); setTimeout(() => f.remove(), 1000);
+}
+
+/* =====================================================================
+   ABAS
+   ===================================================================== */
+function setTab(t){
+  state.tab = t;
+  document.querySelectorAll('.view').forEach(v => v.classList.toggle('on', v.id === 'v-' + t));
+  document.querySelectorAll('.tab').forEach(b => b.classList.toggle('on', b.dataset.t === t));
+  $('actbar').classList.toggle('on', t === 'base');
+  if(t === 'inv'){ state.newCards = 0; renderInv(); }
+  if(t === 'dex') renderDex();
+  window.scrollTo(0, 0);
+  updateLive();
 }
 
 /* =====================================================================
    LOJA / REPOSIÇÃO
    ===================================================================== */
+const isRare = p => p.chance <= 0.15;
 function restock(silent){
   const hits = [];
   for(const p of PACKS){
@@ -471,20 +587,23 @@ function restock(silent){
     }
   }
   if(silent) return;
-  const rare = hits.filter(p => p.chance <= 0.15);
-  rare.forEach(p => { toast(`🔥 ${p.e} <b>${p.name}</b> apareceu na loja!`, true); beep(880,.3,'square',.05); beep(1320,.4,'square',.05,.15); });
-  if(!rare.length) toast('📦 Loja reabastecida!');
+  const rare = hits.filter(isRare);
+  if(rare.length){
+    rare.forEach(p => toast(`🔥 ${p.e} <b>${p.name}</b> apareceu na loja!`, true));
+    beep(880,.3,'square',.05); beep(1320,.4,'square',.05,.15); vibe([80,60,80]);
+  } else toast('📦 Loja reabastecida!');
 }
 
 function renderShop(){
   $('shop').innerHTML = PACKS.map(p => {
     const s = state.stock[p.id] || 0;
-    const odds = R_ORDER.filter(k => p.odds[k]).map(k => `<span class="t-${RAR[k].css}">${k} ${p.odds[k]}%</span>`).join('');
-    return `<div class="pack ${s ? '' : 'empty'}" style="--pc:${p.color}">
-      <div class="pack-art">${p.e}</div>
-      <div><div class="pack-name">${p.name}</div><div class="pack-odds">${odds}</div>
-        <div class="pack-stock">${s ? `Estoque: <b>${s}</b>` : 'ESGOTADO'} · aparece em ${Math.round(p.chance*100)}% das reposições · ${p.n} cartas</div></div>
-      <button class="buy" data-buy="${p.id}" data-price="${p.price}" ${s ? '' : 'data-out="1"'}>$${fmt(p.price)}</button>
+    const odds = R_ORDER.filter(k => p.odds[k]).map(k => `<span class="t-${rcss(k)}">${k} ${p.odds[k]}%</span>`).join('');
+    return `<div class="pack ${s ? 'instock' : 'empty'} ${isRare(p) ? 'rare' : ''}" style="--pc:${p.color}">
+      <div class="pack-row"><div class="pack-art">${p.e}</div>
+        <div><div class="pack-name">${p.name}</div>
+          <div class="pack-stock">${s ? `<span class="stock-pill">${s} em estoque</span>` : '<span class="stock-pill out">ESGOTADO</span>'} · chega em ${Math.round(p.chance*100)}% das reposições</div></div></div>
+      <div class="pack-odds">${odds}</div>
+      <button class="buy" data-a="buy" data-id="${p.id}">${s ? 'Comprar · $' + fmt(p.price) : 'Esgotado · $' + fmt(p.price)}</button>
     </div>`;
   }).join('');
   updateLive();
@@ -493,7 +612,7 @@ function renderShop(){
 function buyPack(id){
   const p = PK[id];
   if((state.stock[id]||0) <= 0) return toast('Esgotado! Espere a próxima reposição.');
-  if(state.money < p.price) return toast('Dinheiro insuficiente 💸');
+  if(state.money < p.price) return toast(`Falta $${fmt(p.price - state.money)} 💸`);
   state.money -= p.price; state.stock[id]--; state.opened++;
   const pulls = [];
   for(let k=0;k<p.n;k++){
@@ -502,57 +621,80 @@ function buyPack(id){
     const isNew = !state.seen[ch.id]; state.seen[ch.id] = 1;
     state.cards.push(card); pulls.push({card, isNew});
   }
-  save(); renderShop(); renderInv(); renderHeader();
+  state.newCards += p.n;
+  save(); renderShop(); renderInv();
   showOpening(p, pulls);
 }
 
 /* =====================================================================
-   ABERTURA DE PACOTE
+   ABERTURA DE PACOTE (tela cheia, uma carta por vez)
    ===================================================================== */
 function showOpening(p, pulls){
-  openModal(`<div class="opening"><h3>${p.e} ${p.name}</h3>
-    <p class="hint">Clique no pacote para abrir!</p>
-    <div class="bigpack" id="bigpack" style="--pc:${p.color}">${p.e}</div></div>`, false);
+  const o = $('opening');
+  o.style.setProperty('--pc', p.color);
+  o.innerHTML = `<h3>${p.e} ${p.name}</h3><div class="bigpack" id="bigpack">${p.e}</div><p class="ohint">Toque no pacote para abrir!</p>`;
+  o.classList.add('open'); closeSheet();
   beep(220,.2,'triangle');
   $('bigpack').onclick = () => {
-    $('bigpack').classList.add('burst'); beep(330,.15,'square',.05); beep(660,.25,'square',.05,.1);
-    setTimeout(() => revealCards(p, pulls), 420);
+    $('bigpack').classList.add('burst'); beep(330,.15,'square',.05); beep(660,.25,'square',.05,.1); vibe(40);
+    setTimeout(() => revealStep(p, pulls, 0), 420);
   };
 }
 
-function revealCards(p, pulls){
-  $('mbox').innerHTML = `<button class="mclose" data-close>✕</button><div class="opening"><h3>${p.e} ${p.name}</h3>
-    <div class="pulls">${pulls.map((x,i) => {
-      const R = RAR[CH[x.card.c].r];
-      return `<div class="flip r-${R.css}" data-flip="${i}" style="animation-delay:${i*.12}s"><div class="flip-inner">
-        <div class="back">呪</div><div class="front">${cardHTML(x.card,'lg')}${x.isNew ? '<span class="new">NOVO!</span>' : ''}</div>
-      </div></div>`;}).join('')}</div>
-    <div class="open-actions" id="openActs"><button class="btn primary" id="revealAll">Revelar tudo</button></div></div>`;
-  let left = pulls.length;
-  const flip = i => {
-    const el = document.querySelector(`[data-flip="${i}"]`);
-    if(!el || el.classList.contains('flipped')) return;
-    el.classList.add('flipped'); left--;
-    const ch = CH[pulls[i].card.c];
+function revealStep(p, pulls, i){
+  const o = $('opening');
+  if(i >= pulls.length) return showSummary(p, pulls);
+  const x = pulls[i], ch = CH[x.card.c], r = rcss(ch.r);
+  const tease = R_ORDER.indexOf(ch.r) >= 3 || x.card.v !== 'n';
+  o.innerHTML = `<span class="ocount">${i+1}/${pulls.length}</span><button class="oskip" id="oskip">Pular ⏭</button>
+    <h3>${p.e} ${p.name}</h3>
+    <div class="stage"><div class="flip enter r-${r}" id="flip"><div class="flip-inner">
+      <div class="back ${tease ? 'tease' : ''}">呪</div>
+      <div class="front">${cardHTML(x.card, '', 'big')}${x.isNew ? '<span class="newtag">NOVO!</span>' : ''}</div>
+    </div></div></div>
+    <div class="rinfo" id="rinfo"></div>
+    <p class="ohint" id="ohint">Toque na carta para virar</p>`;
+  let flipped = false;
+  const flip = $('flip');
+  const doFlip = () => {
+    flipped = true; flip.classList.add('flipped');
     sfxRarity(ch.r);
     if(ch.r === 'SS+') domainExpansion(ch);
-    else if(ch.r === 'SS' || pulls[i].card.v === 'bf') flash(ch.r === 'SS' ? '#ffb020' : '#ff1f3d');
-    if(left === 0) finishOpening(pulls);
+    else if(ch.r === 'SS' || x.card.v === 'bf') flash(ch.r === 'SS' ? '#ffb020' : '#ff1f3d');
+    $('rinfo').innerHTML = `<b class="t-${r}">${ch.r} · ${RAR[ch.r].label}${x.card.v !== 'n' ? ' · ' + VARS[x.card.v].name : ''}</b><small>${ch.t}</small>`;
+    $('ohint').textContent = i < pulls.length - 1 ? 'Toque para a próxima carta' : 'Toque para ver o resumo';
   };
-  document.querySelectorAll('[data-flip]').forEach(el => el.onclick = () => flip(+el.dataset.flip));
-  $('revealAll').onclick = () => pulls.forEach((_,i) => setTimeout(() => flip(i), i*350));
+  o.onclick = ev => {
+    if(ev.target.closest('#oskip')){
+      o.onclick = null;
+      const rest = pulls.slice(flipped ? i + 1 : i).map(y => CH[y.card.c]);
+      const top = rest.sort((a,b) => R_ORDER.indexOf(b.r) - R_ORDER.indexOf(a.r))[0];
+      if(top){ sfxRarity(top.r); if(top.r === 'SS+') domainExpansion(top); else if(top.r === 'SS') flash('#ffb020'); }
+      return showSummary(p, pulls);
+    }
+    if(!flipped) return doFlip();
+    o.onclick = null; flip.classList.add('leave');
+    setTimeout(() => revealStep(p, pulls, i + 1), 260);
+  };
 }
 
-function finishOpening(pulls){
+function showSummary(p, pulls){
+  const o = $('opening'); o.onclick = null;
   const best = pulls.map(x => x.card).sort((a,b) => incOf(b) - incOf(a))[0];
-  const act = $('openActs'); if(!act) return;
-  act.innerHTML = `<button class="btn primary" id="oBest">⚡ Colocar as melhores nos pódios</button>
-    ${PACKS.some(p => (state.stock[p.id]||0) > 0 && state.money >= p.price) ? '<button class="btn" id="oShop">🏪 Voltar pra loja</button>' : ''}
-    <button class="btn" data-close>Continuar</button>`;
-  $('oBest').onclick = () => { autoPlace(); closeModal(); };
-  if($('oShop')) $('oShop').onclick = closeModal;
+  const again = (state.stock[p.id]||0) > 0 && state.money >= p.price;
+  o.innerHTML = `<h3>${p.e} Você conseguiu!</h3>
+    <div class="summary">${pulls.map(x => `<div class="slot">${cardHTML(x.card)}${x.isNew ? '<span class="newtag" style="font-size:12px">NOVO</span>' : ''}</div>`).join('')}</div>
+    <div class="oacts">
+      ${again ? `<button class="big money" id="oAgain">🔁 Abrir outro · $${fmt(p.price)} <small style="opacity:.7">(${state.stock[p.id]} rest.)</small></button>` : ''}
+      <button class="big primary" id="oBest">⚡ Colocar as melhores nos pódios</button>
+      <button class="big ghost" id="oClose">Fechar</button>
+    </div>`;
+  $('oBest').onclick = () => { closeOpening(); autoPlace(); setTab('base'); };
+  $('oClose').onclick = closeOpening;
+  if($('oAgain')) $('oAgain').onclick = () => buyPack(p.id);
   if(R_ORDER.indexOf(CH[best.c].r) >= 3) toast(`🎉 Você tirou <b>${CH[best.c].name}</b> (${CH[best.c].r})!`, true);
 }
+function closeOpening(){ $('opening').classList.remove('open'); $('opening').innerHTML = ''; updateLive(); }
 
 function domainExpansion(ch){
   const d = document.createElement('div'); d.className = 'domain'; d.style.setProperty('--dc', ch.col + 'aa');
@@ -566,28 +708,28 @@ function flash(c){
 }
 
 /* =====================================================================
-   PÓDIOS
+   BASE / PÓDIOS
    ===================================================================== */
-function renderPods(){
+function renderBase(){
   let h = '';
-  for(let i=0;i<POD_MAX;i++){
-    if(i < state.unlocked){
-      const u = state.pods[i], cd = u != null ? cardByU(u) : null;
-      const rc = cd ? `r-${RAR[CH[cd.c].r].css}` : '';
-      h += `<div class="podium ${cd ? 'filled' : ''}">
-        <div class="pod-top" data-pod="${i}">${cd ? cardHTML(cd,'sm') : '<div class="pod-empty">+<small>Colocar carta</small></div>'}</div>
-        ${cd ? `<button class="pod-x" data-remove="${i}" title="Tirar do pódio">✕</button>` : ''}
-        <div class="pod-base ${rc}" data-collect="${i}"><b id="bank${i}">${state.auto ? 'AUTO' : '$'+fmt(state.banks[i])}</b>
-          <small>${cd ? '+$'+fmt(incOf(cd))+'/s' : 'vazio'}</small></div></div>`;
-    } else if(i === state.unlocked){
-      h += `<div class="podium locked next"><div class="pod-top" data-unlock="${i}" style="cursor:pointer"><div class="pod-empty">🔒<small>Desbloquear</small></div></div>
-        <div class="pod-base" data-unlock="${i}"><b id="unlockCost">$${fmt(podCost(i))}</b><small>novo pódio</small></div></div>`;
-    } else {
-      h += `<div class="podium locked"><div class="pod-top"><div class="pod-empty">🔒</div></div><div class="pod-base"><b style="color:#4a3f70">—</b><small>bloqueado</small></div></div>`;
-    }
+  for(let i=0;i<state.unlocked;i++){
+    const u = state.pods[i], cd = u != null ? cardByU(u) : null;
+    const rc = cd ? `r-${rcss(CH[cd.c].r)}` : '';
+    h += `<div class="podium ${cd ? 'filled' : ''}">
+      <button class="pod-top" style="background:none;padding-left:9%;padding-right:9%" data-a="podcard" data-i="${i}">${cd ? cardHTML(cd) : '<div class="pod-empty">+<small>Colocar</small></div>'}</button>
+      <button class="pod-base ${rc}" data-a="pod" data-i="${i}" id="pb${i}"><b id="bank${i}">${state.auto ? 'AUTO' : '$' + fmt(state.banks[i])}</b>
+        <small>${cd ? '+$' + fmt(incOf(cd)) + '/s' : 'vazio'}</small></button></div>`;
+  }
+  if(state.unlocked < POD_MAX){
+    h += `<div class="podium lockednext">
+      <button class="pod-top" style="background:none;padding-left:9%;padding-right:9%" data-a="unlock"><div class="pod-empty">🔒<small>Novo pódio</small></div></button>
+      <button class="pod-base" data-a="unlock"><b id="unlockCost">$${fmt(podCost(state.unlocked))}</b><small>desbloquear</small></button></div>`;
   }
   $('pods').innerHTML = h;
-  $('podInfo').textContent = `${state.pods.slice(0,state.unlocked).filter(x => x!=null).length}/${state.unlocked} pódios em uso`;
+  $('podInfo').textContent = `${state.pods.slice(0,state.unlocked).filter(x => x!=null).length}/${state.unlocked} em uso`;
+  $('upgrades').innerHTML = state.auto ? '' :
+    `<div class="upgrade"><span class="ic">🤖</span><div><b>Coleta automática</b><small>O dinheiro dos pódios cai direto na sua conta.</small></div>
+      <button data-a="auto" id="autoBtn">$${fmt(AUTO_COST)}</button></div>`;
 }
 
 function collect(i, ev){
@@ -595,16 +737,16 @@ function collect(i, ev){
   if(amt < 0.1) return;
   state.money += amt; state.earned += amt; state.banks[i] = 0;
   if(ev) floaty(ev.clientX, ev.clientY, '+$' + fmt(amt));
-  beep(990, .08, 'triangle', .04);
+  beep(990, .08, 'triangle', .04); vibe(10);
   updateLive();
 }
 function collectAll(){
-  let tot = 0;
-  for(let i=0;i<state.unlocked;i++){ tot += state.banks[i]; state.banks[i] = 0; }
+  const tot = totalBank();
   if(tot < 0.1) return toast('Nada pra coletar ainda.');
+  for(let i=0;i<state.unlocked;i++) state.banks[i] = 0;
   state.money += tot; state.earned += tot;
-  const r = $('btnCollect').getBoundingClientRect(); floaty(r.left + r.width/2, r.top, '+$' + fmt(tot));
-  beep(990,.08,'triangle',.04); beep(1320,.1,'triangle',.04,.06);
+  const r = $('collectBtn').getBoundingClientRect(); floaty(r.left + r.width/2, r.top, '+$' + fmt(tot));
+  beep(990,.08,'triangle',.04); beep(1320,.1,'triangle',.04,.06); vibe(20);
   updateLive(); save();
 }
 function freePod(){ for(let i=0;i<state.unlocked;i++) if(state.pods[i] == null) return i; return -1; }
@@ -618,26 +760,70 @@ function placeCard(u, slot){
   let i = slot != null ? slot : freePod();
   if(i < 0){
     i = worstPod();
-    if(i < 0 || incOf(cardByU(state.pods[i])) >= incOf(cd)) return toast('Todos os pódios estão ocupados com cartas melhores ou iguais.');
-    toast(`🔁 Trocou ${CH[cardByU(state.pods[i]).c].name} por ${CH[cd.c].name}`);
+    if(i < 0 || incOf(cardByU(state.pods[i])) >= incOf(cd)) return toast('Seus pódios já têm cartas melhores.');
+    toast(`🔁 ${CH[cardByU(state.pods[i]).c].name} → ${CH[cd.c].name}`);
   }
   state.pods[i] = u;
-  beep(660,.1,'triangle'); save(); renderPods(); renderInv(); updateLive();
+  beep(660,.1,'triangle'); vibe(15);
+  save(); renderBase(); renderInv(); updateLive();
 }
-function removeFromPod(i){ state.pods[i] = null; save(); renderPods(); renderInv(); updateLive(); }
+function removeFromPod(i){ state.pods[i] = null; save(); renderBase(); renderInv(); updateLive(); }
 function autoPlace(){
+  const before = totalIncome();
   const sorted = [...state.cards].sort((a,b) => incOf(b) - incOf(a));
   for(let i=0;i<state.unlocked;i++) state.pods[i] = sorted[i] ? sorted[i].u : null;
-  beep(660,.1,'triangle'); beep(880,.12,'triangle',.06,.08);
-  save(); renderPods(); renderInv(); updateLive();
+  beep(660,.1,'triangle'); beep(880,.12,'triangle',.06,.08); vibe(20);
+  const gain = totalIncome() - before;
+  if(gain > 0.05) toast(`⚡ Renda +$${fmt(gain)}/s`);
+  save(); renderBase(); renderInv(); updateLive();
 }
-function unlockPod(i){
-  const cost = podCost(i);
-  if(i !== state.unlocked) return;
-  if(state.money < cost) return toast(`Precisa de $${fmt(cost)} para desbloquear.`);
+function unlockPod(){
+  if(state.unlocked >= POD_MAX) return;
+  const cost = podCost(state.unlocked);
+  if(state.money < cost) return toast(`Falta $${fmt(cost - state.money)} para o novo pódio.`);
   state.money -= cost; state.unlocked++;
-  toast('🏯 Novo pódio desbloqueado!'); beep(523,.15,'triangle'); beep(784,.2,'triangle',.06,.1);
-  save(); renderPods(); updateLive();
+  toast('🏯 Novo pódio desbloqueado!'); beep(523,.15,'triangle'); beep(784,.2,'triangle',.06,.1); vibe([30,40,30]);
+  const fp = freePod(), best = invGroups()[0];
+  if(fp >= 0 && best) state.pods[fp] = best.list[0].u;
+  save(); renderBase(); renderInv(); updateLive();
+}
+function buyAuto(){
+  if(state.money < AUTO_COST) return toast(`Falta $${fmt(AUTO_COST - state.money)}.`);
+  collectAll(); state.money -= AUTO_COST; state.auto = true;
+  toast('🤖 Coleta automática ativada!', true); vibe([30,40,30]);
+  save(); renderBase(); updateLive();
+}
+function podTap(i, ev){
+  if(state.pods[i] == null) return pickerSheet(i);
+  if(state.auto || state.banks[i] < 0.1) return podSheet(i);
+  collect(i, ev);
+}
+function podSheet(i){
+  const u = state.pods[i];
+  if(u == null) return pickerSheet(i);
+  const cd = cardByU(u), ch = CH[cd.c];
+  openSheet(`<div class="sdetail"><div class="cw">${cardHTML(cd)}</div>
+    <div class="info"><h3>Pódio ${i+1}</h3>
+      <p><b>${ch.name}</b></p><p class="t-${rcss(ch.r)}"><b style="color:inherit">${ch.r} · ${RAR[ch.r].label}</b></p>
+      <p>Rende <b style="color:var(--money)">$${fmt(incOf(cd))}/s</b></p>
+      ${state.auto ? '' : `<p>Acumulado: <b>$${fmt(state.banks[i])}</b></p>`}</div></div>
+    <div class="sactions">
+      ${!state.auto && state.banks[i] >= 0.1 ? `<button class="big money" id="sCol">💰 Coletar $${fmt(state.banks[i])}</button>` : ''}
+      <button class="big primary" id="sSwap">🔁 Trocar carta</button>
+      <button class="big ghost" id="sRem">📥 Guardar no inventário</button>
+    </div>`);
+  if($('sCol')) $('sCol').onclick = ev => { collect(i, ev); closeSheet(); };
+  $('sSwap').onclick = () => pickerSheet(i);
+  $('sRem').onclick = () => { removeFromPod(i); closeSheet(); };
+}
+function pickerSheet(i){
+  const gs = invGroups();
+  openSheet(`<h3>Escolha uma carta</h3><p style="margin-bottom:12px">Para o pódio ${i+1} · as mais fortes primeiro</p>
+    <div class="grid">${gs.length ? gs.map(g => `<button class="slot" style="background:none;padding:0" data-pick="${g.key}">${cardHTML(g.sample, g.list.length > 1 ? `<span class="cnt">×${g.list.length}</span>` : '')}</button>`).join('')
+      : '<div class="empty-msg"><span class="e">🎴</span>Você não tem cartas guardadas.<br><br><button class="big primary" style="width:100%" data-a="tab" data-t="shop">Ir para a loja</button></div>'}</div>`);
+  $('sheet').querySelectorAll('[data-pick]').forEach(el => el.onclick = () => {
+    const g = groupByKey(el.dataset.pick); if(g) placeCard(g.list[0].u, i); closeSheet();
+  });
 }
 
 /* =====================================================================
@@ -652,109 +838,173 @@ function invGroups(){
   }
   return Object.values(g).sort((a,b) => incOf(b.sample) - incOf(a.sample));
 }
-function renderInv(){
-  const gs = invGroups();
-  const n = gs.reduce((s,g) => s + g.list.length, 0);
-  $('invInfo').textContent = `${n} cartas guardadas`;
-  $('inv').innerHTML = gs.length ? gs.map(g =>
-    `<div class="slot" data-group="${g.key}">${cardHTML(g.sample,'sm', g.list.length > 1 ? `<span class="cnt">×${g.list.length}</span>` : '')}</div>`
-  ).join('') : '<div class="empty-msg">Nenhuma carta guardada. Compre pacotes na loja! 🎴</div>';
-}
 function groupByKey(key){ return invGroups().find(g => g.key === key); }
+function renderInv(){
+  const all = invGroups();
+  const count = r => all.filter(g => r === 'all' || CH[g.sample.c].r === r).reduce((s,g) => s + g.list.length, 0);
+  const f = state.filter;
+  const gs = all.filter(g => f === 'all' || CH[g.sample.c].r === f);
+  $('invInfo').textContent = `${count('all')} guardadas`;
+  $('chips').innerHTML = ['all', ...[...R_ORDER].reverse()].map(r =>
+    `<button class="fchip ${f === r ? 'on' : ''} ${r !== 'all' ? 't-' + rcss(r) : ''}" data-a="filter" data-f="${r}">${r === 'all' ? 'Todas' : r} · ${count(r)}</button>`).join('');
+  $('inv').innerHTML = gs.length ? gs.map(g =>
+    `<button class="slot" style="background:none;padding:0" data-a="group" data-k="${g.key}">${cardHTML(g.sample, g.list.length > 1 ? `<span class="cnt">×${g.list.length}</span>` : '')}</button>`
+  ).join('') : `<div class="empty-msg"><span class="e">🎴</span>${f === 'all' ? 'Nenhuma carta guardada.' : 'Nenhuma carta ' + f + ' guardada.'}<br><br>
+      <button class="big primary" style="width:100%" data-a="tab" data-t="shop">Comprar pacotes</button></div>`;
+}
 
-function showCard(key){
-  const g = groupByKey(key); if(!g) return closeModal();
+function cardSheet(key){
+  const g = groupByKey(key); if(!g) return closeSheet();
   const cd = g.sample, ch = CH[cd.c], V = VARS[cd.v||'n'];
   const free = freePod(), worst = worstPod();
   const canSwap = free < 0 && worst >= 0 && incOf(cardByU(state.pods[worst])) < incOf(cd);
-  openModal(`<div class="detail">${cardHTML(cd,'lg')}
+  openSheet(`<div class="sdetail"><div class="cw">${cardHTML(cd)}</div>
     <div class="info"><h3>${ch.name}</h3>
-      <p><b class="t-${RAR[ch.r].css}">${ch.r} · ${RAR[ch.r].label}</b></p>
+      <p class="t-${rcss(ch.r)}"><b style="color:inherit">${ch.r} · ${RAR[ch.r].label}</b></p>
       <p>${ch.t}</p>
-      <p>Variação: <b>${V.name}</b>${V.mult > 1 ? ` (×${V.mult})` : ''}</p>
-      <p>Renda: <b style="color:var(--money)">$${fmt(incOf(cd))}/s</b></p>
-      <p>Você tem: <b>${g.list.length}</b> guardada(s)</p>
-      <div class="actions">
-        <button class="btn primary" id="cPlace" ${free < 0 && !canSwap ? 'disabled' : ''}>${free >= 0 ? '🏯 Colocar no pódio' : canSwap ? '🔁 Trocar pela pior do pódio' : 'Pódios cheios (cartas melhores)'}</button>
-        <button class="btn" id="cSell1">Vender 1 · $${fmt(sellOf(cd))}</button>
-        ${g.list.length > 1 ? `<button class="btn" id="cSellAll">Vender todas (${g.list.length}) · $${fmt(sellOf(cd)*g.list.length)}</button>` : ''}
-      </div></div></div>`, true, true);
-  $('cPlace').onclick = () => { placeCard(g.list[0].u); closeModal(); };
-  $('cSell1').onclick = () => { sell([g.list[0].u]); groupByKey(key) ? showCard(key) : closeModal(); };
-  if($('cSellAll')) $('cSellAll').onclick = () => { sell(g.list.map(c => c.u)); closeModal(); };
+      ${V.mult > 1 ? `<p>Variação: <b>${V.name} ×${V.mult}</b></p>` : ''}
+      <p>Rende <b style="color:var(--money)">$${fmt(incOf(cd))}/s</b></p>
+      <p>Você tem <b>${g.list.length}</b> guardada(s)</p></div></div>
+    <div class="sactions">
+      ${free >= 0 || canSwap ? `<button class="big primary" id="cPlace">${free >= 0 ? '🏯 Colocar no pódio' : '🔁 Trocar pela pior do pódio'}</button>`
+        : '<button class="big ghost" disabled>Seus pódios já têm cartas melhores</button>'}
+      <div class="row2">
+        <button class="big ghost" id="cSell1">Vender 1<br>$${fmt(sellOf(cd))}</button>
+        ${g.list.length > 1 ? `<button class="big ghost" id="cSellAll">Vender ${g.list.length}<br>$${fmt(sellOf(cd)*g.list.length)}</button>` : ''}
+      </div>
+    </div>`);
+  if($('cPlace')) $('cPlace').onclick = () => { placeCard(g.list[0].u); closeSheet(); };
+  $('cSell1').onclick = () => { sell([g.list[0].u]); groupByKey(key) ? cardSheet(key) : closeSheet(); };
+  if($('cSellAll')) $('cSellAll').onclick = () => { sell(g.list.map(c => c.u)); closeSheet(); };
 }
 function sell(uids){
   const used = onPods(); let tot = 0;
   const set = new Set(uids.filter(u => !used.has(u)));
   state.cards = state.cards.filter(cd => { if(set.has(cd.u)){ tot += sellOf(cd); return false; } return true; });
   state.money += tot;
-  if(tot) { toast(`💰 Vendeu ${set.size} carta(s) por $${fmt(tot)}`); beep(784,.1,'triangle'); }
+  if(tot){ toast(`💰 Vendeu ${set.size} carta(s) por $${fmt(tot)}`); beep(784,.1,'triangle'); vibe(15); }
   save(); renderInv(); updateLive();
 }
-function sellRarity(r){
+function massSellSheet(){
   const used = onPods();
-  const list = state.cards.filter(cd => !used.has(cd.u) && CH[cd.c].r === r && (cd.v||'n') === 'n');
-  if(!list.length) return toast(`Nenhuma carta ${r} normal guardada.`);
-  if(!confirm(`Vender ${list.length} carta(s) ${r} (só as normais, guardadas)?`)) return;
-  sell(list.map(c => c.u));
-}
-function showPicker(i){
-  const gs = invGroups();
-  openModal(`<h3>Escolha uma carta para o pódio ${i+1}</h3>
-    ${gs.length ? `<div class="pick">${gs.map(g => `<div class="slot" data-pick="${g.key}">${cardHTML(g.sample,'md', g.list.length>1?`<span class="cnt">×${g.list.length}</span>`:'')}</div>`).join('')}</div>`
-      : '<div class="empty-msg">Você não tem cartas guardadas. Compre um pacote!</div>'}`);
-  document.querySelectorAll('[data-pick]').forEach(el => el.onclick = () => {
-    const g = groupByKey(el.dataset.pick); if(g) placeCard(g.list[0].u, i); closeModal();
+  const opt = r => {
+    const list = state.cards.filter(cd => !used.has(cd.u) && CH[cd.c].r === r && (cd.v||'n') === 'n');
+    const val = list.reduce((s,cd) => s + sellOf(cd), 0);
+    return `<button class="big ghost" data-ms="${r}" ${list.length ? '' : 'disabled'}><span class="t-${rcss(r)}">${r}</span>&nbsp;· vender ${list.length} · $${fmt(val)}</button>`;
+  };
+  openSheet(`<h3>Vender em massa</h3><p style="margin-bottom:12px">Vende só as cartas <b>normais</b> que estão guardadas. As que estão nos pódios e as ✨/⚡ ficam com você.</p>
+    <div class="sactions">${opt('B')}${opt('A')}${opt('S')}</div>`);
+  $('sheet').querySelectorAll('[data-ms]').forEach(b => b.onclick = () => {
+    const r = b.dataset.ms;
+    confirmSheet(`Vender todas as cartas ${r} normais guardadas?`, 'Vender', () => {
+      sell(state.cards.filter(cd => !onPods().has(cd.u) && CH[cd.c].r === r && (cd.v||'n') === 'n').map(c => c.u));
+    });
   });
 }
 
 /* =====================================================================
    COLEÇÃO
    ===================================================================== */
-function showDex(){
+function renderDex(){
   const owned = {}; state.cards.forEach(cd => owned[cd.c] = (owned[cd.c]||0) + 1);
-  const tiers = [...R_ORDER].reverse().map(r => {
-    const cs = BY_R[r];
-    return `<div class="tier"><h4 class="t-${RAR[r].css}">${r} · ${RAR[r].label} <small style="font-family:Nunito;font-size:13px;color:var(--muted)">${cs.filter(c => state.seen[c.id]).length}/${cs.length}</small></h4>
-      <div class="row">${cs.map(c => state.seen[c.id]
-        ? cardHTML({c:c.id, v:'n'}, 'sm', owned[c.id] ? `<span class="cnt">×${owned[c.id]}</span>` : '')
-        : `<div class="card sm unknown r-${RAR[r].css}"><div class="art"><span class="emo mystery">${c.e}</span><span class="badge">${r}</span></div><div class="name">???</div><div class="inc">$${fmt(c.inc)}/s</div></div>`
-      ).join('')}</div></div>`;
-  }).join('');
-  openModal(`<h3>📖 Coleção · Ranking de Força</h3>
-    <p class="hint">Pacotes abertos: ${state.opened} · Total ganho: $${fmt(state.earned)} · Variações: ✨ Dourada (5%, ×3) e ⚡ Black Flash (1%, ×6)</p>${tiers}`);
-}
-
-/* =====================================================================
-   MODAL
-   ===================================================================== */
-function openModal(html, closable=true, narrow=false){
-  $('mbox').className = 'mbox' + (narrow ? ' narrow' : '');
-  $('mbox').innerHTML = (closable ? '<button class="mclose" data-close>✕</button>' : '') + html;
-  $('modal').classList.add('open');
-}
-function closeModal(){ $('modal').classList.remove('open'); $('mbox').innerHTML = ''; }
-
-/* =====================================================================
-   HEADER / LOOP
-   ===================================================================== */
-function renderHeader(){
   const seen = Object.keys(state.seen).length;
-  $('dexCount').textContent = `${seen}/${CHARS.length}`;
-  $('btnAuto').textContent = state.auto ? '🤖 Coleta automática ✓' : `🤖 Coleta automática · $${fmt(AUTO_COST)}`;
-  $('btnAuto').disabled = state.auto;
-  $('btnSound').textContent = state.sound ? '🔊' : '🔇';
-  $('btnCollect').style.display = state.auto ? 'none' : '';
+  const tiers = [...R_ORDER].reverse().map(r => {
+    const cs = BY_R[r], got = cs.filter(c => state.seen[c.id]).length;
+    return `<div class="tier"><h4 class="t-${rcss(r)}">${r}<small>${RAR[r].label} · ${got}/${cs.length}</small>
+        <span class="bar"><i style="width:${got/cs.length*100}%"></i></span></h4>
+      <div class="grid4">${cs.map(c => `<button class="slot" style="background:none;padding:0" data-a="dex" data-id="${c.id}">${state.seen[c.id]
+        ? cardHTML({c:c.id, v:'n'}, owned[c.id] ? `<span class="cnt">×${owned[c.id]}</span>` : '')
+        : unknownCard(c)}</button>`).join('')}</div></div>`;
+  }).join('');
+  $('dex').innerHTML = `<div class="dexhead"><b>${seen}/${CHARS.length}</b> personagens descobertos
+      <div class="bar"><i style="width:${seen/CHARS.length*100}%"></i></div>
+      <p>Pacotes abertos: <b>${state.opened}</b> · Total ganho: <b>$${fmt(state.earned)}</b></p>
+      <p>Variações: ✨ Dourada (5%, rende 3×) · ⚡ Black Flash (1%, rende 6×)</p></div>${tiers}`;
 }
+function dexSheet(id){
+  const c = CH[id], known = state.seen[id];
+  const n = state.cards.filter(cd => cd.c === id).length;
+  openSheet(`<div class="sdetail"><div class="cw">${known ? cardHTML({c:id, v:'n'}) : unknownCard(c)}</div>
+    <div class="info"><h3>${known ? c.name : '???'}</h3>
+      <p class="t-${rcss(c.r)}"><b style="color:inherit">${c.r} · ${RAR[c.r].label}</b></p>
+      <p>${known ? c.t : 'Ainda não descoberto.'}</p>
+      <p>Rende <b style="color:var(--money)">$${fmt(c.inc)}/s</b></p>
+      ${known ? `<p>Você tem <b>${n}</b></p>` : ''}
+      ${c.d ? `<p>Domínio: <b>${known ? c.d : '???'}</b></p>` : ''}</div></div>
+    <p style="margin-top:14px">Pacotes onde aparece: ${PACKS.filter(p => p.odds[c.r]).map(p => p.e).join(' ')}</p>`);
+}
+
+/* =====================================================================
+   SHEETS (painel que sobe de baixo)
+   ===================================================================== */
+function openSheet(html){
+  $('sheet').innerHTML = '<div class="handle"></div>' + html;
+  $('sheet').scrollTop = 0;
+  $('sheetWrap').classList.add('open');
+}
+function closeSheet(){ $('sheetWrap').classList.remove('open'); }
+function confirmSheet(msg, okLabel, onOk){
+  openSheet(`<h3>Tem certeza?</h3><p style="margin-bottom:6px">${msg}</p>
+    <div class="sactions"><button class="big danger" id="cfOk">${okLabel}</button><button class="big ghost" data-a="close">Cancelar</button></div>`);
+  $('cfOk').onclick = () => { closeSheet(); onOk(); };
+}
+function settingsSheet(){
+  openSheet(`<h3>⚙️ Configurações</h3>
+    <div class="setting">🔊 Som <button class="toggle ${state.sound ? 'on' : ''}" id="tSound" aria-label="Som"></button></div>
+    <div class="setting">📳 Vibração <button class="toggle ${state.vibe ? 'on' : ''}" id="tVibe" aria-label="Vibração"></button></div>
+    <p style="margin-top:14px">Dica: no celular, use <b>“Adicionar à tela inicial”</b> no menu do navegador para abrir como app, em tela cheia.</p>
+    <div class="sactions"><button class="big ghost" id="tReset" style="color:#ff6a80">↺ Apagar progresso</button></div>`);
+  $('tSound').onclick = e => { state.sound = !state.sound; e.currentTarget.classList.toggle('on', state.sound); save(); };
+  $('tVibe').onclick = e => { state.vibe = !state.vibe; e.currentTarget.classList.toggle('on', state.vibe); vibe(30); save(); };
+  $('tReset').onclick = () => confirmSheet('Isso apaga TODAS as suas cartas e dinheiro.', 'Apagar tudo', () => {
+    state = newState(); save(); renderAll(); setTab('shop'); toast('Progresso apagado. Boa sorte, feiticeiro! 🍀');
+  });
+}
+// arrastar pra baixo fecha o painel
+(function sheetDrag(){
+  const sh = $('sheet'); let y0 = null, dy = 0;
+  sh.addEventListener('touchstart', e => { if(sh.scrollTop <= 0){ y0 = e.touches[0].clientY; dy = 0; } }, {passive:true});
+  sh.addEventListener('touchmove', e => {
+    if(y0 == null) return; dy = e.touches[0].clientY - y0;
+    if(dy > 0){ sh.classList.add('dragging'); sh.style.transform = `translate(-50%, ${dy}px)`; }
+  }, {passive:true});
+  sh.addEventListener('touchend', () => {
+    sh.classList.remove('dragging'); sh.style.transform = '';
+    if(y0 != null && dy > 90) closeSheet();
+    y0 = null;
+  });
+})();
+
+/* =====================================================================
+   LOOP
+   ===================================================================== */
+let lastShopKey = '';
 function updateLive(){
   $('money').textContent = '$' + fmt(state.money);
   $('income').textContent = `+$${fmt(totalIncome())}/s`;
-  if(!state.auto) for(let i=0;i<state.unlocked;i++){ const b = $('bank'+i); if(b) b.textContent = '$' + fmt(state.banks[i]); }
-  const left = Math.max(0, state.nextRestock - Date.now());
-  $('restockTxt').textContent = `Reposição em ${Math.ceil(left/1000)}s`;
-  $('restockBar').style.width = (100 - left/RESTOCK_MS*100) + '%';
-  document.querySelectorAll('[data-buy]').forEach(b => b.disabled = !!b.dataset.out || state.money < +b.dataset.price);
+  if(!state.auto) for(let i=0;i<state.unlocked;i++){
+    const b = $('bank'+i); if(b) b.textContent = '$' + fmt(state.banks[i]);
+    const pb = $('pb'+i); if(pb) pb.classList.toggle('ready', state.pods[i] != null && state.banks[i] >= Math.max(1, (incOf(cardByU(state.pods[i])||{c:'maldicao'}) * 10)));
+  }
+  const left = Math.max(0, state.nextRestock - Date.now()), sec = Math.ceil(left/1000) + 's', pct = (100 - left/RESTOCK_MS*100) + '%';
+  $('rsChip').textContent = sec; $('rsBig').textContent = sec; $('rsBar').style.width = pct; $('rsLine').style.width = pct;
+  document.querySelectorAll('[data-a="buy"]').forEach(b => {
+    const p = PK[b.dataset.id], ok = (state.stock[p.id]||0) > 0 && state.money >= p.price;
+    b.classList.toggle('cant', !ok);
+  });
+  const cb = $('collectBtn');
+  if(state.auto){ cb.textContent = '🤖 Automático'; cb.disabled = true; }
+  else { cb.textContent = '💰 Coletar $' + fmt(totalBank()); cb.disabled = totalBank() < 0.1; }
   const uc = $('unlockCost'); if(uc) uc.style.color = state.money >= podCost(state.unlocked) ? 'var(--money)' : '#ffcf5a';
+  const ab = $('autoBtn'); if(ab) ab.classList.toggle('cant', state.money < AUTO_COST);
+  // badges
+  const avail = PACKS.filter(p => (state.stock[p.id]||0) > 0 && state.money >= p.price);
+  const bs = $('bShop'), rareIn = PACKS.some(p => isRare(p) && (state.stock[p.id]||0) > 0);
+  bs.textContent = avail.length || (rareIn ? '!' : '');
+  bs.classList.toggle('show', state.tab !== 'shop' && (avail.length > 0 || rareIn));
+  bs.classList.toggle('hot', rareIn);
+  const bi = $('bInv'); bi.textContent = state.newCards > 99 ? '99+' : state.newCards;
+  bi.classList.toggle('show', state.tab !== 'inv' && state.newCards > 0);
 }
 function tick(){
   const now = Date.now();
@@ -778,54 +1028,44 @@ function tick(){
 /* =====================================================================
    EVENTOS
    ===================================================================== */
+const ACTIONS = {
+  tab: el => { closeSheet(); setTab(el.dataset.t); },
+  buy: el => buyPack(el.dataset.id),
+  pod: (el, ev) => podTap(+el.dataset.i, ev),
+  podcard: el => state.pods[+el.dataset.i] == null ? pickerSheet(+el.dataset.i) : podSheet(+el.dataset.i),
+  unlock: () => unlockPod(),
+  group: el => cardSheet(el.dataset.k),
+  dex: el => dexSheet(el.dataset.id),
+  filter: el => { state.filter = el.dataset.f; renderInv(); },
+  close: () => closeSheet(),
+  best: () => autoPlace(),
+  collectAll: () => collectAll(),
+  auto: () => buyAuto(),
+  settings: () => settingsSheet(),
+  massSell: () => massSellSheet(),
+};
 document.addEventListener('click', ev => {
-  const t = ev.target.closest('[data-buy],[data-pod],[data-collect],[data-remove],[data-unlock],[data-group],[data-close]');
-  if(!t) return;
-  const d = t.dataset;
-  if(d.close !== undefined) return closeModal();
-  if(d.buy) return buyPack(d.buy);
-  if(d.remove) return removeFromPod(+d.remove);
-  if(d.unlock) return unlockPod(+d.unlock);
-  if(d.group) return showCard(d.group);
-  if(d.collect){ return state.pods[+d.collect] != null ? collect(+d.collect, ev) : showPicker(+d.collect); }
-  if(d.pod){
-    const i = +d.pod;
-    if(state.pods[i] == null) return showPicker(i);
-    if(state.banks[i] >= 0.1 && !state.auto) return collect(i, ev);
-  }
+  const el = ev.target.closest('[data-a]');
+  if(el && ACTIONS[el.dataset.a]) ACTIONS[el.dataset.a](el, ev);
 });
-$('modal').addEventListener('click', ev => { if(ev.target === $('modal') && $('mbox').querySelector('[data-close]')) closeModal(); });
-document.addEventListener('keydown', ev => { if(ev.key === 'Escape' && $('mbox').querySelector('[data-close]')) closeModal(); });
-$('btnBest').onclick = autoPlace;
-$('btnCollect').onclick = collectAll;
-$('sellB').onclick = () => sellRarity('B');
-$('sellA').onclick = () => sellRarity('A');
-$('btnDex').onclick = showDex;
-$('btnSound').onclick = () => { state.sound = !state.sound; renderHeader(); save(); };
-$('btnAuto').onclick = () => {
-  if(state.money < AUTO_COST) return toast(`Precisa de $${fmt(AUTO_COST)}.`);
-  collectAll(); state.money -= AUTO_COST; state.auto = true;
-  toast('🤖 Coleta automática ativada! O dinheiro cai direto na conta.', true);
-  save(); renderHeader(); renderPods(); updateLive();
-};
-$('btnReset').onclick = () => {
-  if(!confirm('Apagar TODO o progresso e começar de novo?')) return;
-  state = newState(); save(); renderAll(); toast('Progresso apagado. Boa sorte, feiticeiro! 🍀');
-};
+$('sheetWrap').addEventListener('click', ev => { if(ev.target === $('sheetWrap')) closeSheet(); });
+document.addEventListener('keydown', ev => { if(ev.key === 'Escape') closeSheet(); });
+document.addEventListener('visibilitychange', () => { if(document.hidden) save(); else tick(); });
+addEventListener('pagehide', save);
 
-function renderAll(){ renderHeader(); renderShop(); renderPods(); renderInv(); updateLive(); }
+function renderAll(){ renderShop(); renderBase(); renderInv(); renderDex(); updateLive(); }
 
 /* ---------- início ---------- */
 (function init(){
   const away = (Date.now() - state.last) / 1000;
   const inc = totalIncome();
   renderAll();
+  setTab(state.opened ? (state.tab || 'base') : 'shop');
   tick();
   if(away > 30 && inc > 0) toast(`🌙 Enquanto você esteve fora, seus pódios renderam <b>$${fmt(inc * Math.min(away, OFFLINE_CAP))}</b>!`, true);
-  else if(!state.opened) toast('👋 Bem-vindo! Você tem $150. Compre seus primeiros pacotes na loja.', true);
+  else if(!state.opened) toast('👋 Bem-vindo! Você tem $150. Compre seus primeiros pacotes.', true);
   setInterval(tick, 100);
   setInterval(save, 5000);
-  addEventListener('beforeunload', save);
 })();
 </script>
 </body>

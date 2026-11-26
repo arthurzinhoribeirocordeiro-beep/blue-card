@@ -1,6 +1,16 @@
 # Jujutsu Cards (protótipo)
 
-Jogo de abrir pacotes de cartas com tema de Jujutsu Kaisen. É um arquivo só: abra `index.html` no navegador.
+Jogo de abrir pacotes de cartas com tema de Jujutsu Kaisen. O jogo foi feito pensando primeiro no **celular**. É um arquivo só: abra `index.html` no navegador.
+
+## Feito para celular
+
+- **Abas na parte de baixo da tela:** Base, Loja, Cartas e Coleção. Ficam no alcance do polegar e mostram avisos, como um pacote raro em estoque ou cartas novas.
+- **Painéis que sobem de baixo** para ver uma carta, trocar a carta de um pódio, vender e mexer nas configurações. Para fechar, arraste o painel pra baixo ou toque fora dele.
+- **Abertura de pacote em tela cheia, uma carta por vez:** um toque vira a carta, outro toque passa pra próxima. Tem também os botões "Pular" e "Abrir outro".
+- **Barra fixa na Base** com os botões "Organizar" e "Coletar $X".
+- **Botões grandes**, sem zoom ao tocar duas vezes, respeita o notch e a barra do iPhone e **vibra** quando você tira uma carta rara (no Android).
+- **Dá pra instalar como app:** no menu do navegador, toque em "Adicionar à tela inicial" e o jogo abre em tela cheia.
+- No computador, o jogo aparece centralizado, no formato de um celular.
 
 ## Como funciona
 
