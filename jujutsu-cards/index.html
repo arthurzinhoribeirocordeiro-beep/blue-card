@@ -1,0 +1,832 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Jujutsu Cards</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0714; --panel:#150e26; --panel2:#1d1433; --line:#2e2250;
+  --text:#efe9ff; --muted:#9a8fbf; --accent:#7b5cff; --cursed:#3fd0ff; --money:#5dff9a;
+  --rB:#8fa3b8; --rA:#3fa9ff; --rS:#b45cff; --rSS:#ffb020; --rSSP:#ff2e4d;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  font-family:Nunito,system-ui,sans-serif; color:var(--text); min-height:100vh;
+  background:
+    radial-gradient(1200px 600px at 80% -10%, #3a1d6e55, transparent 60%),
+    radial-gradient(900px 500px at -10% 110%, #0b4d6e44, transparent 60%),
+    var(--bg);
+}
+button{font:inherit; cursor:pointer; border:0; border-radius:10px; color:var(--text)}
+button:disabled{opacity:.45; cursor:not-allowed}
+.btn{background:var(--panel2); border:1px solid var(--line); padding:8px 12px; font-weight:700}
+.btn:hover:not(:disabled){border-color:var(--accent)}
+.btn.primary{background:linear-gradient(135deg,#7b5cff,#3fd0ff); border:0; color:#0b0714}
+.btn.danger{background:#3a1020; border-color:#6a1d33}
+
+/* ---------- header ---------- */
+header{
+  position:sticky; top:0; z-index:20; display:flex; flex-wrap:wrap; align-items:center; gap:12px;
+  padding:10px 16px; background:#0b0714e6; backdrop-filter:blur(8px); border-bottom:1px solid var(--line);
+}
+.logo{font-family:Bangers; font-size:30px; letter-spacing:1px; line-height:1;
+  background:linear-gradient(90deg,#3fd0ff,#b45cff,#ff2e4d); -webkit-background-clip:text; background-clip:text; color:transparent}
+.logo small{display:block; font-family:Nunito; font-size:11px; color:var(--muted); letter-spacing:3px; -webkit-text-fill-color:var(--muted)}
+.money{margin-left:auto; text-align:right}
+.money b{font-family:Bangers; font-size:32px; color:var(--money); letter-spacing:1px; text-shadow:0 0 14px #5dff9a55}
+.money small{display:block; color:var(--muted); font-size:12px}
+.hbtns{display:flex; gap:8px; flex-wrap:wrap}
+
+/* ---------- layout ---------- */
+.layout{display:grid; grid-template-columns:390px 1fr; gap:16px; padding:16px; max-width:1500px; margin:0 auto}
+@media (max-width:900px){ .layout{grid-template-columns:1fr; padding:12px} header{padding:10px 12px} }
+@media (max-width:600px){
+  header{gap:8px} .logo{font-size:24px} .money b{font-size:26px}
+  .hbtns{order:3; width:100%} .hbtns .btn{padding:6px 9px; font-size:12px}
+}
+.panel{background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:14px}
+.panel h2{font-family:Bangers; letter-spacing:1px; font-weight:400; font-size:24px; margin:0 0 4px; display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+.panel h2 .sub{font-family:Nunito; font-size:13px; color:var(--muted); margin-left:auto; letter-spacing:0}
+.hint{color:var(--muted); font-size:13px; margin:0 0 12px}
+.col{display:flex; flex-direction:column; gap:16px; min-width:0}
+
+/* ---------- shop ---------- */
+.restock{display:flex; align-items:center; gap:10px; margin-bottom:12px; font-size:13px; color:var(--muted)}
+.bar{flex:1; height:8px; background:#0006; border-radius:6px; overflow:hidden}
+.bar i{display:block; height:100%; background:linear-gradient(90deg,#3fd0ff,#7b5cff)}
+.pack{
+  --pc:#555; display:grid; grid-template-columns:58px 1fr auto; gap:10px; align-items:center;
+  padding:10px; border-radius:14px; margin-bottom:10px; border:1px solid color-mix(in srgb,var(--pc) 55%, transparent);
+  background:linear-gradient(120deg, color-mix(in srgb,var(--pc) 28%, transparent), transparent 70%), var(--panel2);
+}
+.pack.empty{filter:grayscale(.85); opacity:.6}
+.pack-art{width:58px; height:74px; border-radius:10px; display:grid; place-items:center; font-size:30px;
+  background:linear-gradient(160deg,var(--pc),#000); box-shadow:0 0 14px color-mix(in srgb,var(--pc) 60%, transparent); position:relative}
+.pack-art::after{content:'呪'; position:absolute; bottom:2px; right:5px; font-size:12px; opacity:.6}
+.pack-name{font-weight:900}
+.pack-odds{font-size:11px; display:flex; flex-wrap:wrap; gap:4px; margin:4px 0}
+.pack-odds span{padding:0 5px; border-radius:5px; background:#0005; border:1px solid currentColor}
+.pack-stock{font-size:11px; color:var(--muted)}
+.pack-stock b{color:var(--text)}
+.buy{background:linear-gradient(135deg,#2ad17a,#13a35a); color:#04130b; font-weight:900; padding:10px 12px; min-width:76px}
+
+/* ---------- rarity colors ---------- */
+.r-B{--rc:var(--rB)} .r-A{--rc:var(--rA)} .r-S{--rc:var(--rS)} .r-SS{--rc:var(--rSS)} .r-SSP{--rc:var(--rSSP)}
+.t-B{color:var(--rB)} .t-A{color:var(--rA)} .t-S{color:var(--rS)} .t-SS{color:var(--rSS)} .t-SSP{color:var(--rSSP)}
+
+/* ---------- cards ---------- */
+.card{
+  --cc:#666; width:120px; aspect-ratio:3/4.2; border-radius:12px; position:relative; flex:none;
+  background:linear-gradient(160deg,#1a1230,#0d0818); border:3px solid var(--rc);
+  box-shadow:0 0 12px color-mix(in srgb,var(--rc) 45%, transparent);
+  overflow:hidden; display:flex; flex-direction:column; user-select:none;
+}
+.card .art{flex:1; position:relative; display:grid; place-items:center; overflow:hidden;
+  background:radial-gradient(circle at 50% 50%, color-mix(in srgb,var(--cc) 85%, transparent) 0%, transparent 68%), linear-gradient(180deg,#0000,#0008)}
+.card .art::before{content:'呪'; position:absolute; font-size:110px; font-weight:900; opacity:.07; line-height:1}
+.card .emo{font-size:48px; filter:drop-shadow(0 4px 8px #000a); position:relative}
+.card .art img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover}
+.card .badge{position:absolute; top:4px; left:4px; font-family:Bangers; font-size:15px; letter-spacing:.5px;
+  background:var(--rc); color:#0b0714; padding:1px 6px; border-radius:6px; z-index:2}
+.card .vtag{position:absolute; bottom:3px; left:3px; right:3px; text-align:center; font-size:9px; font-weight:900;
+  border-radius:5px; padding:1px 2px; z-index:2}
+.card .name{font-weight:900; font-size:12px; text-align:center; padding:4px 4px 0; line-height:1.1; min-height:28px; display:grid; place-items:center}
+.card .inc{font-size:11px; color:var(--money); text-align:center; padding:1px 0 5px; font-weight:700}
+.card.sm{width:86px; border-width:2px; border-radius:10px}
+.card.sm .emo{font-size:32px} .card.sm .name{font-size:10px; min-height:24px} .card.sm .badge{font-size:12px} .card.sm .inc{font-size:10px}
+.card.sm .art::before{font-size:70px}
+.card.lg{width:190px; border-width:4px} .card.lg .emo{font-size:82px} .card.lg .name{font-size:16px; min-height:40px} .card.lg .inc{font-size:14px} .card.lg .badge{font-size:20px}
+.card.lg .art::before{font-size:170px} .card.lg .vtag{font-size:12px}
+.card.r-SS{animation:glow 2.4s ease-in-out infinite}
+.card.r-SSP{animation:glow 1.4s ease-in-out infinite}
+@keyframes glow{50%{box-shadow:0 0 26px var(--rc), 0 0 4px #fff inset}}
+.card.v-gold{border-color:#ffd54a; background:linear-gradient(160deg,#3a2c05,#120c00)}
+.card.v-gold .vtag{background:#ffd54a; color:#2a1d00}
+.card.v-gold::after{content:''; position:absolute; inset:0; pointer-events:none;
+  background:linear-gradient(115deg,transparent 35%,#fff6 50%,transparent 65%); background-size:250% 100%; animation:shine 2.2s linear infinite}
+.card.v-bf{border-color:#ff1f3d; background:linear-gradient(160deg,#200006,#000)}
+.card.v-bf .art{background:radial-gradient(circle,#ff1f3d99 0%, #000 70%)}
+.card.v-bf .vtag{background:#000; color:#ff3d57; border:1px solid #ff1f3d}
+.card.v-bf::after{content:''; position:absolute; inset:0; pointer-events:none; mix-blend-mode:screen;
+  background:repeating-linear-gradient(60deg,transparent 0 14px,#ff1f3d55 14px 16px,transparent 16px 30px); animation:sparks .6s steps(3) infinite}
+@keyframes shine{from{background-position:150% 0}to{background-position:-100% 0}}
+@keyframes sparks{50%{opacity:.3; transform:translateX(3px)}}
+.cnt{position:absolute; top:4px; right:4px; z-index:3; background:#000c; border:1px solid var(--line); border-radius:8px; padding:0 6px; font-weight:900; font-size:12px}
+.new{position:absolute; top:-8px; right:-8px; z-index:5; background:#ff2e4d; color:#fff; font-family:Bangers; padding:2px 8px; border-radius:8px; transform:rotate(8deg); font-size:16px}
+
+/* ---------- podiums ---------- */
+.pods{display:grid; grid-template-columns:repeat(auto-fill,minmax(118px,1fr)); gap:14px 10px; align-items:end}
+.podium{position:relative; display:flex; flex-direction:column; align-items:center}
+.pod-top{height:142px; display:flex; align-items:flex-end; justify-content:center; cursor:pointer; padding-bottom:4px}
+.pod-top .card{animation:bob 3s ease-in-out infinite}
+.pod-top .card.r-SS,.pod-top .card.r-SSP{animation:bob 3s ease-in-out infinite, glow 1.6s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-7px)}}
+.pod-empty{width:86px; height:120px; border:2px dashed #4a3a80; border-radius:10px; display:grid; place-items:center; align-content:center; color:#6f5fb0; font-size:34px; line-height:1}
+.pod-empty small{font-size:11px; font-weight:700}
+.pod-top:hover .pod-empty{border-color:var(--accent); color:var(--accent)}
+.pod-base{--rc:#4a3a80; width:100%; background:linear-gradient(#3a2a66,#170f2e); cursor:pointer;
+  border-radius:50% 50% 10px 10px / 16px 16px 10px 10px; padding:12px 4px 8px; text-align:center; border-top:3px solid var(--rc)}
+.podium.filled .pod-base{box-shadow:0 -8px 20px -8px var(--rc)}
+.pod-base b{display:block; color:var(--money); font-size:15px}
+.pod-base small{color:var(--muted); font-size:11px}
+.pod-x{position:absolute; top:0; right:4px; width:24px; height:24px; padding:0; background:#000a; border:1px solid var(--line); font-size:12px; z-index:4}
+.podium.locked .pod-top{cursor:default}
+.podium.locked .pod-empty{border-style:solid; border-color:#2a2048; color:#4a3f70}
+.podium.next .pod-empty{border-color:#5a4a20; color:#ffcf5a}
+.collect-all{margin-left:auto}
+
+/* ---------- inventory ---------- */
+.inv{display:flex; flex-wrap:wrap; gap:10px}
+.inv .slot{position:relative; cursor:pointer; transition:transform .1s}
+.inv .slot:hover{transform:translateY(-3px)}
+.empty-msg{color:var(--muted); font-size:14px; padding:20px; text-align:center; width:100%}
+.inv-tools{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px}
+
+/* ---------- modal ---------- */
+.modal{position:fixed; inset:0; z-index:100; background:#05020cdd; display:none; align-items:center; justify-content:center; padding:16px}
+.modal.open{display:flex}
+.mbox{background:var(--panel); border:1px solid var(--line); border-radius:18px; padding:18px; max-width:min(960px,100%); max-height:92vh; overflow:auto; position:relative; width:100%}
+.mbox.narrow{max-width:420px}
+.mclose{position:absolute; top:10px; right:10px; width:34px; height:34px; padding:0; background:var(--panel2); border:1px solid var(--line)}
+.mbox h3{font-family:Bangers; font-weight:400; font-size:28px; letter-spacing:1px; margin:0 0 10px}
+.detail{display:flex; gap:16px; flex-wrap:wrap; align-items:flex-start; justify-content:center}
+.detail .info{flex:1; min-width:180px}
+.detail .info p{margin:4px 0; color:var(--muted)}
+.detail .info p b{color:var(--text)}
+.actions{display:flex; flex-direction:column; gap:8px; margin-top:12px}
+.pick{display:flex; flex-wrap:wrap; gap:10px; justify-content:center}
+.pick .slot{position:relative; cursor:pointer}
+
+/* ---------- pack opening ---------- */
+.opening{text-align:center}
+.bigpack{width:170px; height:230px; margin:20px auto; border-radius:18px; display:grid; place-items:center; font-size:80px; cursor:pointer;
+  background:linear-gradient(160deg,var(--pc),#000); box-shadow:0 0 40px var(--pc); animation:shake .5s ease-in-out infinite; position:relative}
+.bigpack::after{content:'呪'; position:absolute; bottom:10px; right:14px; font-size:30px; opacity:.6}
+.bigpack.burst{animation:burst .45s forwards}
+@keyframes shake{0%,100%{transform:rotate(0)}25%{transform:rotate(-3deg) scale(1.02)}75%{transform:rotate(3deg) scale(1.02)}}
+@keyframes burst{to{transform:scale(1.6); opacity:0; filter:brightness(3)}}
+.pulls{display:flex; flex-wrap:wrap; gap:16px; justify-content:center; margin:16px 0}
+.flip{width:190px; aspect-ratio:3/4.2; perspective:900px; cursor:pointer; position:relative; animation:dealIn .4s backwards}
+@keyframes dealIn{from{transform:translateY(40px) scale(.8); opacity:0}}
+.flip-inner{position:absolute; inset:0; transition:transform .6s; transform-style:preserve-3d}
+.flip.flipped .flip-inner{transform:rotateY(180deg)}
+.flip .back,.flip .front{position:absolute; inset:0; backface-visibility:hidden; -webkit-backface-visibility:hidden}
+.flip .front{transform:rotateY(180deg)}
+.flip .back{border-radius:12px; border:4px solid #3a2a66; display:grid; place-items:center; font-size:90px; color:#7b5cff;
+  background:repeating-linear-gradient(45deg,#160d2b 0 10px,#1d1238 10px 20px); text-shadow:0 0 20px #7b5cff}
+.flip.flipped.r-SS .back,.flip.flipped.r-SSP .back{display:none}
+.flip:not(.flipped):hover .back{border-color:var(--accent)}
+.open-actions{display:flex; gap:10px; justify-content:center; flex-wrap:wrap}
+
+/* ---------- domain expansion ---------- */
+.domain{position:fixed; inset:0; z-index:300; display:grid; place-items:center; align-content:center; text-align:center; pointer-events:none;
+  background:radial-gradient(circle, var(--dc) 0%, #000 72%); animation:dom 2.6s forwards}
+.domain .k{font-size:clamp(54px,13vw,150px); font-weight:900; color:#fff; text-shadow:0 0 30px var(--dc), 0 0 60px var(--dc); letter-spacing:6px}
+.domain .t{font-family:Bangers; font-size:clamp(26px,6vw,58px); letter-spacing:2px; color:#fff}
+.domain .n{font-size:clamp(16px,3vw,24px); color:#fffc; font-weight:700}
+@keyframes dom{0%{opacity:0; transform:scale(1.3)} 12%{opacity:1; transform:scale(1)} 80%{opacity:1} 100%{opacity:0}}
+.flash{position:fixed; inset:0; z-index:250; pointer-events:none; background:var(--dc); animation:flash .5s forwards}
+@keyframes flash{from{opacity:.75}to{opacity:0}}
+
+/* ---------- collection ---------- */
+.tier{margin-bottom:16px}
+.tier h4{font-family:Bangers; font-weight:400; font-size:22px; letter-spacing:1px; margin:0 0 8px}
+.tier .row{display:flex; flex-wrap:wrap; gap:10px}
+.mystery{filter:brightness(0) drop-shadow(0 0 1px #fff3)}
+.card.unknown .name,.card.unknown .inc{color:#5a4f80}
+
+/* ---------- toasts & floating text ---------- */
+.toasts{position:fixed; bottom:16px; left:50%; transform:translateX(-50%); z-index:400; display:flex; flex-direction:column; gap:8px; align-items:center; pointer-events:none; width:min(92vw,460px)}
+.toast{background:#1d1433f2; border:1px solid var(--line); border-radius:12px; padding:10px 14px; font-weight:700; font-size:14px; animation:tin .25s; box-shadow:0 8px 30px #0008; text-align:center}
+.toast.hot{border-color:#ff2e4d; background:#2a0a14f2}
+@keyframes tin{from{transform:translateY(20px); opacity:0}}
+.floaty{position:fixed; z-index:350; pointer-events:none; font-family:Bangers; font-size:24px; color:var(--money); text-shadow:0 2px 6px #000; animation:floaty 1s forwards}
+@keyframes floaty{to{transform:translateY(-60px); opacity:0}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">JUJUTSU CARDS<small>呪術カード · PROTÓTIPO</small></div>
+  <div class="hbtns">
+    <button class="btn" id="btnDex">📖 Coleção <span id="dexCount"></span></button>
+    <button class="btn" id="btnAuto"></button>
+    <button class="btn" id="btnSound">🔊</button>
+    <button class="btn danger" id="btnReset" title="Apagar progresso">↺</button>
+  </div>
+  <div class="money"><b id="money">$0</b><small id="income">+$0/s</small></div>
+</header>
+
+<main class="layout">
+  <section class="panel">
+    <h2>🏪 Loja de Pacotes</h2>
+    <p class="hint">Os pacotes aparecem a cada reposição. Os simples chegam sempre; os raros quase nunca. Compre rápido!</p>
+    <div class="restock"><span id="restockTxt">Reposição em 30s</span><div class="bar"><i id="restockBar"></i></div></div>
+    <div id="shop"></div>
+  </section>
+
+  <div class="col">
+    <section class="panel">
+      <h2>🏯 Sua Base <span class="sub" id="podInfo"></span></h2>
+      <p class="hint">Coloque cartas nos pódios para gerar dinheiro. Clique no pódio para coletar.</p>
+      <div class="inv-tools">
+        <button class="btn primary" id="btnBest">⚡ Colocar as melhores</button>
+        <button class="btn collect-all" id="btnCollect">💰 Coletar tudo</button>
+      </div>
+      <div class="pods" id="pods"></div>
+    </section>
+
+    <section class="panel">
+      <h2>🎴 Inventário <span class="sub" id="invInfo"></span></h2>
+      <div class="inv-tools">
+        <button class="btn" id="sellB">Vender todas as B</button>
+        <button class="btn" id="sellA">Vender todas as A</button>
+      </div>
+      <div class="inv" id="inv"></div>
+    </section>
+  </div>
+</main>
+
+<div class="modal" id="modal"><div class="mbox" id="mbox"></div></div>
+<div class="toasts" id="toasts"></div>
+
+<script>
+/* =====================================================================
+   DADOS DO JOGO
+   ===================================================================== */
+
+// Para usar imagens: coloque arquivos em jujutsu-cards/img/<id>.png
+// (ex: img/gojo.png) ou cole um link aqui. Sem imagem, a carta usa o emoji.
+const IMAGENS = {
+  // gojo: 'https://exemplo.com/gojo.jpg',
+};
+
+const R_ORDER = ['B','A','S','SS','SS+'];
+const RAR = {
+  'B':   {label:'Comum',      css:'B'},
+  'A':   {label:'Raro',       css:'A'},
+  'S':   {label:'Super Raro', css:'S'},
+  'SS':  {label:'Épico',      css:'SS'},
+  'SS+': {label:'Lendário',   css:'SSP'},
+};
+
+// Ranking de força (do mais forte pro mais fraco dentro de cada tier).
+// inc = dinheiro por segundo no pódio.
+const CHARS = [
+  // ---------- SS+ ----------
+  {id:'sukuna',   name:'Ryomen Sukuna',      r:'SS+', inc:2000, e:'👹', col:'#c0122c', t:'Rei das Maldições',       d:'Santuário Malevolente', k:'伏魔御厨子'},
+  {id:'gojo',     name:'Satoru Gojo',        r:'SS+', inc:1850, e:'🕶️', col:'#3fc8ff', t:'O Mais Forte',            d:'Vazio Infinito',        k:'無量空処'},
+  // ---------- SS ----------
+  {id:'yuta',     name:'Yuta Okkotsu',       r:'SS', inc:300, e:'💍', col:'#e6e6ff', t:'Grau Especial · Rika'},
+  {id:'kenjaku',  name:'Kenjaku',            r:'SS', inc:285, e:'🧠', col:'#8a5a2b', t:'O Feiticeiro de Mil Anos'},
+  {id:'yuji',     name:'Yuji Itadori',       r:'SS', inc:270, e:'👊', col:'#ff6a3d', t:'Despertado · Black Flash'},
+  {id:'toji',     name:'Toji Fushiguro',     r:'SS', inc:255, e:'🗡️', col:'#3d8b5a', t:'Assassino de Feiticeiros'},
+  {id:'yuki',     name:'Yuki Tsukumo',       r:'SS', inc:240, e:'🌌', col:'#c58cff', t:'Massa Estelar'},
+  {id:'geto',     name:'Suguru Geto',        r:'SS', inc:225, e:'🐉', col:'#6b6b8a', t:'Manipulação de Maldições'},
+  {id:'mahoraga', name:'Mahoraga',           r:'SS', inc:210, e:'☸️', col:'#d9d9d9', t:'General Divino'},
+  {id:'kashimo',  name:'Hajime Kashimo',     r:'SS', inc:195, e:'⚡', col:'#2fd0ff', t:'Feiticeiro da Era Edo'},
+  // ---------- S ----------
+  {id:'maki',     name:'Maki Zenin',         r:'S', inc:60, e:'⚔️', col:'#3aa66a', t:'Restrição Celestial'},
+  {id:'megumi',   name:'Megumi Fushiguro',   r:'S', inc:56, e:'🐺', col:'#4a4aa8', t:'Técnica das Dez Sombras'},
+  {id:'hakari',   name:'Kinji Hakari',       r:'S', inc:53, e:'🎰', col:'#ff3d9a', t:'Jackpot Inativo'},
+  {id:'jogo',     name:'Jogo',               r:'S', inc:50, e:'🌋', col:'#ff7a00', t:'Maldição do Desastre'},
+  {id:'mahito',   name:'Mahito',             r:'S', inc:47, e:'🖐️', col:'#7aa0b8', t:'Transfiguração Ociosa'},
+  {id:'todo',     name:'Aoi Todo',           r:'S', inc:44, e:'👏', col:'#b07a3b', t:'Boogie Woogie'},
+  {id:'choso',    name:'Choso',              r:'S', inc:41, e:'🩸', col:'#a00018', t:'Manipulação de Sangue'},
+  {id:'higuruma', name:'Hiromi Higuruma',    r:'S', inc:38, e:'⚖️', col:'#d4af37', t:'Tribunal Mortal'},
+  {id:'uraume',   name:'Uraume',             r:'S', inc:35, e:'❄️', col:'#a8e6ff', t:'Manipulação de Gelo'},
+  {id:'ishigori', name:'Ryu Ishigori',       r:'S', inc:32, e:'💥', col:'#ffb000', t:'Canhão de Energia'},
+  {id:'hanami',   name:'Hanami',             r:'S', inc:30, e:'🌿', col:'#4caf50', t:'Maldição da Floresta'},
+  // ---------- A ----------
+  {id:'nanami',   name:'Kento Nanami',       r:'A', inc:12,  e:'👔', col:'#c9a227', t:'Razão 7:3'},
+  {id:'naoya',    name:'Naoya Zenin',        r:'A', inc:11.5,e:'🎞️', col:'#b07cc6', t:'Técnica de Projeção'},
+  {id:'meimei',   name:'Mei Mei',            r:'A', inc:11,  e:'🐦', col:'#5a5a7a', t:'Manipulação de Corvos'},
+  {id:'naobito',  name:'Naobito Zenin',      r:'A', inc:10.5,e:'🍶', col:'#8e6cc0', t:'Líder do Clã Zenin'},
+  {id:'kusakabe', name:'Atsuya Kusakabe',    r:'A', inc:10,  e:'🌑', col:'#56607a', t:'Nova Sombra'},
+  {id:'dagon',    name:'Dagon',              r:'A', inc:9.5, e:'🐙', col:'#1e6fa8', t:'Maldição do Oceano'},
+  {id:'yaga',     name:'Masamichi Yaga',     r:'A', inc:9,   e:'🧸', col:'#a0703a', t:'Diretor de Tóquio'},
+  {id:'gakuganji',name:'Yoshinobu Gakuganji',r:'A', inc:8.5, e:'🎸', col:'#8a2be2', t:'Diretor de Kyoto'},
+  {id:'panda',    name:'Panda',              r:'A', inc:8,   e:'🐼', col:'#dddddd', t:'Cadáver Amaldiçoado'},
+  {id:'inumaki',  name:'Toge Inumaki',       r:'A', inc:7.5, e:'🍙', col:'#7ad0c8', t:'Fala Amaldiçoada'},
+  {id:'kamo',     name:'Noritoshi Kamo',     r:'A', inc:7,   e:'🏹', col:'#b0303a', t:'Manipulação de Sangue'},
+  {id:'miguel',   name:'Miguel',             r:'A', inc:6.5, e:'🪢', col:'#c46a2a', t:'Corda Negra'},
+  {id:'nobara',   name:'Nobara Kugisaki',    r:'A', inc:6,   e:'🔨', col:'#ff7a3d', t:'Técnica do Boneco de Palha'},
+  // ---------- B ----------
+  {id:'mai',      name:'Mai Zenin',          r:'B', inc:3,   e:'🔫', col:'#5a7a9a', t:'Construção'},
+  {id:'momo',     name:'Momo Nishimiya',     r:'B', inc:2.8, e:'🧹', col:'#e8a0c8', t:'Voo de Vassoura'},
+  {id:'mechamaru',name:'Mechamaru',          r:'B', inc:2.6, e:'🤖', col:'#7a8a9a', t:'Manipulação de Marionetes'},
+  {id:'miwa',     name:'Kasumi Miwa',        r:'B', inc:2.4, e:'🌀', col:'#6aa0ff', t:'Nova Sombra · Simples'},
+  {id:'utahime',  name:'Utahime Iori',       r:'B', inc:2.2, e:'🎶', col:'#e05a7a', t:'Solo Proibido'},
+  {id:'ino',      name:'Takuma Ino',         r:'B', inc:2,   e:'🎭', col:'#6a7a5a', t:'Shikigamis Sagrados'},
+  {id:'junpei',   name:'Junpei Yoshino',     r:'B', inc:1.8, e:'🎐', col:'#7ab8d0', t:'Moon Dregs'},
+  {id:'nitta',    name:'Arata Nitta',        r:'B', inc:1.6, e:'🩹', col:'#9ac08a', t:'Técnica de Cura'},
+  {id:'shoko',    name:'Shoko Ieiri',        r:'B', inc:1.4, e:'💉', col:'#c0c0d0', t:'Médica de Jujutsu'},
+  {id:'ijichi',   name:'Kiyotaka Ijichi',    r:'B', inc:1.2, e:'🚗', col:'#4a5a6a', t:'Supervisor (o motorista)'},
+  {id:'maldicao', name:'Maldição Grau 4',    r:'B', inc:1,   e:'👁️', col:'#5a3a6a', t:'Espírito Amaldiçoado'},
+];
+const CH = Object.fromEntries(CHARS.map(c => [c.id, c]));
+const BY_R = {}; R_ORDER.forEach(r => BY_R[r] = CHARS.filter(c => c.r === r));
+
+// Variações: chance de vir especial e multiplicador de renda
+const VARS = {
+  n:    {name:'Normal',      mult:1},
+  gold: {name:'Dourada',     mult:3, tag:'✨ DOURADA ×3',     chance:0.05},
+  bf:   {name:'Black Flash', mult:6, tag:'⚡ BLACK FLASH ×6', chance:0.01},
+};
+
+// Pacotes: odds em %, chance de aparecer em cada reposição, quantidade e limite de estoque
+const PACKS = [
+  {id:'g4',  name:'Pacote Grau 4',           e:'📦', color:'#6b7a8f', price:50,     n:3, odds:{B:80, A:17, S:2.7, SS:0.28, 'SS+':0.02}, chance:1.00, qty:[2,5], cap:10},
+  {id:'g2',  name:'Pacote Grau 2',           e:'🎁', color:'#2f7fd0', price:300,    n:3, odds:{B:55, A:34, S:9.5, SS:1.4,  'SS+':0.1},  chance:0.60, qty:[1,3], cap:6},
+  {id:'g1',  name:'Pacote Grau 1',           e:'💠', color:'#8a3fe0', price:1500,   n:3, odds:{B:25, A:47, S:24,  SS:3.6,  'SS+':0.4},  chance:0.35, qty:[1,2], cap:4},
+  {id:'esp', name:'Pacote Grau Especial',    e:'🔮', color:'#e09a10', price:8000,   n:3, odds:{A:40, S:45, SS:13.5, 'SS+':1.5},         chance:0.15, qty:[1,1], cap:3},
+  {id:'dom', name:'Pacote Expansão de Domínio', e:'🌀', color:'#d0205a', price:40000, n:3, odds:{S:50, SS:44, 'SS+':6},              chance:0.06, qty:[1,1], cap:2},
+  {id:'rei', name:'Pacote Rei das Maldições',e:'👑', color:'#ff1f3d', price:200000, n:3, odds:{SS:75, 'SS+':25},                     chance:0.02, qty:[1,1], cap:1},
+];
+const PK = Object.fromEntries(PACKS.map(p => [p.id, p]));
+
+const RESTOCK_MS = 30000;
+const POD_MAX = 10, POD_START = 4;
+const podCost = i => Math.round(500 * Math.pow(4, i - POD_START));
+const AUTO_COST = 10000;
+const SELL_MULT = 3;          // venda = renda/s × 3
+const OFFLINE_CAP = 7200;     // segundos de renda offline (2h)
+const SAVE_KEY = 'jjk_cards_v1';
+
+/* =====================================================================
+   ESTADO
+   ===================================================================== */
+function newState(){
+  return {money:150, cards:[], pods:Array(POD_MAX).fill(null), banks:Array(POD_MAX).fill(0), unlocked:POD_START,
+    stock:{g4:4, g2:1}, nextRestock:Date.now()+RESTOCK_MS, seen:{}, auto:false, sound:true,
+    opened:0, earned:0, last:Date.now(), uid:1};
+}
+let state = load();
+function load(){
+  try{
+    const s = JSON.parse(localStorage.getItem(SAVE_KEY));
+    if(s && typeof s.money === 'number') return Object.assign(newState(), s);
+  }catch(e){}
+  return newState();
+}
+function save(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(state)); }catch(e){} }
+
+/* =====================================================================
+   HELPERS
+   ===================================================================== */
+const $ = id => document.getElementById(id);
+const pick = arr => arr[Math.floor(Math.random()*arr.length)];
+const rint = (a,b) => a + Math.floor(Math.random()*(b-a+1));
+function fmt(n){
+  if(n < 1000) return n < 10 ? (Math.floor(n*10)/10).toString() : Math.floor(n).toString();
+  const u = ['K','M','B','T','Qa','Qi']; let i = -1;
+  while(n >= 1000 && i < u.length-1){ n /= 1000; i++; }
+  return (n < 10 ? n.toFixed(2) : n < 100 ? n.toFixed(1) : Math.floor(n)) + u[i];
+}
+const incOf = cd => CH[cd.c].inc * VARS[cd.v||'n'].mult;
+const sellOf = cd => Math.max(1, Math.floor(incOf(cd) * SELL_MULT));
+const cardByU = u => state.cards.find(c => c.u === u);
+const onPods = () => new Set(state.pods.filter(u => u != null));
+function totalIncome(){
+  let t = 0;
+  for(let i=0;i<state.unlocked;i++){ const u = state.pods[i]; if(u!=null){ const cd = cardByU(u); if(cd) t += incOf(cd); } }
+  return t;
+}
+function rollRarity(odds){
+  const keys = R_ORDER.filter(k => odds[k]);
+  const total = keys.reduce((s,k) => s + odds[k], 0);
+  let r = Math.random() * total;
+  for(const k of keys){ if(r < odds[k]) return k; r -= odds[k]; }
+  return keys[0];
+}
+function rollVariant(){
+  const r = Math.random();
+  if(r < VARS.bf.chance) return 'bf';
+  if(r < VARS.bf.chance + VARS.gold.chance) return 'gold';
+  return 'n';
+}
+
+/* ---------- imagens opcionais ---------- */
+const BAD_IMG = {};
+function imgFail(el, id){ BAD_IMG[id] = 1; el.remove(); }
+function imgTag(id){
+  if(BAD_IMG[id]) return '';
+  const src = IMAGENS[id] || `img/${id}.png`;
+  return `<img src="${src}" alt="" loading="lazy" onerror="imgFail(this,'${id}')">`;
+}
+
+/* ---------- som ---------- */
+let AC;
+function beep(f, d=0.12, type='sine', vol=0.06, delay=0){
+  if(!state.sound) return;
+  try{
+    AC = AC || new (window.AudioContext||window.webkitAudioContext)();
+    const t = AC.currentTime + delay, o = AC.createOscillator(), g = AC.createGain();
+    o.type = type; o.frequency.setValueAtTime(f, t);
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.0001, t + d);
+    o.connect(g).connect(AC.destination); o.start(t); o.stop(t + d);
+  }catch(e){}
+}
+function sfxRarity(r){
+  const i = R_ORDER.indexOf(r);
+  if(i <= 1){ beep(440 + i*120, .15, 'triangle'); return; }
+  [523,659,784,1047,1319].slice(0, i+2).forEach((f,k) => beep(f, .25, i>=3?'sawtooth':'triangle', .05, k*.07));
+}
+
+/* ---------- card html ---------- */
+function cardHTML(cd, size='md', extra=''){
+  const ch = CH[cd.c], R = RAR[ch.r], v = cd.v || 'n', V = VARS[v];
+  const tag = V.tag ? `<span class="vtag">${size==='sm' ? (v==='bf'?'⚡ ×6':'✨ ×3') : V.tag}</span>` : '';
+  return `<div class="card ${size} r-${R.css} v-${v}" style="--cc:${ch.col}">
+    <div class="art"><span class="emo">${ch.e}</span>${imgTag(ch.id)}<span class="badge">${ch.r}</span>${tag}${extra}</div>
+    <div class="name">${ch.name}</div><div class="inc">$${fmt(incOf(cd))}/s</div></div>`;
+}
+
+/* ---------- toasts / floaty ---------- */
+function toast(msg, hot=false){
+  const t = document.createElement('div'); t.className = 'toast' + (hot ? ' hot' : ''); t.innerHTML = msg;
+  $('toasts').appendChild(t); setTimeout(() => t.remove(), hot ? 4500 : 2600);
+}
+function floaty(x, y, txt){
+  const f = document.createElement('div'); f.className = 'floaty'; f.textContent = txt;
+  f.style.left = (x - 20) + 'px'; f.style.top = (y - 20) + 'px';
+  document.body.appendChild(f); setTimeout(() => f.remove(), 1000);
+}
+
+/* =====================================================================
+   LOJA / REPOSIÇÃO
+   ===================================================================== */
+function restock(silent){
+  const hits = [];
+  for(const p of PACKS){
+    if(Math.random() < p.chance){
+      const before = state.stock[p.id] || 0;
+      state.stock[p.id] = Math.min(p.cap, before + rint(p.qty[0], p.qty[1]));
+      if(state.stock[p.id] > before) hits.push(p);
+    }
+  }
+  if(silent) return;
+  const rare = hits.filter(p => p.chance <= 0.15);
+  rare.forEach(p => { toast(`🔥 ${p.e} <b>${p.name}</b> apareceu na loja!`, true); beep(880,.3,'square',.05); beep(1320,.4,'square',.05,.15); });
+  if(!rare.length) toast('📦 Loja reabastecida!');
+}
+
+function renderShop(){
+  $('shop').innerHTML = PACKS.map(p => {
+    const s = state.stock[p.id] || 0;
+    const odds = R_ORDER.filter(k => p.odds[k]).map(k => `<span class="t-${RAR[k].css}">${k} ${p.odds[k]}%</span>`).join('');
+    return `<div class="pack ${s ? '' : 'empty'}" style="--pc:${p.color}">
+      <div class="pack-art">${p.e}</div>
+      <div><div class="pack-name">${p.name}</div><div class="pack-odds">${odds}</div>
+        <div class="pack-stock">${s ? `Estoque: <b>${s}</b>` : 'ESGOTADO'} · aparece em ${Math.round(p.chance*100)}% das reposições · ${p.n} cartas</div></div>
+      <button class="buy" data-buy="${p.id}" data-price="${p.price}" ${s ? '' : 'data-out="1"'}>$${fmt(p.price)}</button>
+    </div>`;
+  }).join('');
+  updateLive();
+}
+
+function buyPack(id){
+  const p = PK[id];
+  if((state.stock[id]||0) <= 0) return toast('Esgotado! Espere a próxima reposição.');
+  if(state.money < p.price) return toast('Dinheiro insuficiente 💸');
+  state.money -= p.price; state.stock[id]--; state.opened++;
+  const pulls = [];
+  for(let k=0;k<p.n;k++){
+    const ch = pick(BY_R[rollRarity(p.odds)]);
+    const card = {u: state.uid++, c: ch.id, v: rollVariant()};
+    const isNew = !state.seen[ch.id]; state.seen[ch.id] = 1;
+    state.cards.push(card); pulls.push({card, isNew});
+  }
+  save(); renderShop(); renderInv(); renderHeader();
+  showOpening(p, pulls);
+}
+
+/* =====================================================================
+   ABERTURA DE PACOTE
+   ===================================================================== */
+function showOpening(p, pulls){
+  openModal(`<div class="opening"><h3>${p.e} ${p.name}</h3>
+    <p class="hint">Clique no pacote para abrir!</p>
+    <div class="bigpack" id="bigpack" style="--pc:${p.color}">${p.e}</div></div>`, false);
+  beep(220,.2,'triangle');
+  $('bigpack').onclick = () => {
+    $('bigpack').classList.add('burst'); beep(330,.15,'square',.05); beep(660,.25,'square',.05,.1);
+    setTimeout(() => revealCards(p, pulls), 420);
+  };
+}
+
+function revealCards(p, pulls){
+  $('mbox').innerHTML = `<button class="mclose" data-close>✕</button><div class="opening"><h3>${p.e} ${p.name}</h3>
+    <div class="pulls">${pulls.map((x,i) => {
+      const R = RAR[CH[x.card.c].r];
+      return `<div class="flip r-${R.css}" data-flip="${i}" style="animation-delay:${i*.12}s"><div class="flip-inner">
+        <div class="back">呪</div><div class="front">${cardHTML(x.card,'lg')}${x.isNew ? '<span class="new">NOVO!</span>' : ''}</div>
+      </div></div>`;}).join('')}</div>
+    <div class="open-actions" id="openActs"><button class="btn primary" id="revealAll">Revelar tudo</button></div></div>`;
+  let left = pulls.length;
+  const flip = i => {
+    const el = document.querySelector(`[data-flip="${i}"]`);
+    if(!el || el.classList.contains('flipped')) return;
+    el.classList.add('flipped'); left--;
+    const ch = CH[pulls[i].card.c];
+    sfxRarity(ch.r);
+    if(ch.r === 'SS+') domainExpansion(ch);
+    else if(ch.r === 'SS' || pulls[i].card.v === 'bf') flash(ch.r === 'SS' ? '#ffb020' : '#ff1f3d');
+    if(left === 0) finishOpening(pulls);
+  };
+  document.querySelectorAll('[data-flip]').forEach(el => el.onclick = () => flip(+el.dataset.flip));
+  $('revealAll').onclick = () => pulls.forEach((_,i) => setTimeout(() => flip(i), i*350));
+}
+
+function finishOpening(pulls){
+  const best = pulls.map(x => x.card).sort((a,b) => incOf(b) - incOf(a))[0];
+  const act = $('openActs'); if(!act) return;
+  act.innerHTML = `<button class="btn primary" id="oBest">⚡ Colocar as melhores nos pódios</button>
+    ${PACKS.some(p => (state.stock[p.id]||0) > 0 && state.money >= p.price) ? '<button class="btn" id="oShop">🏪 Voltar pra loja</button>' : ''}
+    <button class="btn" data-close>Continuar</button>`;
+  $('oBest').onclick = () => { autoPlace(); closeModal(); };
+  if($('oShop')) $('oShop').onclick = closeModal;
+  if(R_ORDER.indexOf(CH[best.c].r) >= 3) toast(`🎉 Você tirou <b>${CH[best.c].name}</b> (${CH[best.c].r})!`, true);
+}
+
+function domainExpansion(ch){
+  const d = document.createElement('div'); d.className = 'domain'; d.style.setProperty('--dc', ch.col + 'aa');
+  d.innerHTML = `<div class="k">${ch.k || '領域展開'}</div><div class="t">EXPANSÃO DE DOMÍNIO</div><div class="n">${ch.name} · ${ch.d || ''}</div>`;
+  document.body.appendChild(d); setTimeout(() => d.remove(), 2600);
+  [110,147,196].forEach((f,i) => beep(f, 1.2, 'sawtooth', .07, i*.05));
+}
+function flash(c){
+  const f = document.createElement('div'); f.className = 'flash'; f.style.setProperty('--dc', c);
+  document.body.appendChild(f); setTimeout(() => f.remove(), 500);
+}
+
+/* =====================================================================
+   PÓDIOS
+   ===================================================================== */
+function renderPods(){
+  let h = '';
+  for(let i=0;i<POD_MAX;i++){
+    if(i < state.unlocked){
+      const u = state.pods[i], cd = u != null ? cardByU(u) : null;
+      const rc = cd ? `r-${RAR[CH[cd.c].r].css}` : '';
+      h += `<div class="podium ${cd ? 'filled' : ''}">
+        <div class="pod-top" data-pod="${i}">${cd ? cardHTML(cd,'sm') : '<div class="pod-empty">+<small>Colocar carta</small></div>'}</div>
+        ${cd ? `<button class="pod-x" data-remove="${i}" title="Tirar do pódio">✕</button>` : ''}
+        <div class="pod-base ${rc}" data-collect="${i}"><b id="bank${i}">${state.auto ? 'AUTO' : '$'+fmt(state.banks[i])}</b>
+          <small>${cd ? '+$'+fmt(incOf(cd))+'/s' : 'vazio'}</small></div></div>`;
+    } else if(i === state.unlocked){
+      h += `<div class="podium locked next"><div class="pod-top" data-unlock="${i}" style="cursor:pointer"><div class="pod-empty">🔒<small>Desbloquear</small></div></div>
+        <div class="pod-base" data-unlock="${i}"><b id="unlockCost">$${fmt(podCost(i))}</b><small>novo pódio</small></div></div>`;
+    } else {
+      h += `<div class="podium locked"><div class="pod-top"><div class="pod-empty">🔒</div></div><div class="pod-base"><b style="color:#4a3f70">—</b><small>bloqueado</small></div></div>`;
+    }
+  }
+  $('pods').innerHTML = h;
+  $('podInfo').textContent = `${state.pods.slice(0,state.unlocked).filter(x => x!=null).length}/${state.unlocked} pódios em uso`;
+}
+
+function collect(i, ev){
+  const amt = state.banks[i];
+  if(amt < 0.1) return;
+  state.money += amt; state.earned += amt; state.banks[i] = 0;
+  if(ev) floaty(ev.clientX, ev.clientY, '+$' + fmt(amt));
+  beep(990, .08, 'triangle', .04);
+  updateLive();
+}
+function collectAll(){
+  let tot = 0;
+  for(let i=0;i<state.unlocked;i++){ tot += state.banks[i]; state.banks[i] = 0; }
+  if(tot < 0.1) return toast('Nada pra coletar ainda.');
+  state.money += tot; state.earned += tot;
+  const r = $('btnCollect').getBoundingClientRect(); floaty(r.left + r.width/2, r.top, '+$' + fmt(tot));
+  beep(990,.08,'triangle',.04); beep(1320,.1,'triangle',.04,.06);
+  updateLive(); save();
+}
+function freePod(){ for(let i=0;i<state.unlocked;i++) if(state.pods[i] == null) return i; return -1; }
+function worstPod(){
+  let w = -1, wi = Infinity;
+  for(let i=0;i<state.unlocked;i++){ const cd = cardByU(state.pods[i]); if(cd && incOf(cd) < wi){ wi = incOf(cd); w = i; } }
+  return w;
+}
+function placeCard(u, slot){
+  const cd = cardByU(u); if(!cd) return;
+  let i = slot != null ? slot : freePod();
+  if(i < 0){
+    i = worstPod();
+    if(i < 0 || incOf(cardByU(state.pods[i])) >= incOf(cd)) return toast('Todos os pódios estão ocupados com cartas melhores ou iguais.');
+    toast(`🔁 Trocou ${CH[cardByU(state.pods[i]).c].name} por ${CH[cd.c].name}`);
+  }
+  state.pods[i] = u;
+  beep(660,.1,'triangle'); save(); renderPods(); renderInv(); updateLive();
+}
+function removeFromPod(i){ state.pods[i] = null; save(); renderPods(); renderInv(); updateLive(); }
+function autoPlace(){
+  const sorted = [...state.cards].sort((a,b) => incOf(b) - incOf(a));
+  for(let i=0;i<state.unlocked;i++) state.pods[i] = sorted[i] ? sorted[i].u : null;
+  beep(660,.1,'triangle'); beep(880,.12,'triangle',.06,.08);
+  save(); renderPods(); renderInv(); updateLive();
+}
+function unlockPod(i){
+  const cost = podCost(i);
+  if(i !== state.unlocked) return;
+  if(state.money < cost) return toast(`Precisa de $${fmt(cost)} para desbloquear.`);
+  state.money -= cost; state.unlocked++;
+  toast('🏯 Novo pódio desbloqueado!'); beep(523,.15,'triangle'); beep(784,.2,'triangle',.06,.1);
+  save(); renderPods(); updateLive();
+}
+
+/* =====================================================================
+   INVENTÁRIO
+   ===================================================================== */
+function invGroups(){
+  const used = onPods(), g = {};
+  for(const cd of state.cards){
+    if(used.has(cd.u)) continue;
+    const key = cd.c + '|' + (cd.v||'n');
+    (g[key] = g[key] || {key, sample:cd, list:[]}).list.push(cd);
+  }
+  return Object.values(g).sort((a,b) => incOf(b.sample) - incOf(a.sample));
+}
+function renderInv(){
+  const gs = invGroups();
+  const n = gs.reduce((s,g) => s + g.list.length, 0);
+  $('invInfo').textContent = `${n} cartas guardadas`;
+  $('inv').innerHTML = gs.length ? gs.map(g =>
+    `<div class="slot" data-group="${g.key}">${cardHTML(g.sample,'sm', g.list.length > 1 ? `<span class="cnt">×${g.list.length}</span>` : '')}</div>`
+  ).join('') : '<div class="empty-msg">Nenhuma carta guardada. Compre pacotes na loja! 🎴</div>';
+}
+function groupByKey(key){ return invGroups().find(g => g.key === key); }
+
+function showCard(key){
+  const g = groupByKey(key); if(!g) return closeModal();
+  const cd = g.sample, ch = CH[cd.c], V = VARS[cd.v||'n'];
+  const free = freePod(), worst = worstPod();
+  const canSwap = free < 0 && worst >= 0 && incOf(cardByU(state.pods[worst])) < incOf(cd);
+  openModal(`<div class="detail">${cardHTML(cd,'lg')}
+    <div class="info"><h3>${ch.name}</h3>
+      <p><b class="t-${RAR[ch.r].css}">${ch.r} · ${RAR[ch.r].label}</b></p>
+      <p>${ch.t}</p>
+      <p>Variação: <b>${V.name}</b>${V.mult > 1 ? ` (×${V.mult})` : ''}</p>
+      <p>Renda: <b style="color:var(--money)">$${fmt(incOf(cd))}/s</b></p>
+      <p>Você tem: <b>${g.list.length}</b> guardada(s)</p>
+      <div class="actions">
+        <button class="btn primary" id="cPlace" ${free < 0 && !canSwap ? 'disabled' : ''}>${free >= 0 ? '🏯 Colocar no pódio' : canSwap ? '🔁 Trocar pela pior do pódio' : 'Pódios cheios (cartas melhores)'}</button>
+        <button class="btn" id="cSell1">Vender 1 · $${fmt(sellOf(cd))}</button>
+        ${g.list.length > 1 ? `<button class="btn" id="cSellAll">Vender todas (${g.list.length}) · $${fmt(sellOf(cd)*g.list.length)}</button>` : ''}
+      </div></div></div>`, true, true);
+  $('cPlace').onclick = () => { placeCard(g.list[0].u); closeModal(); };
+  $('cSell1').onclick = () => { sell([g.list[0].u]); groupByKey(key) ? showCard(key) : closeModal(); };
+  if($('cSellAll')) $('cSellAll').onclick = () => { sell(g.list.map(c => c.u)); closeModal(); };
+}
+function sell(uids){
+  const used = onPods(); let tot = 0;
+  const set = new Set(uids.filter(u => !used.has(u)));
+  state.cards = state.cards.filter(cd => { if(set.has(cd.u)){ tot += sellOf(cd); return false; } return true; });
+  state.money += tot;
+  if(tot) { toast(`💰 Vendeu ${set.size} carta(s) por $${fmt(tot)}`); beep(784,.1,'triangle'); }
+  save(); renderInv(); updateLive();
+}
+function sellRarity(r){
+  const used = onPods();
+  const list = state.cards.filter(cd => !used.has(cd.u) && CH[cd.c].r === r && (cd.v||'n') === 'n');
+  if(!list.length) return toast(`Nenhuma carta ${r} normal guardada.`);
+  if(!confirm(`Vender ${list.length} carta(s) ${r} (só as normais, guardadas)?`)) return;
+  sell(list.map(c => c.u));
+}
+function showPicker(i){
+  const gs = invGroups();
+  openModal(`<h3>Escolha uma carta para o pódio ${i+1}</h3>
+    ${gs.length ? `<div class="pick">${gs.map(g => `<div class="slot" data-pick="${g.key}">${cardHTML(g.sample,'md', g.list.length>1?`<span class="cnt">×${g.list.length}</span>`:'')}</div>`).join('')}</div>`
+      : '<div class="empty-msg">Você não tem cartas guardadas. Compre um pacote!</div>'}`);
+  document.querySelectorAll('[data-pick]').forEach(el => el.onclick = () => {
+    const g = groupByKey(el.dataset.pick); if(g) placeCard(g.list[0].u, i); closeModal();
+  });
+}
+
+/* =====================================================================
+   COLEÇÃO
+   ===================================================================== */
+function showDex(){
+  const owned = {}; state.cards.forEach(cd => owned[cd.c] = (owned[cd.c]||0) + 1);
+  const tiers = [...R_ORDER].reverse().map(r => {
+    const cs = BY_R[r];
+    return `<div class="tier"><h4 class="t-${RAR[r].css}">${r} · ${RAR[r].label} <small style="font-family:Nunito;font-size:13px;color:var(--muted)">${cs.filter(c => state.seen[c.id]).length}/${cs.length}</small></h4>
+      <div class="row">${cs.map(c => state.seen[c.id]
+        ? cardHTML({c:c.id, v:'n'}, 'sm', owned[c.id] ? `<span class="cnt">×${owned[c.id]}</span>` : '')
+        : `<div class="card sm unknown r-${RAR[r].css}"><div class="art"><span class="emo mystery">${c.e}</span><span class="badge">${r}</span></div><div class="name">???</div><div class="inc">$${fmt(c.inc)}/s</div></div>`
+      ).join('')}</div></div>`;
+  }).join('');
+  openModal(`<h3>📖 Coleção · Ranking de Força</h3>
+    <p class="hint">Pacotes abertos: ${state.opened} · Total ganho: $${fmt(state.earned)} · Variações: ✨ Dourada (5%, ×3) e ⚡ Black Flash (1%, ×6)</p>${tiers}`);
+}
+
+/* =====================================================================
+   MODAL
+   ===================================================================== */
+function openModal(html, closable=true, narrow=false){
+  $('mbox').className = 'mbox' + (narrow ? ' narrow' : '');
+  $('mbox').innerHTML = (closable ? '<button class="mclose" data-close>✕</button>' : '') + html;
+  $('modal').classList.add('open');
+}
+function closeModal(){ $('modal').classList.remove('open'); $('mbox').innerHTML = ''; }
+
+/* =====================================================================
+   HEADER / LOOP
+   ===================================================================== */
+function renderHeader(){
+  const seen = Object.keys(state.seen).length;
+  $('dexCount').textContent = `${seen}/${CHARS.length}`;
+  $('btnAuto').textContent = state.auto ? '🤖 Coleta automática ✓' : `🤖 Coleta automática · $${fmt(AUTO_COST)}`;
+  $('btnAuto').disabled = state.auto;
+  $('btnSound').textContent = state.sound ? '🔊' : '🔇';
+  $('btnCollect').style.display = state.auto ? 'none' : '';
+}
+function updateLive(){
+  $('money').textContent = '$' + fmt(state.money);
+  $('income').textContent = `+$${fmt(totalIncome())}/s`;
+  if(!state.auto) for(let i=0;i<state.unlocked;i++){ const b = $('bank'+i); if(b) b.textContent = '$' + fmt(state.banks[i]); }
+  const left = Math.max(0, state.nextRestock - Date.now());
+  $('restockTxt').textContent = `Reposição em ${Math.ceil(left/1000)}s`;
+  $('restockBar').style.width = (100 - left/RESTOCK_MS*100) + '%';
+  document.querySelectorAll('[data-buy]').forEach(b => b.disabled = !!b.dataset.out || state.money < +b.dataset.price);
+  const uc = $('unlockCost'); if(uc) uc.style.color = state.money >= podCost(state.unlocked) ? 'var(--money)' : '#ffcf5a';
+}
+function tick(){
+  const now = Date.now();
+  const dt = Math.min((now - state.last)/1000, OFFLINE_CAP);
+  state.last = now;
+  for(let i=0;i<state.unlocked;i++){
+    const u = state.pods[i]; if(u == null) continue;
+    const cd = cardByU(u); if(!cd){ state.pods[i] = null; continue; }
+    const g = incOf(cd) * dt;
+    if(state.auto){ state.money += g; state.earned += g; } else state.banks[i] += g;
+  }
+  if(now >= state.nextRestock){
+    let n = 0;
+    while(now >= state.nextRestock && n < 5){ restock(n > 0); state.nextRestock += RESTOCK_MS; n++; }
+    if(now >= state.nextRestock) state.nextRestock = now + RESTOCK_MS;
+    renderShop();
+  }
+  updateLive();
+}
+
+/* =====================================================================
+   EVENTOS
+   ===================================================================== */
+document.addEventListener('click', ev => {
+  const t = ev.target.closest('[data-buy],[data-pod],[data-collect],[data-remove],[data-unlock],[data-group],[data-close]');
+  if(!t) return;
+  const d = t.dataset;
+  if(d.close !== undefined) return closeModal();
+  if(d.buy) return buyPack(d.buy);
+  if(d.remove) return removeFromPod(+d.remove);
+  if(d.unlock) return unlockPod(+d.unlock);
+  if(d.group) return showCard(d.group);
+  if(d.collect){ return state.pods[+d.collect] != null ? collect(+d.collect, ev) : showPicker(+d.collect); }
+  if(d.pod){
+    const i = +d.pod;
+    if(state.pods[i] == null) return showPicker(i);
+    if(state.banks[i] >= 0.1 && !state.auto) return collect(i, ev);
+  }
+});
+$('modal').addEventListener('click', ev => { if(ev.target === $('modal') && $('mbox').querySelector('[data-close]')) closeModal(); });
+document.addEventListener('keydown', ev => { if(ev.key === 'Escape' && $('mbox').querySelector('[data-close]')) closeModal(); });
+$('btnBest').onclick = autoPlace;
+$('btnCollect').onclick = collectAll;
+$('sellB').onclick = () => sellRarity('B');
+$('sellA').onclick = () => sellRarity('A');
+$('btnDex').onclick = showDex;
+$('btnSound').onclick = () => { state.sound = !state.sound; renderHeader(); save(); };
+$('btnAuto').onclick = () => {
+  if(state.money < AUTO_COST) return toast(`Precisa de $${fmt(AUTO_COST)}.`);
+  collectAll(); state.money -= AUTO_COST; state.auto = true;
+  toast('🤖 Coleta automática ativada! O dinheiro cai direto na conta.', true);
+  save(); renderHeader(); renderPods(); updateLive();
+};
+$('btnReset').onclick = () => {
+  if(!confirm('Apagar TODO o progresso e começar de novo?')) return;
+  state = newState(); save(); renderAll(); toast('Progresso apagado. Boa sorte, feiticeiro! 🍀');
+};
+
+function renderAll(){ renderHeader(); renderShop(); renderPods(); renderInv(); updateLive(); }
+
+/* ---------- início ---------- */
+(function init(){
+  const away = (Date.now() - state.last) / 1000;
+  const inc = totalIncome();
+  renderAll();
+  tick();
+  if(away > 30 && inc > 0) toast(`🌙 Enquanto você esteve fora, seus pódios renderam <b>$${fmt(inc * Math.min(away, OFFLINE_CAP))}</b>!`, true);
+  else if(!state.opened) toast('👋 Bem-vindo! Você tem $150. Compre seus primeiros pacotes na loja.', true);
+  setInterval(tick, 100);
+  setInterval(save, 5000);
+  addEventListener('beforeunload', save);
+})();
+</script>
+</body>
+</html>
