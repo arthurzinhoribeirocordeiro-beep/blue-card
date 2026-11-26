@@ -6,7 +6,13 @@ Jogo de abrir pacotes de cartas com tema de Jujutsu Kaisen. O jogo foi feito pen
 
 - **Abas na parte de baixo da tela:** Base, Loja, Cartas e Coleção. Ficam no alcance do polegar e mostram avisos, como um pacote raro em estoque ou cartas novas.
 - **Painéis que sobem de baixo** para ver uma carta, trocar a carta de um pódio, vender e mexer nas configurações. Para fechar, arraste o painel pra baixo ou toque fora dele.
-- **Abertura de pacote em tela cheia, uma carta por vez:** um toque vira a carta, outro toque passa pra próxima. Tem também os botões "Pular" e "Abrir outro".
+- **Abertura de pacote com muito impacto:**
+  - O pacote cai do alto da tela e você toca 3 vezes pra rasgar. A cada toque ele treme mais, racha e solta luz na cor da melhor carta que tem dentro. No terceiro toque ele explode em partículas e a tela treme.
+  - As cartas vêm da mais fraca pra mais forte, então a melhor fica sempre por último.
+  - Carta rara (S pra cima, Dourada ou Black Flash) dá suspense antes de virar: a carta treme, brilha e um som vai subindo. Quando vira, sai uma explosão de partículas com raios girando atrás e o texto "SUPER RARO!", "ÉPICO!!" ou "LENDÁRIO!!!" bate na tela. A renda sobe contando até o valor.
+  - ⚡ Black Flash solta raios vermelhos e ✨ Dourada solta chuva de moedas. Uma carta SS+ ativa a Expansão de Domínio com chuva de confete.
+  - No fim aparece um resumo com 👑 na melhor carta, o total de renda nova subindo na tela e o botão "Abrir outro" pulsando.
+  - Comprar e coletar dinheiro soltam moedas e fazem som de caixa registradora. Os botões verdes e roxos afundam quando você toca, como botões de jogo.
 - **Barra fixa na Base** com os botões "Organizar" e "Coletar $X".
 - **Botões grandes**, sem zoom ao tocar duas vezes, respeita o notch e a barra do iPhone e **vibra** quando você tira uma carta rara (no Android).
 - **Dá pra instalar como app:** no menu do navegador, toque em "Adicionar à tela inicial" e o jogo abre em tela cheia.
