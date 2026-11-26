@@ -18,6 +18,19 @@ Jogo de abrir pacotes de cartas com tema de Jujutsu Kaisen. O jogo foi feito pen
 - **Dá pra instalar como app:** no menu do navegador, toque em "Adicionar à tela inicial" e o jogo abre em tela cheia.
 - No computador, o jogo aparece centralizado, no formato de um celular.
 
+## Mais coisas pra fazer
+
+- **🎁 Pacote grátis a cada 4 minutos:** vem um Grau 4 (70%), um Grau 2 (25%) ou um Grau 1 (5%). Fica na Loja e um aviso aparece quando estiver pronto.
+- **🔥 Fusão:** junte 3 cartas iguais (mesmo personagem, mesma variação e mesmas estrelas) pra ganhar uma estrela.
+  - Renda por estrela: ★ ×2.5 · ★★ ×6 · ★★★ ×15 · ★★★★ ×35 · ★★★★★ ×80.
+  - O botão "Fundir tudo" faz todas as fusões possíveis de uma vez, inclusive em cadeia.
+  - A carta que está no pódio é a que fica, e os pódios vazios são preenchidos sozinhos.
+  - A fusão tem uma animação própria.
+- **🎯 Garantia SS:** se passar 20 pacotes sem tirar uma SS, a última carta do pacote seguinte vem SS ou SS+.
+- **🍀 Sorte Dobrada:** em cada reposição tem 8% de chance de começar esse evento. Durante 60 segundos, as chances de S, SS e SS+ e das variações ✨/⚡ ficam em dobro.
+- **🎯 Missões:** são sempre 3 ao mesmo tempo, como abrir pacotes, ganhar dinheiro, tirar cartas raras, fundir, vender ou descobrir personagens. Cada uma dá dinheiro e XP. Quando você completa uma, vem outra mais difícil e que paga mais.
+- **⭐ Nível do jogador:** você ganha XP abrindo pacotes (os mais caros dão mais XP), completando missões e fazendo fusões. Cada nível dá dinheiro e tem uma comemoração. A cada 5 níveis você ganha um pacote grátis na hora.
+
 ## Como funciona
 
 - Você começa com **$150**.

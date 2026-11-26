@@ -361,6 +361,71 @@ main{padding:12px 12px calc(var(--tabh) + var(--sab) + 84px)}
 .flash{position:fixed; inset:0; z-index:250; pointer-events:none; background:var(--dc); animation:flash .5s forwards}
 @keyframes flash{from{opacity:.75}to{opacity:0}}
 
+/* ---------- nível / missões / grátis / fusão ---------- */
+.lvl{width:46px; height:46px; border-radius:50%; flex:none; padding:0; position:relative; display:grid; place-items:center;
+  background:conic-gradient(#5dff9a var(--p,0%), #2e2250 0)}
+.lvl::before{content:''; position:absolute; inset:4px; border-radius:50%; background:linear-gradient(135deg,#3fd0ff,#7b5cff 50%,#ff2e4d)}
+.lvl b{position:relative; font-family:Bangers,Impact,system-ui; font-weight:400; font-size:21px; color:#fff; line-height:1; text-shadow:0 2px 0 #0008}
+.lvl small{position:absolute; bottom:-5px; font-size:9px; font-weight:900; background:#0b0714; color:#5dff9a; padding:0 5px; border-radius:6px; border:1px solid #2e2250; line-height:13px}
+.lvl.bump{animation:bump .6s}
+@keyframes bump{40%{transform:scale(1.35)}}
+.lvlup{position:fixed; inset:0; z-index:310; display:grid; place-items:center; align-content:center; text-align:center; pointer-events:none; padding:20px;
+  background:radial-gradient(circle,#5dff9a55,#000d 70%); animation:dom 3s forwards}
+.lvlup .t{font-family:Bangers,Impact,system-ui; font-size:clamp(34px,10vw,58px); letter-spacing:3px; color:#fff; text-shadow:0 4px 0 #000}
+.lvlup .n{font-family:Bangers,Impact,system-ui; font-size:clamp(120px,42vw,210px); line-height:.9; color:#5dff9a; -webkit-text-stroke:3px #000; text-shadow:0 0 30px #5dff9a, 0 8px 0 #000}
+.lvlup .r{font-weight:900; font-size:20px; color:#fff; margin-top:10px; text-shadow:0 2px 6px #000}
+.chip.luck{border-color:#2ad17a; background:#2ad17a26; color:#5dff9a; animation:pulse 1s infinite}
+.luckbanner{display:none; margin-bottom:12px; padding:12px 14px; border-radius:16px; font-weight:900; text-align:center;
+  background:linear-gradient(90deg,#2ad17a,#3fd0ff,#2ad17a); background-size:200% 100%; color:#04130b; animation:shine 2s linear infinite}
+.luckbanner.on{display:block}
+.freecard{display:flex; align-items:center; gap:12px; padding:12px; border-radius:18px; margin-bottom:12px;
+  background:linear-gradient(120deg,#2ad17a33,transparent 70%),var(--panel2); border:1px solid #2ad17a55}
+.freecard.ready{--pc:#2ad17a; animation:rarepulse 1.6s ease-in-out infinite}
+.freecard .fic{font-size:34px}
+.freecard.ready .fic{animation:idle 1.2s ease-in-out infinite}
+.freecard > div{flex:1; min-width:0}
+.freecard small{display:block; color:var(--muted); font-size:12px}
+.freecard .buy{width:auto; min-width:100px; padding:0 12px; min-height:46px}
+.pitycard{display:flex; align-items:center; gap:12px; padding:10px 14px; border-radius:16px; margin-bottom:12px; background:var(--panel); border:1px solid var(--line); font-size:13px}
+.pitycard div{flex:1}
+.pitycard .bar i{background:linear-gradient(90deg,#ffb020,#ff2e4d)}
+.quest{display:flex; align-items:center; gap:12px; padding:12px; border-radius:18px; margin-bottom:12px; background:var(--panel2); border:1px solid var(--line)}
+.quest.done{border-color:#2ad17a; box-shadow:0 0 18px #2ad17a44}
+.quest .qic{font-size:30px; width:40px; text-align:center}
+.quest .qb{flex:1; min-width:0}
+.quest .qb b{display:block; font-size:15px}
+.quest small{color:var(--muted); font-size:12px; font-weight:700}
+.quest .bar i{background:linear-gradient(90deg,#2ad17a,#5dff9a)}
+.quest .buy{width:auto; min-width:86px; padding:0 12px; min-height:46px}
+.lvcard{padding:14px; border-radius:18px; margin-bottom:14px; background:linear-gradient(120deg,#7b5cff33,transparent 70%),var(--panel); border:1px solid var(--line)}
+.lvcard b{font-family:Bangers,Impact,system-ui; font-weight:400; font-size:28px; letter-spacing:1px}
+.lvcard p{margin:4px 0 0; color:var(--muted); font-size:13px}
+.lvcard .bar{height:12px}
+.lvcard .bar i{background:linear-gradient(90deg,#5dff9a,#3fd0ff)}
+.howto{padding:14px; border-radius:16px; background:var(--panel); border:1px solid var(--line); color:var(--muted); font-size:13px; line-height:1.5}
+.howto b{color:var(--text)}
+.card .stars{position:absolute; top:.32em; left:50%; transform:translateX(-50%); z-index:2; color:#ffd54a; font-size:.95em; letter-spacing:-.08em; line-height:1;
+  text-shadow:0 0 .25em #000, 0 0 .5em #ffb020; white-space:nowrap}
+.card.st-hi{box-shadow:0 0 16px #ffd54aaa, 0 0 0 1px #ffd54a inset}
+.fusetag{position:absolute; bottom:-7px; left:50%; transform:translateX(-50%); z-index:4; font-size:10px; font-weight:900; white-space:nowrap;
+  background:linear-gradient(135deg,#ff7a00,#ff2e4d); color:#fff; padding:2px 8px; border-radius:9px; animation:pulse 1.2s infinite}
+.fusebar{margin-bottom:12px}
+.big.fire{background:linear-gradient(135deg,#ff7a00,#ff2e4d); color:#fff; --bs:#8a1a1a; box-shadow:0 5px 0 var(--bs); margin-bottom:5px; width:100%}
+.big.fire:active:not(:disabled){transform:translateY(4px); box-shadow:0 1px 0 var(--bs)}
+.fuse3{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; z-index:3; pointer-events:none}
+.fz{position:absolute; width:min(30vw,128px)}
+.fz .card{--cw:min(30vw,128px)}
+.fz0{animation:fzL 1.15s cubic-bezier(.55,0,.85,.35) forwards}
+.fz1{animation:fzC 1.15s cubic-bezier(.55,0,.85,.35) forwards}
+.fz2{animation:fzR 1.15s cubic-bezier(.55,0,.85,.35) forwards}
+@keyframes fzL{0%{transform:translateX(-108%) rotate(-10deg)}35%{transform:translateX(-118%) rotate(-16deg) scale(1.06)}100%{transform:translateX(0) rotate(400deg) scale(.25); opacity:.3; filter:brightness(3)}}
+@keyframes fzC{0%{transform:translateY(-6%)}35%{transform:translateY(-16%) scale(1.06)}100%{transform:scale(.25) rotate(-400deg); opacity:.3; filter:brightness(3)}}
+@keyframes fzR{0%{transform:translateX(108%) rotate(10deg)}35%{transform:translateX(118%) rotate(16deg) scale(1.06)}100%{transform:translateX(0) rotate(-400deg) scale(.25); opacity:.3; filter:brightness(3)}}
+.fres{opacity:0}
+.fres.show{opacity:1; animation:fpop .65s cubic-bezier(.2,1.7,.4,1)}
+@keyframes fpop{from{transform:scale(0) rotate(-25deg)}}
+.tabbar{grid-template-columns:repeat(5,1fr)}
+.tab{font-size:10.5px}
 /* ---------- toasts / floaty ---------- */
 .toasts{position:fixed; top:calc(var(--sat) + 64px); left:50%; transform:translateX(-50%); z-index:400; display:flex; flex-direction:column; gap:8px; align-items:center; pointer-events:none; width:min(92vw,460px)}
 .toast{background:#1d1433f5; border:1px solid var(--line); border-radius:14px; padding:11px 14px; font-weight:800; font-size:14px; animation:tin .25s; box-shadow:0 8px 30px #000a; text-align:center}
@@ -377,7 +442,7 @@ main{padding:12px 12px calc(var(--tabh) + var(--sab) + 84px)}
 <div id="app">
 
   <header class="top">
-    <div class="logo">呪</div>
+    <button class="lvl" data-a="tab" data-t="quest" id="lvl" aria-label="Nível e missões"><b id="lvlN">1</b><small>NV</small></button>
     <div class="wallet"><b id="money">$0</b><small id="income">+$0/s</small></div>
     <button class="chip" data-a="tab" data-t="shop" aria-label="Próxima reposição">📦 <span id="rsChip">30s</span></button>
     <button class="iconbtn" data-a="settings" aria-label="Configurações">⚙️</button>
@@ -396,6 +461,11 @@ main{padding:12px 12px calc(var(--tabh) + var(--sab) + 84px)}
     <!-- LOJA -->
     <section class="view" id="v-shop">
       <div class="vh"><h2>🏪 Loja</h2><span>3 cartas por pacote</span></div>
+      <div class="luckbanner" id="luckBanner">🍀 SORTE DOBRADA! Chances de S, SS e SS+ em dobro · <span id="luckTxt">60s</span></div>
+      <div class="freecard" id="freeCard"><div class="fic">🎁</div>
+        <div><b>Pacote grátis</b><small id="freeTxt">Grau 4, Grau 2 ou até Grau 1!</small><div class="bar"><i id="freeBar"></i></div></div>
+        <button class="buy" data-a="free" id="freeBtn">PEGAR!</button></div>
+      <div class="pitycard"><span style="font-size:24px">🎯</span><div><b>Garantia SS</b> · <span id="pityTxt"></span><div class="bar"><i id="pityBar"></i></div></div></div>
       <div class="restock-card">
         <div class="clock" id="rsBig">30s</div>
         <div><b>Próxima reposição</b><br><small>Os pacotes simples sempre chegam. Os raros, quase nunca!</small>
@@ -407,9 +477,16 @@ main{padding:12px 12px calc(var(--tabh) + var(--sab) + 84px)}
     <!-- INVENTÁRIO -->
     <section class="view" id="v-inv">
       <div class="vh"><h2>🎴 Cartas</h2><span id="invInfo"></span></div>
+      <div class="fusebar" id="fuseBar"></div>
       <div class="chips" id="chips"></div>
       <div class="grid" id="inv"></div>
       <div style="text-align:center;margin-top:14px"><button class="linkbtn" data-a="massSell">💰 Vender cartas em massa</button></div>
+    </section>
+
+    <!-- MISSÕES -->
+    <section class="view" id="v-quest">
+      <div class="vh"><h2>🎯 Missões</h2><span>dinheiro + XP</span></div>
+      <div id="quests"></div>
     </section>
 
     <!-- COLEÇÃO -->
@@ -428,6 +505,7 @@ main{padding:12px 12px calc(var(--tabh) + var(--sab) + 84px)}
     <button class="tab" data-a="tab" data-t="base"><i>🏯</i>Base</button>
     <button class="tab" data-a="tab" data-t="shop"><i>🏪</i>Loja<span class="tbadge" id="bShop"></span></button>
     <button class="tab" data-a="tab" data-t="inv"><i>🎴</i>Cartas<span class="tbadge" id="bInv"></span></button>
+    <button class="tab" data-a="tab" data-t="quest"><i>🎯</i>Missões<span class="tbadge" id="bQuest"></span></button>
     <button class="tab" data-a="tab" data-t="dex"><i>📖</i>Coleção</button>
   </nav>
 </div>
@@ -539,6 +617,22 @@ const AUTO_COST = 10000;
 const SELL_MULT = 3;          // venda = renda/s × 3
 const OFFLINE_CAP = 7200;     // segundos de renda offline (2h)
 const SAVE_KEY = 'jjk_cards_v1';
+const STAR_MULT = [1, 2.5, 6, 15, 35, 80];     // renda por estrela (fusão de 3 cartas iguais)
+const STAR_MAX = 5;
+const FREE_MS = 4 * 60 * 1000;                 // pacote grátis a cada 4 minutos
+const FREE_POOL = [['g4',70], ['g2',25], ['g1',5]];
+const PITY_MAX = 20;                            // a cada 20 pacotes sem SS, 1 carta SS ou melhor garantida
+const LUCK_MS = 60000, LUCK_CHANCE = 0.08;      // evento "Sorte Dobrada" (chance em cada reposição)
+const PACK_XP = {g4:5, g2:12, g1:30, esp:70, dom:150, rei:350};
+const xpNeed = l => Math.round(60 * Math.pow(1.4, l - 1));
+const MISSIONS = [
+  {id:'open',    stat:'opened',     base:3,   grow:1.7, ic:'📦', txt:n => `Abra ${n} pacotes`},
+  {id:'collect', stat:'collected',  base:300, grow:3.2, ic:'💰', txt:n => `Ganhe $${fmt(n)} nos pódios`},
+  {id:'rare',    stat:'rare',       base:1,   grow:1.6, ic:'💜', txt:n => `Tire ${n} carta${n > 1 ? 's' : ''} S ou melhor`},
+  {id:'fuse',    stat:'fused',      base:1,   grow:1.8, ic:'🔥', txt:n => `Faça ${n} fus${n > 1 ? 'ões' : 'ão'} de cartas`},
+  {id:'sell',    stat:'sold',       base:5,   grow:2,   ic:'🏷️', txt:n => `Venda ${n} cartas`},
+  {id:'new',     stat:'discovered', base:2,   grow:1.4, ic:'📖', txt:n => `Descubra ${n} personage${n > 1 ? 'ns' : 'm'} novo${n > 1 ? 's' : ''}`},
+];
 
 /* =====================================================================
    ESTADO
@@ -546,13 +640,15 @@ const SAVE_KEY = 'jjk_cards_v1';
 function newState(){
   return {money:150, cards:[], pods:Array(POD_MAX).fill(null), banks:Array(POD_MAX).fill(0), unlocked:POD_START,
     stock:{g4:4, g2:1}, nextRestock:Date.now()+RESTOCK_MS, seen:{}, auto:false, sound:true, vibe:true,
-    opened:0, earned:0, last:Date.now(), uid:1, tab:'shop', filter:'all', newCards:0};
+    opened:0, earned:0, last:Date.now(), uid:1, tab:'shop', filter:'all', newCards:0,
+    freeAt:Date.now(), pity:0, xp:0, lvl:1, luckUntil:0, missions:[], mtier:{},
+    st:{opened:0, collected:0, rare:0, fused:0, sold:0, discovered:0}};
 }
 let state = load();
 function load(){
   try{
     const s = JSON.parse(localStorage.getItem(SAVE_KEY));
-    if(s && typeof s.money === 'number') return Object.assign(newState(), s);
+    if(s && typeof s.money === 'number'){ const d = newState(), m = Object.assign(d, s); m.st = Object.assign(newState().st, s.st); return m; }
   }catch(e){}
   return newState();
 }
@@ -570,7 +666,7 @@ function fmt(n){
   while(n >= 1000 && i < u.length-1){ n /= 1000; i++; }
   return (n < 10 ? n.toFixed(2) : n < 100 ? n.toFixed(1) : Math.floor(n)) + u[i];
 }
-const incOf = cd => CH[cd.c].inc * VARS[cd.v||'n'].mult;
+const incOf = cd => CH[cd.c].inc * VARS[cd.v||'n'].mult * STAR_MULT[cd.s||0];
 const sellOf = cd => Math.max(1, Math.floor(incOf(cd) * SELL_MULT));
 const cardByU = u => state.cards.find(c => c.u === u);
 const onPods = () => new Set(state.pods.filter(u => u != null));
@@ -583,15 +679,16 @@ function totalIncome(){
 function totalBank(){ let t = 0; for(let i=0;i<state.unlocked;i++) t += state.banks[i]; return t; }
 function rollRarity(odds){
   const keys = R_ORDER.filter(k => odds[k]);
-  const total = keys.reduce((s,k) => s + odds[k], 0);
+  const w = k => odds[k] * (Date.now() < state.luckUntil && R_ORDER.indexOf(k) >= 2 ? 2 : 1);
+  const total = keys.reduce((s,k) => s + w(k), 0);
   let r = Math.random() * total;
-  for(const k of keys){ if(r < odds[k]) return k; r -= odds[k]; }
+  for(const k of keys){ if(r < w(k)) return k; r -= w(k); }
   return keys[0];
 }
 function rollVariant(){
-  const r = Math.random();
-  if(r < VARS.bf.chance) return 'bf';
-  if(r < VARS.bf.chance + VARS.gold.chance) return 'gold';
+  const r = Math.random(), m = Date.now() < state.luckUntil ? 2 : 1;
+  if(r < VARS.bf.chance*m) return 'bf';
+  if(r < (VARS.bf.chance + VARS.gold.chance)*m) return 'gold';
   return 'n';
 }
 
@@ -742,9 +839,10 @@ function countUp(el, to, dur=700, pre='+$', suf='/s'){
 /* ---------- card html ---------- */
 function cardHTML(cd, extra='', cls=''){
   const ch = CH[cd.c], v = cd.v || 'n', V = VARS[v];
-  const tag = V.tag ? `<span class="vtag">${V.tag}</span>` : '';
-  return `<div class="card ${cls} r-${rcss(ch.r)} v-${v}" style="--cc:${ch.col}">
-    <div class="art"><span class="emo">${ch.e}</span>${imgTag(ch.id)}<span class="badge">${ch.r}</span>${tag}${extra}</div>
+  const tag = V.tag ? `<span class="vtag">${V.tag}</span>` : '', st = cd.s || 0;
+  const stars = st ? `<span class="stars">${'★'.repeat(st)}</span>` : '';
+  return `<div class="card ${cls} r-${rcss(ch.r)} v-${v} ${st >= 3 ? 'st-hi' : ''}" style="--cc:${ch.col}">
+    <div class="art"><span class="emo">${ch.e}</span>${imgTag(ch.id)}<span class="badge">${ch.r}</span>${stars}${tag}${extra}</div>
     <div class="name">${ch.name}</div><div class="inc">$${fmt(incOf(cd))}/s</div></div>`;
 }
 function unknownCard(c){
@@ -775,6 +873,7 @@ function setTab(t){
   $('actbar').classList.toggle('on', t === 'base');
   if(t === 'inv'){ state.newCards = 0; renderInv(); }
   if(t === 'dex') renderDex();
+  if(t === 'quest') renderQuests();
   window.scrollTo(0, 0);
   updateLive();
 }
@@ -793,6 +892,11 @@ function restock(silent){
     }
   }
   if(silent) return;
+  if(!luckOn() && Math.random() < LUCK_CHANCE){
+    state.luckUntil = Date.now() + LUCK_MS;
+    toast('🍀 <b>SORTE DOBRADA!</b> Chances de S, SS e SS+ em dobro por 60s!', true);
+    chimes(3); vibe([60,40,60,40,120]); rain(['#2ad17a','#5dff9a','#ffffff'], 60);
+  }
   const rare = hits.filter(isRare);
   if(rare.length){
     rare.forEach(p => toast(`🔥 ${p.e} <b>${p.name}</b> apareceu na loja!`, true));
@@ -819,25 +923,39 @@ function buyPack(id, btn){
   const p = PK[id];
   if((state.stock[id]||0) <= 0) return toast('Esgotado! Espere a próxima reposição.');
   if(state.money < p.price){ vibe([20,40,20]); return toast(`Falta $${fmt(p.price - state.money)} 💸`); }
-  state.money -= p.price; state.stock[id]--; state.opened++;
+  state.money -= p.price; state.stock[id]--;
+  openPack(p, btn, false);
+}
+function openPack(p, btn, free){
+  state.opened++; state.st.opened++; state.pity++;
+  const pity = state.pity >= PITY_MAX;
+  let gotSS = false;
   const pulls = [];
   for(let k=0;k<p.n;k++){
-    const ch = pick(BY_R[rollRarity(p.odds)]);
-    const card = {u: state.uid++, c: ch.id, v: rollVariant()};
+    let r = rollRarity(p.odds);
+    if(pity && k === p.n - 1 && !gotSS && R_ORDER.indexOf(r) < 3) r = Math.random() < .85 ? 'SS' : 'SS+';
+    const ch = pick(BY_R[r]);
+    const card = {u: state.uid++, c: ch.id, v: rollVariant(), s:0};
     const isNew = !state.seen[ch.id]; state.seen[ch.id] = 1;
+    if(isNew) state.st.discovered++;
+    if(R_ORDER.indexOf(r) >= 2) state.st.rare++;
+    if(R_ORDER.indexOf(r) >= 3) gotSS = true;
     state.cards.push(card); pulls.push({card, isNew});
   }
+  if(gotSS) state.pity = 0;
   state.newCards += p.n;
+  addXP(PACK_XP[p.id] || 5, true);
   save(); renderShop(); renderInv(); updateLive();
   coinSfx(); vibe(25);
   if(btn && btn.isConnected){ const [x,y] = centerOf(btn); burst(x, y, {n:22, kinds:['coin'], speed:9, up:5}); }
-  setTimeout(() => showOpening(p, pulls), btn ? 260 : 0);
+  setTimeout(() => { OINFO = {free, pity}; showOpening(p, pulls); }, btn ? 260 : 0);
 }
 
 /* =====================================================================
    ABERTURA DE PACOTE (tela cheia, com suspense)
    ===================================================================== */
-let OTOK = 0, OREV = 0;            // OTOK cancela timers antigos; OREV = cartas já reveladas
+let OTOK = 0, OREV = 0, OINFO = {};
+const ptitle = p => `${OINFO.free ? '🎁 ' : ''}${p.e} ${p.name}${OINFO.pity ? ' · 🎯' : ''}`;            // OTOK cancela timers antigos; OREV = cartas já reveladas
 const later = (tok, ms, fn) => setTimeout(() => { if(tok === OTOK) fn(); }, ms);
 const rankOf = cd => R_ORDER.indexOf(CH[cd.c].r);
 const hype = cd => Math.max(rankOf(cd), cd.v === 'bf' ? 3 : cd.v === 'gold' ? 2 : 0);   // 0..4
@@ -863,11 +981,11 @@ function showOpening(p, pulls){
   const o = $('opening');
   o.style.setProperty('--pc', p.color);
   o.innerHTML = `<button class="oskip" id="oskip">Pular ⏭</button>
-    <h3 class="otitle">${p.e} ${p.name}</h3>
+    <h3 class="otitle">${ptitle(p)}</h3>
     <div class="zone"><div class="rays on" style="--ray:${p.color}"><i></i></div>
       <div class="punch" id="punch"><div class="bigpack" id="bigpack" style="--lc:${lc}"><div class="glowcore"></div><span>${p.e}</span>${CRACK_SVG}</div></div></div>
     <div class="tapdots" id="tapdots" style="--lc:${lc}"><i></i><i></i><i></i></div>
-    <p class="ohint" id="ohint">Toque 3× para rasgar!</p>`;
+    <p class="ohint" id="ohint">${OINFO.pity ? "🎯 GARANTIA: tem SS ou melhor aqui!<br>" : ""}Toque 3× para rasgar!</p>`;
   o.classList.remove('shake1','shake2','shake3'); o.classList.add('open','fadein'); closeSheet(); $('toasts').innerHTML = '';
   whoosh(.6, .14, 3000, 200); later(tok, 520, () => { tone(70, .25, 'sine', .25, 0, 40); vibe(30); });
   let taps = 0;
@@ -902,7 +1020,7 @@ function revealStep(p, pulls, i, tok){
   const o = $('opening'), x = pulls[i], cd = x.card, ch = CH[cd.c], r = rcss(ch.r), h = hype(cd), cols = colsOf(cd);
   o.innerHTML = `<div class="pips">${pulls.map((y,j) => `<i class="${j < i ? 'done' : j === i ? 'cur' : ''}" style="--c:${colsOf(y.card)[0]}"></i>`).join('')}</div>
     <button class="oskip">Pular ⏭</button>
-    <h3 class="otitle">${p.e} ${p.name}</h3>
+    <h3 class="otitle">${ptitle(p)}</h3>
     <div class="zone"><div class="rays" id="rays" style="--ray:${cols[0]}"><i></i></div>
       <div class="stage" id="stage"><div class="flip enter r-${r}" id="flip"><div class="flip-inner">
         <div class="back ${h >= 2 ? 'tease' : ''}">呪</div>
@@ -1004,7 +1122,7 @@ function showSummary(p, pulls, tok){
   $('oClose').onclick = closeOpening;
   if($('oAgain')) $('oAgain').onclick = ev => buyPack(p.id, ev.currentTarget);
 }
-function closeOpening(){ OTOK++; FX.ps = FX.ps.filter(p => p.k !== 'confetti' && p.k !== 'star'); $('opening').classList.remove('open'); $('opening').innerHTML = ''; updateLive(); }
+function closeOpening(){ OTOK++; setTimeout(showLevelUp, 250); FX.ps = FX.ps.filter(p => p.k !== 'confetti' && p.k !== 'star'); $('opening').classList.remove('open'); $('opening').innerHTML = ''; updateLive(); }
 
 function domainExpansion(ch){
   const d = document.createElement('div'); d.className = 'domain'; d.style.setProperty('--dc', ch.col + 'aa');
@@ -1046,7 +1164,7 @@ function renderBase(){
 function collect(i, ev){
   const amt = state.banks[i];
   if(amt < 0.1) return;
-  state.money += amt; state.earned += amt; state.banks[i] = 0;
+  state.money += amt; state.earned += amt; state.st.collected += amt; state.banks[i] = 0;
   if(ev){ floaty(ev.clientX, ev.clientY, '+$' + fmt(amt)); burst(ev.clientX, ev.clientY, {n:10, kinds:['coin'], speed:6, up:4}); }
   coinSfx(); vibe(10);
   updateLive();
@@ -1055,7 +1173,7 @@ function collectAll(){
   const tot = totalBank();
   if(tot < 0.1) return toast('Nada pra coletar ainda.');
   for(let i=0;i<state.unlocked;i++) state.banks[i] = 0;
-  state.money += tot; state.earned += tot;
+  state.money += tot; state.earned += tot; state.st.collected += tot;
   const r = $('collectBtn').getBoundingClientRect(); floaty(r.left + r.width/2, r.top, '+$' + fmt(tot));
   burst(r.left + r.width/2, r.top + r.height/2, {n:26, kinds:['coin'], speed:9, up:6});
   coinSfx(); tone(1568, .3, 'square', .04, .16); vibe(20);
@@ -1118,14 +1236,17 @@ function podSheet(i){
     <div class="info"><h3>Pódio ${i+1}</h3>
       <p><b>${ch.name}</b></p><p class="t-${rcss(ch.r)}"><b style="color:inherit">${ch.r} · ${RAR[ch.r].label}</b></p>
       <p>Rende <b style="color:var(--money)">$${fmt(incOf(cd))}/s</b></p>
-      ${state.auto ? '' : `<p>Acumulado: <b>$${fmt(state.banks[i])}</b></p>`}</div></div>
+      ${state.auto ? '' : `<p>Acumulado: <b>$${fmt(state.banks[i])}</b></p>`}
+      ${fuseInfo(cd)}</div></div>
     <div class="sactions">
+      ${fuseBtn(cd)}
       ${!state.auto && state.banks[i] >= 0.1 ? `<button class="big money" id="sCol">💰 Coletar $${fmt(state.banks[i])}</button>` : ''}
       <button class="big primary" id="sSwap">🔁 Trocar carta</button>
       <button class="big ghost" id="sRem">📥 Guardar no inventário</button>
     </div>`);
   if($('sCol')) $('sCol').onclick = ev => { collect(i, ev); closeSheet(); };
   $('sSwap').onclick = () => pickerSheet(i);
+  if($('cFuse')) $('cFuse').onclick = () => fuse(fuseKey(cd));
   $('sRem').onclick = () => { removeFromPod(i); closeSheet(); };
 }
 function pickerSheet(i){
@@ -1145,7 +1266,7 @@ function invGroups(){
   const used = onPods(), g = {};
   for(const cd of state.cards){
     if(used.has(cd.u)) continue;
-    const key = cd.c + '|' + (cd.v||'n');
+    const key = fuseKey(cd);
     (g[key] = g[key] || {key, sample:cd, list:[]}).list.push(cd);
   }
   return Object.values(g).sort((a,b) => incOf(b.sample) - incOf(a.sample));
@@ -1159,8 +1280,10 @@ function renderInv(){
   $('invInfo').textContent = `${count('all')} guardadas`;
   $('chips').innerHTML = ['all', ...[...R_ORDER].reverse()].map(r =>
     `<button class="fchip ${f === r ? 'on' : ''} ${r !== 'all' ? 't-' + rcss(r) : ''}" data-a="filter" data-f="${r}">${r === 'all' ? 'Todas' : r} · ${count(r)}</button>`).join('');
+  const fk = new Set(fusableKeys());
+  $('fuseBar').innerHTML = fk.size ? `<button class="big fire" data-a="fuseAll">🔥 Fundir tudo · ${fk.size} fus${fk.size > 1 ? 'ões' : 'ão'} disponíve${fk.size > 1 ? 'is' : 'l'}</button>` : '';
   $('inv').innerHTML = gs.length ? gs.map(g =>
-    `<button class="slot" style="background:none;padding:0" data-a="group" data-k="${g.key}">${cardHTML(g.sample, g.list.length > 1 ? `<span class="cnt">×${g.list.length}</span>` : '')}</button>`
+    `<button class="slot" style="background:none;padding:0" data-a="group" data-k="${g.key}">${cardHTML(g.sample, g.list.length > 1 ? `<span class="cnt">×${g.list.length}</span>` : '')}${fk.has(g.key) ? '<span class="fusetag">🔥 FUNDIR</span>' : ''}</button>`
   ).join('') : `<div class="empty-msg"><span class="e">🎴</span>${f === 'all' ? 'Nenhuma carta guardada.' : 'Nenhuma carta ' + f + ' guardada.'}<br><br>
       <button class="big primary" style="width:100%" data-a="tab" data-t="shop">Comprar pacotes</button></div>`;
 }
@@ -1176,8 +1299,10 @@ function cardSheet(key){
       <p>${ch.t}</p>
       ${V.mult > 1 ? `<p>Variação: <b>${V.name} ×${V.mult}</b></p>` : ''}
       <p>Rende <b style="color:var(--money)">$${fmt(incOf(cd))}/s</b></p>
-      <p>Você tem <b>${g.list.length}</b> guardada(s)</p></div></div>
+      <p>Você tem <b>${g.list.length}</b> guardada(s)</p>
+      ${fuseInfo(cd)}</div></div>
     <div class="sactions">
+      ${fuseBtn(cd)}
       ${free >= 0 || canSwap ? `<button class="big primary" id="cPlace">${free >= 0 ? '🏯 Colocar no pódio' : '🔁 Trocar pela pior do pódio'}</button>`
         : '<button class="big ghost" disabled>Seus pódios já têm cartas melhores</button>'}
       <div class="row2">
@@ -1186,30 +1311,41 @@ function cardSheet(key){
       </div>
     </div>`);
   if($('cPlace')) $('cPlace').onclick = () => { placeCard(g.list[0].u); closeSheet(); };
+  if($('cFuse')) $('cFuse').onclick = () => fuse(key);
   $('cSell1').onclick = () => { sell([g.list[0].u]); groupByKey(key) ? cardSheet(key) : closeSheet(); };
   if($('cSellAll')) $('cSellAll').onclick = () => { sell(g.list.map(c => c.u)); closeSheet(); };
+}
+function fuseInfo(cd){
+  const s = cd.s || 0, n = fuseCount(fuseKey(cd));
+  if(s >= STAR_MAX) return '<p>⭐ Estrelas no máximo!</p>';
+  return `<p>🔥 Fusão: <b>${Math.min(n,3)}/3</b> iguais${s ? ` (${'★'.repeat(s)})` : ''}</p>`;
+}
+function fuseBtn(cd){
+  const s = cd.s || 0;
+  if(s >= STAR_MAX || fuseCount(fuseKey(cd)) < 3) return '';
+  return `<button class="big fire" id="cFuse">🔥 Fundir 3 → ${'★'.repeat(s+1)} · $${fmt(incOf({...cd, s:s+1}))}/s</button>`;
 }
 function sell(uids){
   const used = onPods(); let tot = 0;
   const set = new Set(uids.filter(u => !used.has(u)));
   state.cards = state.cards.filter(cd => { if(set.has(cd.u)){ tot += sellOf(cd); return false; } return true; });
-  state.money += tot;
+  state.money += tot; state.st.sold += set.size;
   if(tot){ toast(`💰 Vendeu ${set.size} carta(s) por $${fmt(tot)}`); beep(784,.1,'triangle'); vibe(15); }
   save(); renderInv(); updateLive();
 }
 function massSellSheet(){
   const used = onPods();
   const opt = r => {
-    const list = state.cards.filter(cd => !used.has(cd.u) && CH[cd.c].r === r && (cd.v||'n') === 'n');
+    const list = state.cards.filter(cd => !used.has(cd.u) && CH[cd.c].r === r && (cd.v||'n') === 'n' && !(cd.s||0));
     const val = list.reduce((s,cd) => s + sellOf(cd), 0);
     return `<button class="big ghost" data-ms="${r}" ${list.length ? '' : 'disabled'}><span class="t-${rcss(r)}">${r}</span>&nbsp;· vender ${list.length} · $${fmt(val)}</button>`;
   };
-  openSheet(`<h3>Vender em massa</h3><p style="margin-bottom:12px">Vende só as cartas <b>normais</b> que estão guardadas. As que estão nos pódios e as ✨/⚡ ficam com você.</p>
+  openSheet(`<h3>Vender em massa</h3><p style="margin-bottom:12px">Vende só as cartas <b>normais</b> que estão guardadas. As que estão nos pódios, as ✨/⚡ e as com ★ ficam com você.</p>
     <div class="sactions">${opt('B')}${opt('A')}${opt('S')}</div>`);
   $('sheet').querySelectorAll('[data-ms]').forEach(b => b.onclick = () => {
     const r = b.dataset.ms;
     confirmSheet(`Vender todas as cartas ${r} normais guardadas?`, 'Vender', () => {
-      sell(state.cards.filter(cd => !onPods().has(cd.u) && CH[cd.c].r === r && (cd.v||'n') === 'n').map(c => c.u));
+      sell(state.cards.filter(cd => !onPods().has(cd.u) && CH[cd.c].r === r && (cd.v||'n') === 'n' && !(cd.s||0)).map(c => c.u));
     });
   });
 }
@@ -1231,7 +1367,8 @@ function renderDex(){
   $('dex').innerHTML = `<div class="dexhead"><b>${seen}/${CHARS.length}</b> personagens descobertos
       <div class="bar"><i style="width:${seen/CHARS.length*100}%"></i></div>
       <p>Pacotes abertos: <b>${state.opened}</b> · Total ganho: <b>$${fmt(state.earned)}</b></p>
-      <p>Variações: ✨ Dourada (5%, rende 3×) · ⚡ Black Flash (1%, rende 6×)</p></div>${tiers}`;
+      <p>Variações: ✨ Dourada (5%, rende 3×) · ⚡ Black Flash (1%, rende 6×)</p>
+      <p>🔥 Fusão: junte 3 cartas iguais → ★ ×2.5 · ★★ ×6 · ★★★ ×15 · ★★★★ ×35 · ★★★★★ ×80</p></div>${tiers}`;
 }
 function dexSheet(id){
   const c = CH[id], known = state.seen[id];
@@ -1269,7 +1406,7 @@ function settingsSheet(){
   $('tSound').onclick = e => { state.sound = !state.sound; e.currentTarget.classList.toggle('on', state.sound); save(); };
   $('tVibe').onclick = e => { state.vibe = !state.vibe; e.currentTarget.classList.toggle('on', state.vibe); vibe(30); save(); };
   $('tReset').onclick = () => confirmSheet('Isso apaga TODAS as suas cartas e dinheiro.', 'Apagar tudo', () => {
-    state = newState(); save(); renderAll(); setTab('shop'); toast('Progresso apagado. Boa sorte, feiticeiro! 🍀');
+    state = newState(); LVQ = 0; ensureMissions(); renderLevel(); save(); renderAll(); setTab('shop'); toast('Progresso apagado. Boa sorte, feiticeiro! 🍀');
   });
 }
 // arrastar pra baixo fecha o painel
@@ -1288,6 +1425,190 @@ function settingsSheet(){
 })();
 
 /* =====================================================================
+   PACOTE GRÁTIS / GARANTIA / SORTE
+   ===================================================================== */
+const luckOn = () => Date.now() < state.luckUntil;
+function claimFree(btn){
+  if(Date.now() < state.freeAt) return toast('O pacote grátis ainda está carregando ⏳');
+  const tot = FREE_POOL.reduce((s,x) => s + x[1], 0); let r = Math.random()*tot, id = FREE_POOL[0][0];
+  for(const [k,w] of FREE_POOL){ if(r < w){ id = k; break; } r -= w; }
+  state.freeAt = Date.now() + FREE_MS;
+  openPack(PK[id], btn, true);
+}
+
+/* =====================================================================
+   NÍVEL DO JOGADOR
+   ===================================================================== */
+let LVQ = 0;
+const lvlReward = l => Math.round((200*l + totalIncome()*60) / 10) * 10;
+function addXP(n, defer){
+  state.xp += n;
+  while(state.xp >= xpNeed(state.lvl)){ state.xp -= xpNeed(state.lvl); state.lvl++; LVQ++; }
+  renderLevel();
+  if(LVQ && !defer && !$('opening').classList.contains('open')) showLevelUp();
+}
+function renderLevel(){
+  const el = $('lvl'); if(!el) return;
+  $('lvlN').textContent = state.lvl;
+  el.style.setProperty('--p', (state.xp / xpNeed(state.lvl) * 100) + '%');
+  if(state.tab === 'quest') renderQuests();
+}
+function showLevelUp(){
+  if(!LVQ) return;
+  const from = state.lvl - LVQ + 1; let cash = 0, freeBonus = false;
+  for(let l = from; l <= state.lvl; l++){ cash += lvlReward(l); if(l % 5 === 0) freeBonus = true; }
+  LVQ = 0; state.money += cash;
+  if(freeBonus) state.freeAt = 0;
+  const d = document.createElement('div'); d.className = 'lvlup';
+  d.innerHTML = `<div class="t">SUBIU DE NÍVEL!</div><div class="n">${state.lvl}</div>
+    <div class="r">💰 +$${fmt(cash)}${freeBonus ? '<br>🎁 Pacote grátis liberado!' : ''}</div>`;
+  document.body.appendChild(d); setTimeout(() => d.remove(), 3000);
+  rain(['#5dff9a','#3fd0ff','#ffd54a','#ffffff','#b45cff'], 130);
+  chimes(4); vibe([60,40,60,40,160]);
+  const el = $('lvl'); el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump');
+  save(); updateLive();
+}
+
+/* =====================================================================
+   MISSÕES
+   ===================================================================== */
+const MS = Object.fromEntries(MISSIONS.map(m => [m.id, m]));
+const undiscovered = () => CHARS.length - Object.keys(state.seen).length;
+function niceNum(n){ const p = Math.pow(10, Math.max(0, Math.floor(Math.log10(n)) - 1)); return Math.ceil(n / p) * p; }
+function newMission(exclude){
+  const opts = MISSIONS.filter(m => !exclude.includes(m.id) && !(m.id === 'new' && undiscovered() < 1));
+  const m = pick(opts.length ? opts : MISSIONS.filter(m => m.id !== 'new')), tier = state.mtier[m.id] || 0;
+  let goal = Math.ceil(m.base * Math.pow(m.grow, tier));
+  if(m.id === 'collect') goal = niceNum(Math.max(goal, totalIncome()*90));
+  if(m.id === 'new') goal = Math.max(1, Math.min(goal, undiscovered()));
+  return {id:m.id, goal, start:state.st[m.stat] || 0, tier};
+}
+function ensureMissions(extraExclude=[]){
+  state.missions = state.missions.filter(x => MS[x.id]);
+  while(state.missions.length < 3) state.missions.push(newMission([...state.missions.map(x => x.id), ...extraExclude]));
+}
+const mProg = ms => Math.max(0, Math.min(ms.goal, (state.st[MS[ms.id].stat] || 0) - ms.start));
+const mDone = ms => mProg(ms) >= ms.goal;
+const mReward = ms => Math.round((150*Math.pow(2.4, ms.tier) + totalIncome()*45) / 10) * 10;
+const mXP = ms => 20 + ms.tier*15;
+const mShow = (ms, n) => ms.id === 'collect' ? '$' + fmt(n) : Math.floor(n);
+function renderQuests(){
+  ensureMissions();
+  const need = xpNeed(state.lvl);
+  $('quests').innerHTML = `<div class="lvcard"><b>Nível ${state.lvl}</b>
+      <div class="bar"><i style="width:${state.xp/need*100}%"></i></div>
+      <p>${Math.floor(state.xp)}/${need} XP · próximo nível: <b style="color:var(--money)">+$${fmt(lvlReward(state.lvl+1))}</b>${(state.lvl+1) % 5 === 0 ? ' + 🎁 pacote grátis' : ''}</p></div>
+    ${state.missions.map((ms, i) => { const m = MS[ms.id]; return `<div class="quest" id="q${i}"><div class="qic">${m.ic}</div>
+      <div class="qb"><b>${m.txt(ms.goal)}</b><div class="bar"><i id="q${i}bar"></i></div>
+        <small id="q${i}txt"></small></div>
+      <button class="buy" data-a="claim" data-i="${i}" id="q${i}btn">Pegar!</button></div>`; }).join('')}
+    <div class="howto"><b>Como ganhar XP:</b> abrir pacotes (os mais caros dão mais XP), completar missões e fazer fusões.<br>
+      <b>A cada nível:</b> você ganha dinheiro. A cada 5 níveis: 🎁 pacote grátis na hora.</div>`;
+  updateQuests();
+}
+function updateQuests(){
+  let ready = 0;
+  state.missions.forEach((ms, i) => {
+    const done = mDone(ms); if(done) ready++;
+    const bar = $('q'+i+'bar'); if(!bar) return;
+    bar.style.width = (mProg(ms)/ms.goal*100) + '%';
+    $('q'+i+'txt').textContent = `${mShow(ms, mProg(ms))}/${mShow(ms, ms.goal)} · 💰 $${fmt(mReward(ms))} · ⭐ ${mXP(ms)} XP`;
+    $('q'+i).classList.toggle('done', done);
+    const b = $('q'+i+'btn'); b.classList.toggle('cant', !done); b.textContent = done ? 'Pegar!' : Math.floor(mProg(ms)/ms.goal*100) + '%';
+  });
+  const bq = $('bQuest'); bq.textContent = ready; bq.classList.toggle('show', ready > 0); bq.classList.toggle('hot', ready > 0);
+}
+function claimMission(i, btn){
+  const ms = state.missions[i]; if(!ms) return;
+  if(!mDone(ms)) return toast('Missão ainda não completa 💪');
+  const cash = mReward(ms), xp = mXP(ms);
+  state.money += cash; state.mtier[ms.id] = ms.tier + 1;
+  state.missions.splice(i, 1); ensureMissions([ms.id]);
+  if(btn && btn.isConnected){ const [x,y] = centerOf(btn); burst(x, y, {n:30, kinds:['coin','star'], colors:['#ffd54a','#5dff9a'], speed:10, up:6}); floaty(x, y, '+$' + fmt(cash)); }
+  coinSfx(); chimes(2); vibe([30,40,60]);
+  toast(`🎯 Missão completa! <b>+$${fmt(cash)}</b> · ⭐ +${xp} XP`);
+  renderQuests(); addXP(xp); save(); updateLive();
+}
+
+/* =====================================================================
+   FUSÃO (3 cartas iguais -> 1 carta com +1 estrela)
+   ===================================================================== */
+const fuseKey = cd => cd.c + '|' + (cd.v||'n') + '|' + (cd.s||0);
+function fuseCount(key){ return state.cards.filter(cd => fuseKey(cd) === key).length; }
+function fusableKeys(){
+  const m = {};
+  state.cards.forEach(cd => { if((cd.s||0) < STAR_MAX){ const k = fuseKey(cd); m[k] = (m[k]||0) + 1; } });
+  return Object.keys(m).filter(k => m[k] >= 3);
+}
+function fuseOnce(key){
+  const used = onPods();
+  const all = state.cards.filter(cd => fuseKey(cd) === key).sort((a,b) => (used.has(b.u)?1:0) - (used.has(a.u)?1:0));
+  if(all.length < 3 || (all[0].s||0) >= STAR_MAX) return null;
+  const keep = all[0], rem = new Set([all[all.length-1].u, all[all.length-2].u]);
+  state.cards = state.cards.filter(cd => !rem.has(cd.u));
+  state.pods = state.pods.map(u => rem.has(u) ? null : u);
+  keep.s = (keep.s||0) + 1; state.st.fused++;
+  return keep;
+}
+function fillEmptyPods(){
+  const used = onPods();
+  const inv = state.cards.filter(cd => !used.has(cd.u)).sort((a,b) => incOf(b) - incOf(a));
+  for(let i=0;i<state.unlocked && inv.length;i++) if(state.pods[i] == null) state.pods[i] = inv.shift().u;
+}
+function fuse(key){
+  const before = state.cards.find(cd => fuseKey(cd) === key); if(!before) return;
+  const src = {...before};
+  const res = fuseOnce(key); if(!res) return toast('Precisa de 3 cartas iguais.');
+  fillEmptyPods(); closeSheet(); save(); renderInv(); renderBase();
+  showFusion(src, res, 1);
+}
+function fuseAll(){
+  const done = []; let guard = 0, ks;
+  while((ks = fusableKeys()).length && guard++ < 50) ks.forEach(k => { let r; while((r = fuseOnce(k))) done.push({...r}); });
+  if(!done.length) return toast('Nenhuma fusão disponível.');
+  const best = done.reduce((a,b) => incOf(b) > incOf(a) ? b : a);
+  const src = {...best, s:(best.s||0) - 1};
+  fillEmptyPods(); save(); renderInv(); renderBase();
+  showFusion(src, best, done.length);
+}
+function showFusion(src, res, count){
+  const tok = ++OTOK; OINFO = {};
+  const o = $('opening');
+  o.style.setProperty('--pc', '#ff7a00');
+  o.innerHTML = `<h3 class="otitle">🔥 FUSÃO${count > 1 ? ' ×' + count : ''}</h3>
+    <div class="zone"><div class="rays on" id="rays" style="--ray:#ffb020"><i></i></div>
+      <div class="fuse3" id="fuse3">${[0,1,2].map(k => `<div class="fz fz${k}">${cardHTML(src)}</div>`).join('')}</div>
+      <div class="stage fres" id="stage"><div class="flip"><div class="flip-inner" style="transform:none"><div class="front" style="transform:none">${cardHTML(res, '', 'big')}<div class="shine"></div></div></div></div></div>
+    </div>
+    <div class="rinfo" id="rinfo"></div>
+    <div class="oacts" id="facts" style="visibility:hidden">
+      <button class="big primary" id="fBest">⚡ Organizar pódios</button>
+      <button class="big ghost" id="fClose">Continuar</button></div>`;
+  o.classList.remove('shake1','shake2','shake3'); o.classList.add('open','fadein'); closeSheet(); $('toasts').innerHTML = '';
+  riser(1.1); vibe([20,60,20,60,20,60,40]);
+  const [cx, cy] = centerOf($('stage'));
+  const iv = setInterval(() => { if(tok !== OTOK) return clearInterval(iv); burst(cx, cy, {n:5, colors:['#ffb020','#ff2e4d','#fff'], kinds:['spark'], speed:-6}); }, 80);
+  later(tok, 600, () => shake(1));
+  later(tok, 1150, () => {
+    clearInterval(iv);
+    $('fuse3').remove(); $('stage').classList.add('show'); $('stage').querySelector('.flip').classList.add('flipped');
+    $('rays').classList.add('max');
+    flash('#ffd54a'); ring(cx, cy, '#ffd54a', innerWidth*.9, 12); ring(cx, cy, '#ffffff', 220, 5);
+    burst(cx, cy, {n:160, colors:['#ffd54a','#ffb020','#ff7a00','#ffffff'], speed:15, kinds:['spark','star','confetti']});
+    burst(cx, cy, {n:30, kinds:['coin'], speed:12, up:6});
+    boom(.35); chimes(3); vibe([80,40,160]); shake(2);
+    slam(tok, '★'.repeat(res.s) + ' FUSÃO!', '#ffd54a', 200);
+    $('rinfo').innerHTML = `<b class="t-SS">${CH[res.c].name} ${'★'.repeat(res.s)}</b>
+      <small>$${fmt(incOf(src))}/s →</small> <div class="incup" id="incup">+$0/s</div><small>cada estrela multiplica a renda</small>`;
+    countUp($('incup'), incOf(res), 900);
+    later(tok, 700, () => { $('facts').style.visibility = 'visible'; });
+  });
+  $('fBest').onclick = () => { closeOpening(); autoPlace(); setTab('base'); };
+  $('fClose').onclick = closeOpening;
+  addXP(10*count + 5*(res.s||0));
+}
+
+/* =====================================================================
    LOOP
    ===================================================================== */
 let lastShopKey = '';
@@ -1299,7 +1620,18 @@ function updateLive(){
     const pb = $('pb'+i); if(pb) pb.classList.toggle('ready', state.pods[i] != null && state.banks[i] >= Math.max(1, (incOf(cardByU(state.pods[i])||{c:'maldicao'}) * 10)));
   }
   const left = Math.max(0, state.nextRestock - Date.now()), sec = Math.ceil(left/1000) + 's', pct = (100 - left/RESTOCK_MS*100) + '%';
-  $('rsChip').textContent = sec; $('rsBig').textContent = sec; $('rsBar').style.width = pct; $('rsLine').style.width = pct;
+  const luck = luckOn(), lsec = Math.ceil((state.luckUntil - Date.now())/1000) + 's';
+  $('rsChip').textContent = luck ? '🍀 ' + lsec : sec; $('rsChip').parentNode.classList.toggle('luck', luck);
+  $('luckBanner').classList.toggle('on', luck); if(luck) $('luckTxt').textContent = lsec;
+  const fl = state.freeAt - Date.now(), fready = fl <= 0;
+  $('freeCard').classList.toggle('ready', fready); $('freeBtn').classList.toggle('cant', !fready);
+  const fs = Math.ceil(fl/1000);
+  $('freeBtn').textContent = fready ? 'PEGAR!' : `⏳ ${Math.floor(fs/60)}:${String(fs%60).padStart(2,'0')}`;
+  $('freeBar').style.width = (fready ? 100 : 100 - fl/FREE_MS*100) + '%';
+  $('pityTxt').textContent = `${PITY_MAX - state.pity} pacote${PITY_MAX - state.pity > 1 ? 's' : ''} até uma carta SS garantida`;
+  $('pityBar').style.width = (state.pity/PITY_MAX*100) + '%';
+  if(state.tab === 'quest') updateQuests(); else { const rq = state.missions.filter(mDone).length, bq = $('bQuest'); bq.textContent = rq; bq.classList.toggle('show', rq > 0); bq.classList.toggle('hot', rq > 0); }
+  $('rsBig').textContent = sec; $('rsBar').style.width = pct; $('rsLine').style.width = pct;
   document.querySelectorAll('[data-a="buy"]').forEach(b => {
     const p = PK[b.dataset.id], ok = (state.stock[p.id]||0) > 0 && state.money >= p.price;
     b.classList.toggle('cant', !ok);
@@ -1312,9 +1644,9 @@ function updateLive(){
   // badges
   const avail = PACKS.filter(p => (state.stock[p.id]||0) > 0 && state.money >= p.price);
   const bs = $('bShop'), rareIn = PACKS.some(p => isRare(p) && (state.stock[p.id]||0) > 0);
-  bs.textContent = avail.length || (rareIn ? '!' : '');
-  bs.classList.toggle('show', state.tab !== 'shop' && (avail.length > 0 || rareIn));
-  bs.classList.toggle('hot', rareIn);
+  bs.textContent = fready ? '🎁' : avail.length || (rareIn ? '!' : '');
+  bs.classList.toggle('show', state.tab !== 'shop' && (fready || avail.length > 0 || rareIn));
+  bs.classList.toggle('hot', rareIn || fready);
   const bi = $('bInv'); bi.textContent = state.newCards > 99 ? '99+' : state.newCards;
   bi.classList.toggle('show', state.tab !== 'inv' && state.newCards > 0);
 }
@@ -1326,7 +1658,7 @@ function tick(){
     const u = state.pods[i]; if(u == null) continue;
     const cd = cardByU(u); if(!cd){ state.pods[i] = null; continue; }
     const g = incOf(cd) * dt;
-    if(state.auto){ state.money += g; state.earned += g; } else state.banks[i] += g;
+    if(state.auto){ state.money += g; state.earned += g; state.st.collected += g; } else state.banks[i] += g;
   }
   if(now >= state.nextRestock){
     let n = 0;
@@ -1355,6 +1687,9 @@ const ACTIONS = {
   auto: () => buyAuto(),
   settings: () => settingsSheet(),
   massSell: () => massSellSheet(),
+  free: el => claimFree(el),
+  claim: el => claimMission(+el.dataset.i, el),
+  fuseAll: () => fuseAll(),
 };
 document.addEventListener('click', ev => {
   const el = ev.target.closest('[data-a]');
@@ -1372,6 +1707,7 @@ function renderAll(){ renderShop(); renderBase(); renderInv(); renderDex(); upda
   fxSetup();
   const away = (Date.now() - state.last) / 1000;
   const inc = totalIncome();
+  ensureMissions(); renderLevel();
   renderAll();
   setTab(state.opened ? (state.tab || 'base') : 'shop');
   tick();
