@@ -46,22 +46,23 @@ button:disabled{opacity:.4; cursor:not-allowed}
 /* ---------- top bar ---------- */
 .top{
   position:sticky; top:0; z-index:30; padding:calc(var(--sat) + 8px) 12px 8px;
-  display:flex; align-items:center; gap:10px; background:#0b0714ee; backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+  display:flex; align-items:center; gap:10px; background:#0b0714fa;
   border-bottom:1px solid var(--line);
 }
 .logo{width:40px; height:40px; border-radius:12px; display:grid; place-items:center; flex:none; font-weight:900; font-size:22px;
   background:linear-gradient(135deg,#3fd0ff,#7b5cff 50%,#ff2e4d); color:#0b0714}
 .wallet{flex:1; min-width:0; line-height:1}
-.wallet b{font-family:Bangers; font-size:30px; color:var(--money); letter-spacing:.5px; text-shadow:0 0 14px #5dff9a44; display:block}
+.wallet b{font-variant-numeric:tabular-nums; transform-origin:left center; font-family:Bangers; font-size:30px; color:var(--money); letter-spacing:.5px; text-shadow:0 0 14px #5dff9a44; display:block}
 .wallet small{color:var(--muted); font-size:12px; font-weight:700}
-.chip{display:flex; align-items:center; gap:6px; padding:8px 10px; background:var(--panel2); border:1px solid var(--line); border-radius:12px; font-weight:800; font-size:13px; min-height:40px}
+.chip{font-variant-numeric:tabular-nums; display:flex; align-items:center; gap:6px; padding:8px 10px; background:var(--panel2); border:1px solid var(--line); border-radius:12px; font-weight:800; font-size:13px; min-height:40px}
 .iconbtn{width:40px; height:40px; padding:0; display:grid; place-items:center; background:var(--panel2); border:1px solid var(--line); font-size:18px; flex:none}
-.restock-line{position:absolute; left:0; bottom:-1px; height:2px; background:linear-gradient(90deg,#3fd0ff,#7b5cff); transition:width .2s linear}
+.restock-line{position:absolute; left:0; bottom:-1px; height:2px; width:100%; transform-origin:left center; transform:scaleX(0); background:linear-gradient(90deg,#3fd0ff,#7b5cff); transition:transform .3s linear}
 
 /* ---------- views ---------- */
 main{padding:12px 12px calc(var(--tabh) + var(--sab) + 84px)}
-.view{display:none; animation:vin .2s}
-.view.on{display:block}
+.view{animation:vin .2s}
+.view:not(.on){display:none}
+@supports (content-visibility:hidden){ .view:not(.on){display:block; content-visibility:hidden; height:0; overflow:hidden; animation:none} }
 @keyframes vin{from{opacity:0; transform:translateY(6px)}}
 .vh{display:flex; align-items:baseline; gap:8px; margin:2px 2px 10px}
 .vh h2{font-family:Bangers; font-weight:400; letter-spacing:1px; font-size:26px; margin:0}
@@ -71,7 +72,7 @@ main{padding:12px 12px calc(var(--tabh) + var(--sab) + 84px)}
 /* ---------- tab bar ---------- */
 .tabbar{
   position:fixed; z-index:40; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:520px;
-  display:grid; grid-template-columns:repeat(4,1fr); background:#0e0920f2; backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+  display:grid; grid-template-columns:repeat(4,1fr); background:#0e0920fc;
   border-top:1px solid var(--line); padding-bottom:var(--sab);
 }
 .tab{background:none; border-radius:0; height:var(--tabh); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; color:var(--muted); font-size:11px; font-weight:800; position:relative}
@@ -121,25 +122,29 @@ main{padding:12px 12px calc(var(--tabh) + var(--sab) + 84px)}
 .card .art{flex:1 1 auto; width:100%; align-self:stretch; min-height:0; position:relative; display:flex; align-items:center; justify-content:center; overflow:hidden;
   background:radial-gradient(circle at 50% 50%, color-mix(in srgb,var(--cc) 85%, transparent) 0%, transparent 68%), linear-gradient(180deg,#0000,#0008)}
 .card .art::before{content:'呪'; position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); font-size:9em; font-weight:900; opacity:.07; line-height:1}
-.card .emo{font-size:4em; line-height:1; filter:drop-shadow(0 4px 8px #000a); position:relative}
+.card .emo{font-size:4em; line-height:1; text-shadow:0 .08em .16em #000b; position:relative}
+.grid .card .art::before,.grid4 .card .art::before,.pods .card .art::before{display:none}
 .card .art img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover}
 .card .badge{position:absolute; top:.3em; left:.3em; font-family:Bangers,Impact,system-ui; font-size:1.3em; line-height:1.15; letter-spacing:.5px;
   background:var(--rc); color:#0b0714; padding:0 .3em; border-radius:.35em; z-index:2}
 .card .vtag{position:absolute; bottom:.35em; left:.35em; right:.35em; text-align:center; font-size:.72em; font-weight:900; border-radius:.4em; padding:1px 2px; z-index:2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 .card .name{font-weight:900; font-size:1.05em; text-align:center; padding:.3em .3em 0; line-height:1.1; min-height:2.5em; display:flex; align-items:center; justify-content:center}
 .card .inc{font-size:.95em; color:var(--money); text-align:center; padding:0 0 .4em; font-weight:800}
-.card.r-SS{animation:glow 2.4s ease-in-out infinite}
-.card.r-SSP{animation:glow 1.4s ease-in-out infinite}
+.card.r-SS,.card.r-SSP{box-shadow:0 0 16px color-mix(in srgb,var(--rc) 70%, transparent)}
+.stage .card.r-SS{animation:glow 2.4s ease-in-out infinite}
+.stage .card.r-SSP{animation:glow 1.4s ease-in-out infinite}
 @keyframes glow{50%{box-shadow:0 0 22px var(--rc), 0 0 4px #fff inset}}
 .card.v-gold{border-color:#ffd54a; background:linear-gradient(160deg,#3a2c05,#120c00)}
 .card.v-gold .vtag{background:#ffd54a; color:#2a1d00}
-.card.v-gold::after{content:''; position:absolute; inset:0; pointer-events:none;
-  background:linear-gradient(115deg,transparent 35%,#fff6 50%,transparent 65%); background-size:250% 100%; animation:shine 2.2s linear infinite}
+.card.v-gold::after{content:''; position:absolute; top:0; bottom:0; left:-60%; width:60%; pointer-events:none; z-index:3;
+  background:linear-gradient(105deg,transparent,#ffffff70,transparent); animation:sweepT 2.4s linear infinite; will-change:transform}
+@keyframes sweepT{from{transform:translateX(0)}to{transform:translateX(370%)}}
 .card.v-bf{border-color:#ff1f3d; background:linear-gradient(160deg,#200006,#000)}
 .card.v-bf .art{background:radial-gradient(circle,#ff1f3d99 0%, #000 70%)}
 .card.v-bf .vtag{background:#000; color:#ff3d57; border:1px solid #ff1f3d}
-.card.v-bf::after{content:''; position:absolute; inset:0; pointer-events:none; mix-blend-mode:screen;
-  background:repeating-linear-gradient(60deg,transparent 0 14px,#ff1f3d55 14px 16px,transparent 16px 30px); animation:sparks .6s steps(3) infinite}
+.card.v-bf::after{content:''; position:absolute; inset:0; pointer-events:none; z-index:1;
+  background:repeating-linear-gradient(60deg,transparent 0 14px,#ff1f3d55 14px 16px,transparent 16px 30px); animation:bfflick .9s steps(2) infinite}
+@keyframes bfflick{50%{opacity:.35}}
 @keyframes shine{from{background-position:150% 0}to{background-position:-100% 0}}
 @keyframes sparks{50%{opacity:.3; transform:translateX(3px)}}
 .cnt{position:absolute; top:4px; right:4px; z-index:3; background:#000c; border:1px solid var(--line); border-radius:8px; padding:0 6px; font-weight:900; font-size:12px; line-height:18px}
@@ -152,7 +157,6 @@ main{padding:12px 12px calc(var(--tabh) + var(--sab) + 84px)}
 .podium{display:flex; flex-direction:column; align-items:center; min-width:0}
 .pod-top{width:100%; display:flex; justify-content:center; padding:0 9% 4px}
 .pod-top .card{animation:bob 3s ease-in-out infinite}
-.pod-top .card.r-SS,.pod-top .card.r-SSP{animation:bob 3s ease-in-out infinite, glow 1.6s ease-in-out infinite}
 @keyframes bob{50%{transform:translateY(-6px)}}
 .pod-empty{width:100%; aspect-ratio:3/4.2; border:2px dashed #4a3a80; border-radius:10px; display:grid; place-items:center; align-content:center; gap:4px; color:#8a7bd0; font-size:30px; line-height:1; background:#ffffff05}
 .pod-empty small{font-size:11px; font-weight:800}
@@ -161,8 +165,9 @@ main{padding:12px 12px calc(var(--tabh) + var(--sab) + 84px)}
 .podium.filled .pod-base{box-shadow:0 -8px 20px -8px var(--rc)}
 .pod-base b{display:block; color:var(--money); font-size:16px; font-weight:900}
 .pod-base small{color:var(--muted); font-size:11px; font-weight:700}
-.pod-base.ready{animation:ready 1.2s ease-in-out infinite}
-@keyframes ready{50%{filter:brightness(1.35)}}
+.pod-base{position:relative}
+.pod-base.ready::after{content:''; position:absolute; inset:0; border-radius:inherit; background:#5dff9a2e; pointer-events:none; animation:readyO 1.2s ease-in-out infinite}
+@keyframes readyO{50%{opacity:0}}
 .podium.lockednext .pod-empty{border-style:solid; border-color:#6a5420; color:#ffcf5a}
 .podium.lockednext .pod-base b{color:#ffcf5a}
 .upgrade{margin-top:18px; display:flex; align-items:center; gap:12px; padding:12px; border-radius:16px; background:var(--panel); border:1px solid var(--line)}
@@ -178,12 +183,14 @@ main{padding:12px 12px calc(var(--tabh) + var(--sab) + 84px)}
 .restock-card div{flex:1}
 .restock-card small{color:var(--muted); font-size:12px}
 .bar{height:8px; background:#0006; border-radius:6px; overflow:hidden; margin-top:6px}
-.bar i{display:block; height:100%; background:linear-gradient(90deg,#3fd0ff,#7b5cff); transition:width .2s linear}
+.bar i{display:block; height:100%; width:100%; transform-origin:left center; background:linear-gradient(90deg,#3fd0ff,#7b5cff); transition:transform .3s linear}
 .pack{--pc:#555; padding:12px; border-radius:18px; margin-bottom:12px; border:1px solid color-mix(in srgb,var(--pc) 55%, transparent);
   background:linear-gradient(120deg, color-mix(in srgb,var(--pc) 30%, transparent), transparent 70%), var(--panel2)}
 .pack.empty{filter:grayscale(.9); opacity:.55}
-.pack.instock.rare{box-shadow:0 0 22px color-mix(in srgb,var(--pc) 55%, transparent); animation:rarepulse 1.6s ease-in-out infinite}
-@keyframes rarepulse{50%{box-shadow:0 0 34px var(--pc)}}
+.pack,.freecard{position:relative}
+.pack.instock.rare::before,.freecard.ready::before{content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+  box-shadow:0 0 30px var(--pc); opacity:.35; animation:gp 1.6s ease-in-out infinite}
+@keyframes gp{50%{opacity:1}}
 .pack-row{display:flex; gap:12px; align-items:center}
 .pack-art{width:56px; height:72px; border-radius:12px; display:grid; place-items:center; font-size:30px; flex:none;
   background:linear-gradient(160deg,var(--pc),#000); box-shadow:0 0 14px color-mix(in srgb,var(--pc) 60%, transparent); position:relative}
@@ -203,7 +210,7 @@ main{padding:12px 12px calc(var(--tabh) + var(--sab) + 84px)}
 .chips::-webkit-scrollbar{display:none}
 .fchip{flex:none; min-height:38px; padding:0 14px; border-radius:20px; background:var(--panel2); border:1px solid var(--line); font-weight:900; font-size:14px}
 .fchip.on{background:var(--text); color:#0b0714; border-color:var(--text)}
-.grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px}
+.grid{display:grid; grid-template-columns:repeat(3,1fr); gap:18px 10px}
 .slot{position:relative; min-width:0}
 .empty-msg{color:var(--muted); font-size:15px; padding:40px 20px; text-align:center; grid-column:1/-1}
 .empty-msg .e{font-size:44px; display:block; margin-bottom:8px}
@@ -222,7 +229,7 @@ main{padding:12px 12px calc(var(--tabh) + var(--sab) + 84px)}
 /* ---------- bottom sheet ---------- */
 .sheet-wrap{position:fixed; inset:0; z-index:100; background:#05020c00; pointer-events:none; transition:background .25s}
 .sheet-wrap.open{background:#05020cc4; pointer-events:auto}
-.sheet{position:absolute; left:50%; bottom:0; width:100%; max-width:520px; max-height:88vh; overflow-y:auto; overscroll-behavior:contain;
+.sheet{will-change:transform; position:absolute; left:50%; bottom:0; width:100%; max-width:520px; max-height:88vh; overflow-y:auto; overscroll-behavior:contain;
   transform:translate(-50%,105%); transition:transform .28s cubic-bezier(.2,.9,.3,1);
   background:var(--panel); border:1px solid var(--line); border-bottom:0; border-radius:24px 24px 0 0; padding:8px 16px calc(var(--sab) + 18px)}
 .sheet-wrap.open .sheet{transform:translate(-50%,0)}
@@ -279,7 +286,7 @@ main{padding:12px 12px calc(var(--tabh) + var(--sab) + 84px)}
 .bigpack{--lc:#fff; width:min(50vw,210px); aspect-ratio:3/4; border-radius:22px; position:relative; display:flex; align-items:center; justify-content:center; font-size:min(22vw,92px); cursor:pointer;
   background:linear-gradient(160deg,var(--pc),#000); box-shadow:0 0 40px var(--pc), 0 12px 0 #0007; overflow:hidden;
   animation:drop .7s cubic-bezier(.2,1.5,.4,1) backwards, idle 1.6s ease-in-out .7s infinite}
-.bigpack::before{content:''; position:absolute; inset:0; background:linear-gradient(115deg,transparent 35%,#fff5 50%,transparent 65%); background-size:250% 100%; animation:shine 1.8s linear infinite}
+.bigpack::before{content:''; position:absolute; top:0; bottom:0; left:-60%; width:60%; background:linear-gradient(105deg,transparent,#ffffff60,transparent); animation:sweepT 1.8s linear infinite}
 .bigpack::after{content:'呪'; position:absolute; bottom:10px; right:14px; font-size:30px; opacity:.6}
 .bigpack span{position:relative; z-index:1; filter:drop-shadow(0 6px 10px #000a)}
 @keyframes drop{0%{transform:translateY(-110vh) rotate(-25deg)}}
@@ -380,7 +387,7 @@ main{padding:12px 12px calc(var(--tabh) + var(--sab) + 84px)}
 .luckbanner.on{display:block}
 .freecard{display:flex; align-items:center; gap:12px; padding:12px; border-radius:18px; margin-bottom:12px;
   background:linear-gradient(120deg,#2ad17a33,transparent 70%),var(--panel2); border:1px solid #2ad17a55}
-.freecard.ready{--pc:#2ad17a; animation:rarepulse 1.6s ease-in-out infinite}
+.freecard.ready{--pc:#2ad17a}
 .freecard .fic{font-size:34px}
 .freecard.ready .fic{animation:idle 1.2s ease-in-out infinite}
 .freecard > div{flex:1; min-width:0}
@@ -407,8 +414,9 @@ main{padding:12px 12px calc(var(--tabh) + var(--sab) + 84px)}
 .card .stars{position:absolute; top:.32em; left:50%; transform:translateX(-50%); z-index:2; color:#ffd54a; font-size:.95em; letter-spacing:-.08em; line-height:1;
   text-shadow:0 0 .25em #000, 0 0 .5em #ffb020; white-space:nowrap}
 .card.st-hi{box-shadow:0 0 16px #ffd54aaa, 0 0 0 1px #ffd54a inset}
-.fusetag{position:absolute; bottom:-7px; left:50%; transform:translateX(-50%); z-index:4; font-size:10px; font-weight:900; white-space:nowrap;
-  background:linear-gradient(135deg,#ff7a00,#ff2e4d); color:#fff; padding:2px 8px; border-radius:9px; animation:pulse 1.2s infinite}
+.fusetag{position:absolute; bottom:-13px; left:50%; transform:translateX(-50%); z-index:4; font-size:10px; font-weight:900; white-space:nowrap;
+  background:linear-gradient(135deg,#ff7a00,#ff2e4d); color:#fff; padding:2px 8px; border-radius:9px; animation:tagpulse 1.2s ease-in-out infinite}
+@keyframes tagpulse{50%{transform:translateX(-50%) scale(1.12)}}
 .fusebar{margin-bottom:12px}
 .big.fire{background:linear-gradient(135deg,#ff7a00,#ff2e4d); color:#fff; --bs:#8a1a1a; box-shadow:0 5px 0 var(--bs); margin-bottom:5px; width:100%}
 .big.fire:active:not(:disabled){transform:translateY(4px); box-shadow:0 1px 0 var(--bs)}
@@ -426,6 +434,11 @@ main{padding:12px 12px calc(var(--tabh) + var(--sab) + 84px)}
 @keyframes fpop{from{transform:scale(0) rotate(-25deg)}}
 .tabbar{grid-template-columns:repeat(5,1fr)}
 .tab{font-size:10.5px}
+.wallet b.bump{animation:mbump .35s cubic-bezier(.2,1.8,.4,1)}
+@keyframes mbump{40%{transform:scale(1.12)}}
+.tier{content-visibility:auto; contain-intrinsic-size:auto 320px}
+.restock-card .clock,.pod-base b,.freecard .buy,.quest small{font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion:reduce){ .pod-top .card,.card::after,.bigpack::before{animation:none !important} }
 /* ---------- toasts / floaty ---------- */
 .toasts{position:fixed; top:calc(var(--sat) + 64px); left:50%; transform:translateX(-50%); z-index:400; display:flex; flex-direction:column; gap:8px; align-items:center; pointer-events:none; width:min(92vw,460px)}
 .toast{background:#1d1433f5; border:1px solid var(--line); border-radius:14px; padding:11px 14px; font-weight:800; font-size:14px; animation:tin .25s; box-shadow:0 8px 30px #000a; text-align:center}
@@ -668,7 +681,17 @@ function fmt(n){
 }
 const incOf = cd => CH[cd.c].inc * VARS[cd.v||'n'].mult * STAR_MULT[cd.s||0];
 const sellOf = cd => Math.max(1, Math.floor(incOf(cd) * SELL_MULT));
-const cardByU = u => state.cards.find(c => c.u === u);
+// índice uid -> carta (refeito só quando a lista de cartas muda)
+let IDX = null, IDX_ARR = null, IDX_LEN = -1;
+function cardByU(u){
+  if(state.cards !== IDX_ARR || state.cards.length !== IDX_LEN){ IDX = new Map(state.cards.map(c => [c.u, c])); IDX_ARR = state.cards; IDX_LEN = state.cards.length; }
+  return IDX.get(u);
+}
+// escreve no DOM só quando o valor muda
+function setT(el, v){ if(el && el._t !== v){ el._t = v; el.textContent = v; } }
+function setX(el, f){ if(!el) return; const v = 'scaleX(' + Math.max(0, Math.min(1, f)).toFixed(3) + ')'; if(el._x !== v){ el._x = v; el.style.transform = v; } }
+function setC(el, c, on){ if(el && el.classList.contains(c) !== !!on) el.classList.toggle(c, !!on); }
+function bumpMoney(){ const m = $('money'); m.classList.remove('bump'); void m.offsetWidth; m.classList.add('bump'); }
 const onPods = () => new Set(state.pods.filter(u => u != null));
 const rcss = r => RAR[r].css;
 function totalIncome(){
@@ -746,19 +769,22 @@ function sfxRarity(r){ chimes(R_ORDER.indexOf(r)); }
 
 /* ---------- partículas (canvas) ---------- */
 const FX = {ps:[], on:false, cv:null, ctx:null};
+const LOWEND = (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 3;
+const FXCAP = LOWEND ? 320 : 700, FXK = LOWEND ? .55 : 1;
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const RCOL = {B:['#e3e9f2','#8fa3b8','#ffffff'], A:['#3fa9ff','#9fd4ff','#ffffff'], S:['#b45cff','#e2b6ff','#ffffff','#7b5cff'],
   SS:['#ffb020','#ffe07a','#ffffff','#ff7a00'], 'SS+':['#ff2e4d','#ffd54a','#ffffff','#3fd0ff','#b45cff']};
 const VCOL = {gold:['#ffd54a','#fff3b0','#e8a90f','#ffffff'], bf:['#ff1f3d','#ff6a80','#ffffff','#ff1f3d']};
 const HCOL = ['#ffffff','#3fa9ff','#b45cff','#ffb020','#ff2e4d'];
 function fxSetup(){
   FX.cv = $('fx'); FX.ctx = FX.cv.getContext('2d');
-  const rs = () => { const d = Math.min(2, devicePixelRatio || 1); FX.cv.width = innerWidth*d; FX.cv.height = innerHeight*d; FX.ctx.setTransform(d,0,0,d,0,0); };
+  const rs = () => { const d = Math.min(LOWEND ? 1.5 : 2, devicePixelRatio || 1); FX.cv.width = innerWidth*d; FX.cv.height = innerHeight*d; FX.ctx.setTransform(d,0,0,d,0,0); };
   rs(); addEventListener('resize', rs);
 }
 function fxRun(){ if(!FX.on){ FX.on = true; requestAnimationFrame(fxStep); } }
-function fxAdd(p){ if(FX.ps.length < 700) FX.ps.push(p); }
+function fxAdd(p){ if(FX.ps.length < FXCAP) FX.ps.push(p); }
 function burst(x, y, o={}){
-  const n = o.n || 30, cols = o.colors || ['#fff'], sp = o.speed || 9, kinds = o.kinds || ['spark','star','confetti'];
+  const n = Math.ceil((o.n || 30) * FXK), cols = o.colors || ['#fff'], sp = o.speed || 9, kinds = o.kinds || ['spark','star','confetti'];
   for(let i=0;i<n;i++){
     const a = Math.random()*Math.PI*2, v = sp*(.3 + Math.random()*.9), k = pick(kinds);
     fxAdd({k, x, y, vx:Math.cos(a)*v, vy:Math.sin(a)*v - (o.up||0),
@@ -771,6 +797,7 @@ function burst(x, y, o={}){
 }
 function ring(x, y, c, R=180, w=6){ fxAdd({k:'ring', x, y, c, life:0, max:30, R, s:w}); fxRun(); }
 function rain(cols, n=100){
+  n = Math.ceil(n * FXK);
   for(let i=0;i<n;i++) fxAdd({k: Math.random() < .25 ? 'star' : 'confetti', x:Math.random()*innerWidth, y:-20 - Math.random()*innerHeight*.7,
     vx:(Math.random()-.5)*2, vy:2 + Math.random()*3, g:.04, drag:.995, life:0, max:230 + Math.random()*90,
     c:pick(cols), s:5 + Math.random()*6, r:Math.random()*6, vr:(Math.random()-.5)*.3});
@@ -787,7 +814,8 @@ function fxStar(ctx, r){ ctx.beginPath(); for(let i=0;i<8;i++){ const a = i*Math
 function fxStep(){
   const ctx = FX.ctx, W = innerWidth, H = innerHeight;
   ctx.clearRect(0, 0, W, H);
-  FX.ps = FX.ps.filter(p => {
+  let j = 0;
+  const alive = p => {
     p.life++; if(p.life > p.max) return false;
     const t = 1 - p.life/p.max;
     if(p.k === 'ring'){
@@ -819,7 +847,9 @@ function fxStep(){
       ctx.restore();
     }
     return true;
-  });
+  };
+  for(let i=0;i<FX.ps.length;i++){ const p = FX.ps[i]; if(alive(p)) FX.ps[j++] = p; }
+  FX.ps.length = j;
   ctx.globalAlpha = 1;
   if(FX.ps.length) requestAnimationFrame(fxStep);
   else { FX.on = false; ctx.clearRect(0, 0, W, H); }
@@ -866,7 +896,11 @@ function floaty(x, y, txt){
 /* =====================================================================
    ABAS
    ===================================================================== */
+const SCROLL = {};
 function setTab(t){
+  const same = t === state.tab && $('v-' + t).classList.contains('on');
+  if(same){ window.scrollTo({top:0, behavior:'smooth'}); return; }
+  SCROLL[state.tab] = window.scrollY;
   state.tab = t;
   document.querySelectorAll('.view').forEach(v => v.classList.toggle('on', v.id === 'v-' + t));
   document.querySelectorAll('.tab').forEach(b => b.classList.toggle('on', b.dataset.t === t));
@@ -874,7 +908,7 @@ function setTab(t){
   if(t === 'inv'){ state.newCards = 0; renderInv(); }
   if(t === 'dex') renderDex();
   if(t === 'quest') renderQuests();
-  window.scrollTo(0, 0);
+  window.scrollTo(0, SCROLL[t] || 0);
   updateLive();
 }
 
@@ -916,10 +950,14 @@ function renderShop(){
       <button class="buy" data-a="buy" data-id="${p.id}">${s ? 'Comprar · $' + fmt(p.price) : 'Esgotado · $' + fmt(p.price)}</button>
     </div>`;
   }).join('');
+  BUYBTNS = [...$('shop').querySelectorAll('[data-a="buy"]')];
+  BUYBTNS.forEach(b => b._p = PK[b.dataset.id]);
   updateLive();
 }
 
+let BUSY = false;   // evita abrir dois pacotes com um toque duplo
 function buyPack(id, btn){
+  if(BUSY) return;
   const p = PK[id];
   if((state.stock[id]||0) <= 0) return toast('Esgotado! Espere a próxima reposição.');
   if(state.money < p.price){ vibe([20,40,20]); return toast(`Falta $${fmt(p.price - state.money)} 💸`); }
@@ -927,6 +965,7 @@ function buyPack(id, btn){
   openPack(p, btn, false);
 }
 function openPack(p, btn, free){
+  BUSY = true;
   state.opened++; state.st.opened++; state.pity++;
   const pity = state.pity >= PITY_MAX;
   let gotSS = false;
@@ -948,7 +987,7 @@ function openPack(p, btn, free){
   save(); renderShop(); renderInv(); updateLive();
   coinSfx(); vibe(25);
   if(btn && btn.isConnected){ const [x,y] = centerOf(btn); burst(x, y, {n:22, kinds:['coin'], speed:9, up:5}); }
-  setTimeout(() => { OINFO = {free, pity}; showOpening(p, pulls); }, btn ? 260 : 0);
+  setTimeout(() => { BUSY = false; OINFO = {free, pity}; showOpening(p, pulls); }, btn ? 260 : 0);
 }
 
 /* =====================================================================
@@ -963,7 +1002,7 @@ const colsOf = cd => cd.v !== 'n' && VCOL[cd.v] ? VCOL[cd.v] : RCOL[CH[cd.c].r];
 const CRACK_SVG = `<svg class="crack" viewBox="0 0 100 133" preserveAspectRatio="none">
   <path class="c1" d="M52 0 L45 16 L57 29 L44 47 L59 60 L50 74"/>
   <path class="c2" d="M0 66 L16 60 L27 73 L41 64 L59 60 L71 73 L86 64 L100 70"/></svg>`;
-function shake(n){ const o = $('opening'); o.classList.remove('shake1','shake2','shake3','fadein'); void o.offsetWidth; o.classList.add('shake' + Math.min(3, Math.max(1, n))); }
+function shake(n){ if(REDUCED) return; const o = $('opening'); o.classList.remove('shake1','shake2','shake3','fadein'); void o.offsetWidth; o.classList.add('shake' + Math.min(3, Math.max(1, n))); }
 function slam(tok, text, color, delay=0){
   later(tok, delay, () => {
     const s = document.createElement('div'); s.className = 'slam'; s.style.setProperty('--sc', color); s.textContent = text;
@@ -986,7 +1025,9 @@ function showOpening(p, pulls){
       <div class="punch" id="punch"><div class="bigpack" id="bigpack" style="--lc:${lc}"><div class="glowcore"></div><span>${p.e}</span>${CRACK_SVG}</div></div></div>
     <div class="tapdots" id="tapdots" style="--lc:${lc}"><i></i><i></i><i></i></div>
     <p class="ohint" id="ohint">${OINFO.pity ? "🎯 GARANTIA: tem SS ou melhor aqui!<br>" : ""}Toque 3× para rasgar!</p>`;
-  o.classList.remove('shake1','shake2','shake3'); o.classList.add('open','fadein'); closeSheet(); $('toasts').innerHTML = '';
+  if(!o.classList.contains('open') && !sheetOpen()) pushLayer();
+  closeSheet(true);
+  o.classList.remove('shake1','shake2','shake3'); o.classList.add('open','fadein'); $('toasts').innerHTML = '';
   whoosh(.6, .14, 3000, 200); later(tok, 520, () => { tone(70, .25, 'sine', .25, 0, 40); vibe(30); });
   let taps = 0;
   o.onclick = ev => {
@@ -1119,10 +1160,10 @@ function showSummary(p, pulls, tok){
   pulls.forEach((x, j) => later(tok, 100 + j*140, () => tone(660 + j*150, .12, 'triangle', .05)));
   later(tok, 550, () => { countUp($('sumtotal'), total, 900); if(topH >= 2){ rain(bc, 70 + topH*20); } });
   $('oBest').onclick = () => { closeOpening(); autoPlace(); setTab('base'); };
-  $('oClose').onclick = closeOpening;
+  $('oClose').onclick = () => closeOpening();
   if($('oAgain')) $('oAgain').onclick = ev => buyPack(p.id, ev.currentTarget);
 }
-function closeOpening(){ OTOK++; setTimeout(showLevelUp, 250); FX.ps = FX.ps.filter(p => p.k !== 'confetti' && p.k !== 'star'); $('opening').classList.remove('open'); $('opening').innerHTML = ''; updateLive(); }
+function closeOpening(fromHist){ if(!$('opening').classList.contains('open')) return; if(!fromHist) popLayer(); OTOK++; setTimeout(showLevelUp, 250); FX.ps = FX.ps.filter(p => p.k !== 'confetti' && p.k !== 'star'); $('opening').classList.remove('open','shake1','shake2','shake3'); $('opening').innerHTML = ''; $('opening').onclick = null; updateLive(); }
 
 function domainExpansion(ch){
   const d = document.createElement('div'); d.className = 'domain'; d.style.setProperty('--dc', ch.col + 'aa');
@@ -1166,7 +1207,7 @@ function collect(i, ev){
   if(amt < 0.1) return;
   state.money += amt; state.earned += amt; state.st.collected += amt; state.banks[i] = 0;
   if(ev){ floaty(ev.clientX, ev.clientY, '+$' + fmt(amt)); burst(ev.clientX, ev.clientY, {n:10, kinds:['coin'], speed:6, up:4}); }
-  coinSfx(); vibe(10);
+  coinSfx(); vibe(10); bumpMoney();
   updateLive();
 }
 function collectAll(){
@@ -1176,7 +1217,7 @@ function collectAll(){
   state.money += tot; state.earned += tot; state.st.collected += tot;
   const r = $('collectBtn').getBoundingClientRect(); floaty(r.left + r.width/2, r.top, '+$' + fmt(tot));
   burst(r.left + r.width/2, r.top + r.height/2, {n:26, kinds:['coin'], speed:9, up:6});
-  coinSfx(); tone(1568, .3, 'square', .04, .16); vibe(20);
+  coinSfx(); tone(1568, .3, 'square', .04, .16); vibe(20); bumpMoney();
   updateLive(); save();
 }
 function freePod(){ for(let i=0;i<state.unlocked;i++) if(state.pods[i] == null) return i; return -1; }
@@ -1272,7 +1313,11 @@ function invGroups(){
   return Object.values(g).sort((a,b) => incOf(b.sample) - incOf(a.sample));
 }
 function groupByKey(key){ return invGroups().find(g => g.key === key); }
-function renderInv(){
+let INV_SIG = '';
+function renderInv(force){
+  const sig = `${state.cards.length}|${state.uid}|${state.filter}|${state.pods.join()}|${state.unlocked}`;
+  if(!force && sig === INV_SIG) return;
+  INV_SIG = sig;
   const all = invGroups();
   const count = r => all.filter(g => r === 'all' || CH[g.sample.c].r === r).reduce((s,g) => s + g.list.length, 0);
   const f = state.filter;
@@ -1353,9 +1398,19 @@ function massSellSheet(){
 /* =====================================================================
    COLEÇÃO
    ===================================================================== */
+let DEX_SIG = '';
 function renderDex(){
+  const seenN = Object.keys(state.seen).length;
+  if(!$('dexHead')) $('dex').innerHTML = '<div id="dexHead"></div><div id="dexTiers"></div>';
+  $('dexHead').innerHTML = `<div class="dexhead"><b>${seenN}/${CHARS.length}</b> personagens descobertos
+      <div class="bar"><i style="width:${seenN/CHARS.length*100}%"></i></div>
+      <p>Pacotes abertos: <b>${state.opened}</b> · Total ganho: <b>$${fmt(state.earned)}</b></p>
+      <p>Variações: ✨ Dourada (5%, rende 3×) · ⚡ Black Flash (1%, rende 6×)</p>
+      <p>🔥 Fusão: junte 3 cartas iguais → ★ ×2.5 · ★★ ×6 · ★★★ ×15 · ★★★★ ×35 · ★★★★★ ×80</p></div>`;
+  const sig = `${seenN}|${state.cards.length}|${state.uid}`;
+  if(sig === DEX_SIG) return;
+  DEX_SIG = sig;
   const owned = {}; state.cards.forEach(cd => owned[cd.c] = (owned[cd.c]||0) + 1);
-  const seen = Object.keys(state.seen).length;
   const tiers = [...R_ORDER].reverse().map(r => {
     const cs = BY_R[r], got = cs.filter(c => state.seen[c.id]).length;
     return `<div class="tier"><h4 class="t-${rcss(r)}">${r}<small>${RAR[r].label} · ${got}/${cs.length}</small>
@@ -1364,11 +1419,7 @@ function renderDex(){
         ? cardHTML({c:c.id, v:'n'}, owned[c.id] ? `<span class="cnt">×${owned[c.id]}</span>` : '')
         : unknownCard(c)}</button>`).join('')}</div></div>`;
   }).join('');
-  $('dex').innerHTML = `<div class="dexhead"><b>${seen}/${CHARS.length}</b> personagens descobertos
-      <div class="bar"><i style="width:${seen/CHARS.length*100}%"></i></div>
-      <p>Pacotes abertos: <b>${state.opened}</b> · Total ganho: <b>$${fmt(state.earned)}</b></p>
-      <p>Variações: ✨ Dourada (5%, rende 3×) · ⚡ Black Flash (1%, rende 6×)</p>
-      <p>🔥 Fusão: junte 3 cartas iguais → ★ ×2.5 · ★★ ×6 · ★★★ ×15 · ★★★★ ×35 · ★★★★★ ×80</p></div>${tiers}`;
+  $('dexTiers').innerHTML = tiers;
 }
 function dexSheet(id){
   const c = CH[id], known = state.seen[id];
@@ -1386,12 +1437,24 @@ function dexSheet(id){
 /* =====================================================================
    SHEETS (painel que sobe de baixo)
    ===================================================================== */
+const CAN_HIST = (() => { try{ return window.top === window && !!history.pushState; }catch(e){ return false; } })();
+let HIST = 0, IGNOREPOP = 0;
+function pushLayer(){ if(!CAN_HIST) return; try{ history.pushState({jjk:1}, ''); HIST++; }catch(e){} }
+function popLayer(){ if(!CAN_HIST || HIST <= 0) return; HIST--; IGNOREPOP++; try{ history.back(); }catch(e){ IGNOREPOP--; } }
+addEventListener('popstate', () => {
+  if(IGNOREPOP){ IGNOREPOP--; return; }
+  if(HIST > 0) HIST--;
+  if($('opening').classList.contains('open')) closeOpening(true);
+  else closeSheet(true);
+});
+const sheetOpen = () => $('sheetWrap').classList.contains('open');
 function openSheet(html){
+  if(!sheetOpen() && !$('opening').classList.contains('open')) pushLayer();
   $('sheet').innerHTML = '<div class="handle"></div>' + html;
   $('sheet').scrollTop = 0;
   $('sheetWrap').classList.add('open');
 }
-function closeSheet(){ $('sheetWrap').classList.remove('open'); }
+function closeSheet(fromHist){ if(!sheetOpen()) return; $('sheetWrap').classList.remove('open'); if(!fromHist) popLayer(); }
 function confirmSheet(msg, okLabel, onOk){
   openSheet(`<h3>Tem certeza?</h3><p style="margin-bottom:6px">${msg}</p>
     <div class="sactions"><button class="big danger" id="cfOk">${okLabel}</button><button class="big ghost" data-a="close">Cancelar</button></div>`);
@@ -1406,7 +1469,7 @@ function settingsSheet(){
   $('tSound').onclick = e => { state.sound = !state.sound; e.currentTarget.classList.toggle('on', state.sound); save(); };
   $('tVibe').onclick = e => { state.vibe = !state.vibe; e.currentTarget.classList.toggle('on', state.vibe); vibe(30); save(); };
   $('tReset').onclick = () => confirmSheet('Isso apaga TODAS as suas cartas e dinheiro.', 'Apagar tudo', () => {
-    state = newState(); LVQ = 0; ensureMissions(); renderLevel(); save(); renderAll(); setTab('shop'); toast('Progresso apagado. Boa sorte, feiticeiro! 🍀');
+    state = newState(); LVQ = 0; SHOWN = null; INV_SIG = DEX_SIG = ''; ensureMissions(); renderLevel(); save(); renderAll(); setTab('shop'); toast('Progresso apagado. Boa sorte, feiticeiro! 🍀');
   });
 }
 // arrastar pra baixo fecha o painel
@@ -1429,6 +1492,7 @@ function settingsSheet(){
    ===================================================================== */
 const luckOn = () => Date.now() < state.luckUntil;
 function claimFree(btn){
+  if(BUSY) return;
   if(Date.now() < state.freeAt) return toast('O pacote grátis ainda está carregando ⏳');
   const tot = FREE_POOL.reduce((s,x) => s + x[1], 0); let r = Math.random()*tot, id = FREE_POOL[0][0];
   for(const [k,w] of FREE_POOL){ if(r < w){ id = k; break; } r -= w; }
@@ -1511,12 +1575,12 @@ function updateQuests(){
   state.missions.forEach((ms, i) => {
     const done = mDone(ms); if(done) ready++;
     const bar = $('q'+i+'bar'); if(!bar) return;
-    bar.style.width = (mProg(ms)/ms.goal*100) + '%';
-    $('q'+i+'txt').textContent = `${mShow(ms, mProg(ms))}/${mShow(ms, ms.goal)} · 💰 $${fmt(mReward(ms))} · ⭐ ${mXP(ms)} XP`;
-    $('q'+i).classList.toggle('done', done);
-    const b = $('q'+i+'btn'); b.classList.toggle('cant', !done); b.textContent = done ? 'Pegar!' : Math.floor(mProg(ms)/ms.goal*100) + '%';
+    setX(bar, mProg(ms)/ms.goal);
+    setT($('q'+i+'txt'), `${mShow(ms, mProg(ms))}/${mShow(ms, ms.goal)} · 💰 $${fmt(mReward(ms))} · ⭐ ${mXP(ms)} XP`);
+    setC($('q'+i), 'done', done);
+    const b = $('q'+i+'btn'); setC(b, 'cant', !done); setT(b, done ? 'Pegar!' : Math.floor(mProg(ms)/ms.goal*100) + '%');
   });
-  const bq = $('bQuest'); bq.textContent = ready; bq.classList.toggle('show', ready > 0); bq.classList.toggle('hot', ready > 0);
+  const bq = $('bQuest'); setT(bq, String(ready)); setC(bq, 'show', ready > 0); setC(bq, 'hot', ready > 0);
 }
 function claimMission(i, btn){
   const ms = state.missions[i]; if(!ms) return;
@@ -1525,7 +1589,7 @@ function claimMission(i, btn){
   state.money += cash; state.mtier[ms.id] = ms.tier + 1;
   state.missions.splice(i, 1); ensureMissions([ms.id]);
   if(btn && btn.isConnected){ const [x,y] = centerOf(btn); burst(x, y, {n:30, kinds:['coin','star'], colors:['#ffd54a','#5dff9a'], speed:10, up:6}); floaty(x, y, '+$' + fmt(cash)); }
-  coinSfx(); chimes(2); vibe([30,40,60]);
+  coinSfx(); chimes(2); vibe([30,40,60]); bumpMoney();
   toast(`🎯 Missão completa! <b>+$${fmt(cash)}</b> · ⭐ +${xp} XP`);
   renderQuests(); addXP(xp); save(); updateLive();
 }
@@ -1559,7 +1623,7 @@ function fuse(key){
   const before = state.cards.find(cd => fuseKey(cd) === key); if(!before) return;
   const src = {...before};
   const res = fuseOnce(key); if(!res) return toast('Precisa de 3 cartas iguais.');
-  fillEmptyPods(); closeSheet(); save(); renderInv(); renderBase();
+  fillEmptyPods(); save(); renderInv(); renderBase();
   showFusion(src, res, 1);
 }
 function fuseAll(){
@@ -1584,7 +1648,9 @@ function showFusion(src, res, count){
     <div class="oacts" id="facts" style="visibility:hidden">
       <button class="big primary" id="fBest">⚡ Organizar pódios</button>
       <button class="big ghost" id="fClose">Continuar</button></div>`;
-  o.classList.remove('shake1','shake2','shake3'); o.classList.add('open','fadein'); closeSheet(); $('toasts').innerHTML = '';
+  if(!o.classList.contains('open') && !sheetOpen()) pushLayer();
+  closeSheet(true);
+  o.classList.remove('shake1','shake2','shake3'); o.classList.add('open','fadein'); $('toasts').innerHTML = '';
   riser(1.1); vibe([20,60,20,60,20,60,40]);
   const [cx, cy] = centerOf($('stage'));
   const iv = setInterval(() => { if(tok !== OTOK) return clearInterval(iv); burst(cx, cy, {n:5, colors:['#ffb020','#ff2e4d','#fff'], kinds:['spark'], speed:-6}); }, 80);
@@ -1604,51 +1670,50 @@ function showFusion(src, res, count){
     later(tok, 700, () => { $('facts').style.visibility = 'visible'; });
   });
   $('fBest').onclick = () => { closeOpening(); autoPlace(); setTab('base'); };
-  $('fClose').onclick = closeOpening;
+  $('fClose').onclick = () => closeOpening();
   addXP(10*count + 5*(res.s||0));
 }
 
 /* =====================================================================
    LOOP
    ===================================================================== */
-let lastShopKey = '';
+let BUYBTNS = [];
 function updateLive(){
-  $('money').textContent = '$' + fmt(state.money);
-  $('income').textContent = `+$${fmt(totalIncome())}/s`;
+  const now = Date.now();
+  setT($('income'), `+$${fmt(totalIncome())}/s`);
   if(!state.auto) for(let i=0;i<state.unlocked;i++){
-    const b = $('bank'+i); if(b) b.textContent = '$' + fmt(state.banks[i]);
-    const pb = $('pb'+i); if(pb) pb.classList.toggle('ready', state.pods[i] != null && state.banks[i] >= Math.max(1, (incOf(cardByU(state.pods[i])||{c:'maldicao'}) * 10)));
+    setT($('bank'+i), '$' + fmt(state.banks[i]));
+    const cd = state.pods[i] != null ? cardByU(state.pods[i]) : null;
+    setC($('pb'+i), 'ready', !!cd && state.banks[i] >= Math.max(1, incOf(cd) * 10));
   }
-  const left = Math.max(0, state.nextRestock - Date.now()), sec = Math.ceil(left/1000) + 's', pct = (100 - left/RESTOCK_MS*100) + '%';
-  const luck = luckOn(), lsec = Math.ceil((state.luckUntil - Date.now())/1000) + 's';
-  $('rsChip').textContent = luck ? '🍀 ' + lsec : sec; $('rsChip').parentNode.classList.toggle('luck', luck);
-  $('luckBanner').classList.toggle('on', luck); if(luck) $('luckTxt').textContent = lsec;
-  const fl = state.freeAt - Date.now(), fready = fl <= 0;
-  $('freeCard').classList.toggle('ready', fready); $('freeBtn').classList.toggle('cant', !fready);
-  const fs = Math.ceil(fl/1000);
-  $('freeBtn').textContent = fready ? 'PEGAR!' : `⏳ ${Math.floor(fs/60)}:${String(fs%60).padStart(2,'0')}`;
-  $('freeBar').style.width = (fready ? 100 : 100 - fl/FREE_MS*100) + '%';
-  $('pityTxt').textContent = `${PITY_MAX - state.pity} pacote${PITY_MAX - state.pity > 1 ? 's' : ''} até uma carta SS garantida`;
-  $('pityBar').style.width = (state.pity/PITY_MAX*100) + '%';
-  if(state.tab === 'quest') updateQuests(); else { const rq = state.missions.filter(mDone).length, bq = $('bQuest'); bq.textContent = rq; bq.classList.toggle('show', rq > 0); bq.classList.toggle('hot', rq > 0); }
-  $('rsBig').textContent = sec; $('rsBar').style.width = pct; $('rsLine').style.width = pct;
-  document.querySelectorAll('[data-a="buy"]').forEach(b => {
-    const p = PK[b.dataset.id], ok = (state.stock[p.id]||0) > 0 && state.money >= p.price;
-    b.classList.toggle('cant', !ok);
-  });
-  const cb = $('collectBtn');
-  if(state.auto){ cb.textContent = '🤖 Automático'; cb.disabled = true; }
-  else { cb.textContent = '💰 Coletar $' + fmt(totalBank()); cb.disabled = totalBank() < 0.1; }
-  const uc = $('unlockCost'); if(uc) uc.style.color = state.money >= podCost(state.unlocked) ? 'var(--money)' : '#ffcf5a';
-  const ab = $('autoBtn'); if(ab) ab.classList.toggle('cant', state.money < AUTO_COST);
-  // badges
-  const avail = PACKS.filter(p => (state.stock[p.id]||0) > 0 && state.money >= p.price);
+  const left = Math.max(0, state.nextRestock - now), sec = Math.ceil(left/1000) + 's', frac = 1 - left/RESTOCK_MS;
+  const luck = luckOn(), lsec = Math.ceil((state.luckUntil - now)/1000) + 's';
+  setT($('rsChip'), luck ? '🍀 ' + lsec : sec); setC($('rsChip').parentNode, 'luck', luck);
+  setC($('luckBanner'), 'on', luck); if(luck) setT($('luckTxt'), lsec);
+  setT($('rsBig'), sec); setX($('rsBar'), frac); setX($('rsLine'), frac);
+  const fl = state.freeAt - now, fready = fl <= 0, fs = Math.ceil(fl/1000);
+  setC($('freeCard'), 'ready', fready); setC($('freeBtn'), 'cant', !fready);
+  setT($('freeBtn'), fready ? 'PEGAR!' : `⏳ ${Math.floor(fs/60)}:${String(fs%60).padStart(2,'0')}`);
+  setX($('freeBar'), fready ? 1 : 1 - fl/FREE_MS);
+  const pl = PITY_MAX - state.pity;
+  setT($('pityTxt'), `${pl} pacote${pl > 1 ? 's' : ''} até uma carta SS garantida`);
+  setX($('pityBar'), state.pity/PITY_MAX);
+  if(state.tab === 'quest') updateQuests();
+  else { const rq = state.missions.filter(mDone).length, bq = $('bQuest'); setT(bq, String(rq)); setC(bq, 'show', rq > 0); setC(bq, 'hot', rq > 0); }
+  for(const b of BUYBTNS) setC(b, 'cant', !((state.stock[b._p.id]||0) > 0 && state.money >= b._p.price));
+  const cb = $('collectBtn'), bank = totalBank();
+  setT(cb, state.auto ? '🤖 Automático' : '💰 Coletar $' + fmt(bank));
+  const dis = state.auto || bank < 0.1; if(cb.disabled !== dis) cb.disabled = dis;
+  const uc = $('unlockCost'); if(uc){ const c = state.money >= podCost(state.unlocked) ? 'var(--money)' : '#ffcf5a'; if(uc._c !== c){ uc._c = c; uc.style.color = c; } }
+  setC($('autoBtn'), 'cant', state.money < AUTO_COST);
+  // avisos nas abas
+  const avail = PACKS.filter(p => (state.stock[p.id]||0) > 0 && state.money >= p.price).length;
   const bs = $('bShop'), rareIn = PACKS.some(p => isRare(p) && (state.stock[p.id]||0) > 0);
-  bs.textContent = fready ? '🎁' : avail.length || (rareIn ? '!' : '');
-  bs.classList.toggle('show', state.tab !== 'shop' && (fready || avail.length > 0 || rareIn));
-  bs.classList.toggle('hot', rareIn || fready);
-  const bi = $('bInv'); bi.textContent = state.newCards > 99 ? '99+' : state.newCards;
-  bi.classList.toggle('show', state.tab !== 'inv' && state.newCards > 0);
+  setT(bs, fready ? '🎁' : String(avail || (rareIn ? '!' : '')));
+  setC(bs, 'show', state.tab !== 'shop' && (fready || avail > 0 || rareIn));
+  setC(bs, 'hot', rareIn || fready);
+  const bi = $('bInv'); setT(bi, state.newCards > 99 ? '99+' : String(state.newCards));
+  setC(bi, 'show', state.tab !== 'inv' && state.newCards > 0);
 }
 function tick(){
   const now = Date.now();
@@ -1666,7 +1731,16 @@ function tick(){
     if(now >= state.nextRestock) state.nextRestock = now + RESTOCK_MS;
     renderShop();
   }
-  updateLive();
+}
+// a tela roda no ritmo do celular (e para sozinha quando o app está em segundo plano)
+let SHOWN = null, lastUI = 0;
+function frame(t){
+  if(SHOWN == null || !isFinite(SHOWN)) SHOWN = state.money;
+  const d = state.money - SHOWN;
+  SHOWN = Math.abs(d) <= Math.max(0.05, Math.abs(state.money) * 2e-4) ? state.money : SHOWN + d * .2;
+  setT($('money'), '$' + fmt(Math.max(0, SHOWN)));
+  if(t - lastUI >= 100){ lastUI = t; updateLive(); }
+  requestAnimationFrame(frame);
 }
 
 /* =====================================================================
@@ -1696,8 +1770,8 @@ document.addEventListener('click', ev => {
   if(el && ACTIONS[el.dataset.a]) ACTIONS[el.dataset.a](el, ev);
 });
 $('sheetWrap').addEventListener('click', ev => { if(ev.target === $('sheetWrap')) closeSheet(); });
-document.addEventListener('keydown', ev => { if(ev.key === 'Escape') closeSheet(); });
-document.addEventListener('visibilitychange', () => { if(document.hidden) save(); else tick(); });
+document.addEventListener('keydown', ev => { if(ev.key === 'Escape'){ if(sheetOpen()) closeSheet(); else if($('opening').classList.contains('open') && $('opening').querySelector('#oClose,#fClose')) closeOpening(); } });
+document.addEventListener('visibilitychange', () => { if(document.hidden) save(); else { tick(); updateLive(); } });
 addEventListener('pagehide', save);
 
 function renderAll(){ renderShop(); renderBase(); renderInv(); renderDex(); updateLive(); }
@@ -1713,8 +1787,9 @@ function renderAll(){ renderShop(); renderBase(); renderInv(); renderDex(); upda
   tick();
   if(away > 30 && inc > 0) toast(`🌙 Enquanto você esteve fora, seus pódios renderam <b>$${fmt(inc * Math.min(away, OFFLINE_CAP))}</b>!`, true);
   else if(!state.opened) toast('👋 Bem-vindo! Você tem $150. Compre seus primeiros pacotes.', true);
-  setInterval(tick, 100);
+  setInterval(tick, 250);
   setInterval(save, 5000);
+  requestAnimationFrame(frame);
 })();
 </script>
 </body>
